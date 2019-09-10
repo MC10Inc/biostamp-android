@@ -1,6 +1,8 @@
 package com.mc10inc.biostamp3.sdkexample;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,14 +10,47 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.mc10inc.biostamp3.sdk.BioStampManager;
+import com.mc10inc.biostamp3.sdk.SensorStatus;
+
+import java.util.Map;
+
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+import timber.log.Timber;
 
 public class ControlsFragment extends BaseFragment {
+    private BioStampManager bs;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        bs = BioStampManager.getInstance(requireActivity());
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_controls, container, false);
         unbinder = ButterKnife.bind(this, view);
         return view;
+    }
+
+    @OnClick(R.id.scanButton) void scanForSensors() {
+        if (!bs.hasPermissions()) {
+            if (getActivity() != null) {
+                bs.requestPermissions(getActivity());
+            }
+            return;
+        }
+
+        handler.postDelayed(() -> {
+            bs.stopScanning();
+            Map<String, SensorStatus> results = bs.getScanResults();
+            Timber.i(results.toString());
+        }, 3000);
+
+        bs.startScanning();
     }
 }
