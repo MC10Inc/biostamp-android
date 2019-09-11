@@ -21,6 +21,7 @@ import com.fitbit.bluetooth.fbgatt.tx.SetClientConnectionStateTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.SubscribeToCharacteristicNotificationsTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.WriteGattCharacteristicTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.WriteGattDescriptorTransaction;
+import com.google.protobuf.ByteString;
 import com.mc10inc.biostamp3.sdk.BleException;
 
 import java.nio.charset.StandardCharsets;
@@ -66,6 +67,8 @@ public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
     private BluetoothGattCharacteristic charData;
     private BluetoothGattCharacteristic charResponse;
     private GattConnection conn;
+    private DataHandler dataHandler = new DataHandler();
+    private BleDataListener dataListener;
     private BleDisconnectListener disconnectListener;
     private CountDownLatch doneLatch;
     private byte[] response;
@@ -78,7 +81,8 @@ public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
     }
 
     @Override
-    public void connect(BleDisconnectListener disconnectListener) throws BleException {
+    public void connect(BleDisconnectListener disconnectListener, BleDataListener dataListener)
+            throws BleException {
         try {
             busySemaphore.acquire();
         } catch (InterruptedException e) {
@@ -90,6 +94,7 @@ public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
                     throw new BleException();
                 }
                 this.disconnectListener = disconnectListener;
+                this.dataListener = dataListener;
                 state = State.CONNECTING;
                 doneLatch = new CountDownLatch(1);
                 GattConnectTransaction tx = new GattConnectTransaction(conn, GattState.CONNECTED);
@@ -232,6 +237,17 @@ public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
         }
     }
 
+    private void handleDataNotification(TransactionResult result) {
+        if (result.getData() == null) {
+            Timber.e("Data notification missing data");
+            return;
+        }
+        ByteString dataBlock = dataHandler.handleDataPacket(result.getData());
+        if (dataBlock != null) {
+            dataListener.handleData(dataBlock);
+        }
+    }
+
     private void handleError(String error) {
         state = State.DISCONNECTING;
         Timber.e("Disconnecting after error: %s", error);
@@ -341,7 +357,7 @@ public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
         if (COMMAND_CHAR_UUID.equals(result.getCharacteristicUuid())) {
             handleCommandIndication(result);
         } else if (DATA_CHAR_UUID.equals(result.getCharacteristicUuid())) {
-
+            handleDataNotification(result);
         } else {
             Timber.e("Unexpected characteristic change %s", result);
         }

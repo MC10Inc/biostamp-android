@@ -3,6 +3,7 @@ package com.mc10inc.biostamp3.sdk;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.mc10inc.biostamp3.sdk.ble.SensorBle;
 import com.mc10inc.biostamp3.sdk.task.Task;
@@ -70,6 +71,10 @@ public class BioStampImpl implements BioStamp {
         return handler;
     }
 
+    private void handleData(ByteString data) {
+        Timber.i("Received %d bytes", data.size());
+    }
+
     private void handleDisconnect() {
         Timber.i("Disconnected, stopping sensor thread");
         sensorThread.interrupt();
@@ -82,7 +87,9 @@ public class BioStampImpl implements BioStamp {
             public void doTask() {
                 try {
                     Brc3.Request req = Brc3.Request.newBuilder()
-                            .setCommand(Brc3.Command.BLINK_LEDS)
+                            .setCommand(Brc3.Command.TEST_DATA)
+                            .setTestData(Brc3.TestDataCommandParam.newBuilder()
+                                    .setNumBytes(2000))
                             .build();
                     Brc3.Response resp = execute(req);
                     Timber.i("Resp %s", resp.toString());
@@ -100,7 +107,7 @@ public class BioStampImpl implements BioStamp {
             Timber.i("Connecting to sensor");
             state = BioStampImpl.State.CONNECTING;
             try {
-                ble.connect(BioStampImpl.this::handleDisconnect);
+                ble.connect(BioStampImpl.this::handleDisconnect, BioStampImpl.this::handleData);
                 Timber.i("Connected to sensor %s", ble.getSerial());
             } catch (BleException e) {
                 state = BioStampImpl.State.DISCONNECTED;

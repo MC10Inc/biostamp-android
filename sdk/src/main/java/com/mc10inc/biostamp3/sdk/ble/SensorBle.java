@@ -1,5 +1,6 @@
 package com.mc10inc.biostamp3.sdk.ble;
 
+import com.google.protobuf.ByteString;
 import com.mc10inc.biostamp3.sdk.BleException;
 
 /**
@@ -32,11 +33,16 @@ import com.mc10inc.biostamp3.sdk.BleException;
  * error occurs.
  */
 public interface SensorBle {
+    interface BleDataListener {
+        void handleData(ByteString data);
+    }
+
     interface BleDisconnectListener {
         void disconnected();
     }
 
-    void connect(BleDisconnectListener disconnectListener) throws BleException;
+    void connect(BleDisconnectListener disconnectListener, BleDataListener dataListener)
+            throws BleException;
 
     void disconnect() throws BleException;
 
