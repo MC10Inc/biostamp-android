@@ -19,11 +19,13 @@ import com.fitbit.bluetooth.fbgatt.tx.GattConnectTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.ReadGattCharacteristicTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.SetClientConnectionStateTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.SubscribeToCharacteristicNotificationsTransaction;
+import com.fitbit.bluetooth.fbgatt.tx.WriteGattCharacteristicTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.WriteGattDescriptorTransaction;
 import com.mc10inc.biostamp3.sdk.BleException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -47,6 +49,9 @@ public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
     private static final UUID DEVICE_NAME_CHAR_UUID =
             UUID.fromString("00002a00-0000-1000-8000-00805f9b34fb");
 
+    private static final byte COMMAND_CODE_RESP_FOLLOWS = 1;
+    private static final byte COMMAND_CODE_RESP_LONG = 2;
+
     private enum State {
         INIT,
         DISCONNECTED,
@@ -63,6 +68,7 @@ public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
     private GattConnection conn;
     private BleDisconnectListener disconnectListener;
     private CountDownLatch doneLatch;
+    private byte[] response;
     private String serial;
     private State state;
 
@@ -141,6 +147,41 @@ public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
         }
     }
 
+    @Override
+    public byte[] execute(byte[] command) throws BleException {
+        try {
+            busySemaphore.acquire();
+        } catch (InterruptedException e) {
+            throw new BleException();
+        }
+        try {
+            synchronized (this) {
+                doneLatch = new CountDownLatch(1);
+                state = State.BUSY;
+                charCommand.setValue(command);
+                WriteGattCharacteristicTransaction tx = new WriteGattCharacteristicTransaction(
+                        conn, GattState.WRITE_CHARACTERISTIC_SUCCESS, charCommand);
+                runTx(tx, result -> {
+                    if (result.getResultStatus().equals(TransactionResult.TransactionResultStatus.SUCCESS)) {
+                        // TODO Set a timeout waiting for the response
+                    } else {
+                        handleError(result.toString());
+                    }
+                });
+            }
+            try {
+                doneLatch.await();
+            } catch (InterruptedException e) {
+                throw new BleException();
+            }
+            synchronized (this) {
+                return new byte[0];
+            }
+        } finally {
+            busySemaphore.release();
+        }
+    }
+
     private void failConnect(String error) {
         Timber.e(error);
         state = State.DISCONNECTED;
@@ -154,6 +195,50 @@ public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
         } else {
             throw new BleException();
         }
+    }
+
+    private void handleCommandIndication(TransactionResult result) {
+        if (state != State.BUSY) {
+            Timber.e("Unexpected command indication in state %s: %s", state, result);
+            return;
+        }
+
+        byte[] ind = result.getData();
+        if (ind == null || ind.length < 1) {
+            handleError("Command indication missing data");
+            return;
+        }
+        if (ind[0] == COMMAND_CODE_RESP_FOLLOWS) {
+            response = Arrays.copyOfRange(ind, 1, ind.length);
+            done();
+        } else if (ind[0] == COMMAND_CODE_RESP_LONG) {
+            ReadGattCharacteristicTransaction tx = new ReadGattCharacteristicTransaction(
+                    conn, GattState.READ_CHARACTERISTIC_SUCCESS, charResponse);
+            runTx(tx, longResult -> {
+                if (longResult.getResultStatus().equals(TransactionResult.TransactionResultStatus.SUCCESS)) {
+                    byte[] longResp = longResult.getData();
+                    if (longResp == null) {
+                        handleError("Long response missing data");
+                        return;
+                    }
+                    response = longResp;
+                    done();
+                } else {
+                    handleError("Failed to read long response: " + longResult);
+                }
+            });
+        } else {
+            handleError("Invalid command indication");
+        }
+    }
+
+    private void handleError(String error) {
+        state = State.DISCONNECTING;
+        Timber.e("Disconnecting after error: %s", error);
+        // Unblock the bitgatt transaction queue
+        SetClientConnectionStateTransaction tx = new SetClientConnectionStateTransaction(
+                conn, GattState.GATT_CONNECTION_STATE_SET_SUCCESSFULLY, GattState.DISCONNECTED);
+        runTx(tx, result -> {});
     }
 
     private void handleServices(List<BluetoothGattService> services) {
@@ -253,7 +338,13 @@ public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
 
     @Override
     public void onClientCharacteristicChanged(@NonNull TransactionResult result, @NonNull GattConnection connection) {
+        if (COMMAND_CHAR_UUID.equals(result.getCharacteristicUuid())) {
+            handleCommandIndication(result);
+        } else if (DATA_CHAR_UUID.equals(result.getCharacteristicUuid())) {
 
+        } else {
+            Timber.e("Unexpected characteristic change %s", result);
+        }
     }
 
     @Override

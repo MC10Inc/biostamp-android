@@ -59,6 +59,7 @@ public class ControlsFragment extends BaseFragment {
                     @Override
                     public void connected() {
                         Timber.i("connected");
+                        b.test();
                     }
 
                     @Override

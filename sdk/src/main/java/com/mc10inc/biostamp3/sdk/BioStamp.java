@@ -5,6 +5,8 @@ public interface BioStamp {
 
     void disconnect();
 
+    void test();
+
     interface ConnectListener {
         void connected();
         void connectFailed();

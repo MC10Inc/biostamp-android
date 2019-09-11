@@ -40,5 +40,7 @@ public interface SensorBle {
 
     void disconnect() throws BleException;
 
+    byte[] execute(byte[] command) throws BleException;
+
     String getSerial() throws BleException;
 }

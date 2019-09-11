@@ -47,6 +47,14 @@ public class BioStampImpl implements BioStamp {
 
     }
 
+    private void executeTask(Task task) {
+        if (state == State.CONNECTED) {
+            taskQueue.add(task);
+        } else {
+            task.disconnected();
+        }
+    }
+
     public Handler getHandler() {
         return handler;
     }
@@ -54,6 +62,23 @@ public class BioStampImpl implements BioStamp {
     private void handleDisconnect() {
         Timber.i("Disconnected, stopping sensor thread");
         sensorThread.interrupt();
+    }
+
+    @Override
+    public void test() {
+        executeTask(new Task<Void>(this, (error, result) -> {}) {
+            @Override
+            public void doTask() {
+                try {
+                    byte[] cmd = new byte[]{0x08, 0x66};
+                    byte[] resp = ble.execute(cmd);
+                    Timber.i("resp %s", resp.toString());
+                    success(null);
+                } catch (BleException e) {
+                    error(e);
+                }
+            }
+        });
     }
 
     private class SensorThread extends Thread {
