@@ -1,4 +1,14 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.google.protobuf'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.10'
+    }
+}
 
 android {
     compileSdkVersion 29
@@ -37,4 +47,20 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation project(':bitgatt')
     implementation 'com.jakewharton.timber:timber:4.7.1'
+    implementation 'com.google.protobuf:protobuf-javalite:3.9.1'
+}
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.9.1'
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option "lite"
+                }
+            }
+        }
+    }
 }

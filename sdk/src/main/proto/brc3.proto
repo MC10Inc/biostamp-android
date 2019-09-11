@@ -1,0 +1,454 @@
+syntax = "proto3";
+option java_package = "com.mc10inc.biostamp3.sdk";
+
+enum Command {
+    COMMAND_UNDEFINED = 0;
+    TEMPERATURE_GET = 20;
+    TIME_GET = 21;
+    TIME_SET = 22;
+    FLASH_MFG_SETUP = 23;
+    FLASH_ERASE_BLOCK = 24;
+    FLASH_WRITE_PAGE = 25;
+    FLASH_READ_DATA = 26;
+    AMBIENT_LIGHT_GET = 27;
+    PRESSURE_GET = 28;
+    SYSTEM_STATUS = 29;
+    POWER_OFF = 30;
+    RESET = 31;
+    SENSING_START = 32;
+    SENSING_STOP = 33;
+    STREAMING_START = 34;
+    STREAMING_STOP = 35;
+    UPLOAD_START = 36;
+    UPLOAD_WRITE_PAGE = 37;
+    UPLOAD_FINISH = 38;
+    CLEAR_ALL_RECORDINGS = 39;
+    RECORDING_GET_INFO = 40;
+    RECORDING_READ = 41;
+    SENSING_GET_INFO = 42;
+    RECORDING_GET_FREE_SPACE = 43;
+    VERSION_GET = 44;
+    TIMESYNC_TX_DISABLE = 45;
+    TIMESYNC_TX_ENABLE = 46;
+    TIMESYNC_RX_DISABLE = 47;
+    TIMESYNC_RX_ENABLE = 48;
+    AFE4900_DYNAMIC_CONFIG = 49;
+    TEST_DATA = 101;
+    BLINK_LEDS = 102;
+    TIMESTAMP_TEST_DISABLE = 103;
+    TIMESTAMP_TEST_ENABLE = 104;
+    ADVERTISING_DISABLE = 105;
+}
+
+enum ErrorCode {
+    ERROR_UNDEFINED = 0;
+    SUCCESS = 1;
+    PARSE = 2;
+    UNSUPPORTED = 3;
+    FAIL = 4;
+    INVALID_PARAMETER = 5;
+    TIME_NOT_SET = 6;
+    CANNOT_START = 7;
+    CANNOT_STOP = 8;
+    UPLOAD_FAILED = 9;
+    MEMORY_FULL = 10;
+    RECORDING_NOT_FOUND = 11;
+}
+
+message FlashEraseBlockCommandParam {
+    uint32 address = 1;
+}
+
+message FlashWritePageCommandParam {
+    uint32 address = 1;
+    bytes data = 2;
+}
+
+message FlashReadDataCommandParam {
+    uint32 address = 1;
+    uint32 length = 2;
+}
+
+message TestDataCommandParam {
+    uint32 num_bytes = 100;
+}
+
+message AmbientLightGetResponseParam {
+    double lux = 1;
+}
+
+message PressureGetResponseParam {
+    double pascals = 1;
+}
+
+message TemperatureGetResponseParam {
+    int32 temperature_c = 1;
+}
+
+message FlashReadDataResponseParam {
+    bytes data = 1;
+}
+
+message TimeGetResponseParam {
+    double timestamp = 1;
+}
+
+message TimeSetCommandParam {
+    double timestamp = 1;
+}
+
+message SystemStatusResponseParam {
+    uint32 battery_percent = 1;
+    bool charge_power = 2;
+    uint32 uptime_sec = 3;
+}
+
+message SensingStartCommandParam {
+    SensorConfig config = 1;
+}
+
+message StreamingStartCommandParam {
+    StreamingType type = 1;
+}
+
+message StreamingStartResponseParam {
+    StreamingInfo info = 1;
+}
+
+message StreamingStopCommandParam {
+    StreamingType type = 1;
+}
+
+enum UploadType {
+    UPLOAD_TYPE_UNDEFINED = 0;
+    FIRMWARE_IMAGE = 1;
+}
+
+message UploadStartCommandParam {
+    UploadType type = 1;
+    uint32 size = 2;
+    uint32 crc = 3;
+}
+
+message UploadWritePageCommandParam {
+    uint32 offset = 1;
+    bytes data = 2;
+}
+
+message RecordingGetInfoCommandParam {
+    uint32 index = 1;
+}
+
+message RecordingGetInfoResponseParam {
+    RecordingInfo info = 1;
+}
+
+message RecordingReadCommandParam {
+    uint32 recording_id = 1;
+    uint32 first_page = 2;
+}
+
+message SensingGetInfoResponseParam {
+    bool enabled = 1;
+    SensorConfig sensor_config = 2;
+    uint32 timestamp_start = 3;
+}
+
+message RecordingGetFreeSpaceResponseParam {
+    uint32 free_blocks = 1;
+    uint32 total_blocks = 2;
+}
+
+message VersionGetResponseParam {
+    string firmware_version = 1;
+}
+
+message TimesyncTxEnableCommandParam {
+    uint32 address = 1;
+    uint32 interval_ms = 2;
+}
+
+message TimesyncRxEnableCommandParam {
+    uint32 address = 1;
+    uint32 interval_ms = 2;
+    bool calibration_enabled = 3;
+}
+
+message AFE4900DynamicConfigCommandParam {
+    AFE4900Dynamic dynamic = 1;
+}
+
+message Request {
+    Command command = 1;
+    oneof param {
+        TestDataCommandParam test_data = 101;
+        TimeSetCommandParam time_set = 102;
+        FlashEraseBlockCommandParam flash_erase_block = 103;
+        FlashWritePageCommandParam flash_write_page = 104;
+        FlashReadDataCommandParam flash_read_data = 105;
+        SensingStartCommandParam sensing_start = 106;
+        StreamingStartCommandParam streaming_start = 107;
+        StreamingStopCommandParam streaming_stop = 108;
+        UploadStartCommandParam upload_start = 109;
+        UploadWritePageCommandParam upload_write_page = 110;
+        RecordingGetInfoCommandParam recording_get_info = 111;
+        RecordingReadCommandParam recording_read = 112;
+        TimesyncTxEnableCommandParam timesync_tx_enable = 113;
+        TimesyncRxEnableCommandParam timesync_rx_enable = 114;
+        AFE4900DynamicConfigCommandParam afe4900_dynamic_config = 115;
+    }
+}
+
+message Response {
+    Command command = 1;
+    ErrorCode error = 2;
+    string error_message = 3;
+    oneof param {
+        TemperatureGetResponseParam temperature_get = 20;
+        TimeGetResponseParam time_get = 21;
+        FlashReadDataResponseParam flash_read_data = 22;
+        AmbientLightGetResponseParam ambient_light_get = 23;
+        PressureGetResponseParam pressure_get = 24;
+        SystemStatusResponseParam system_status = 25;
+        StreamingStartResponseParam streaming_start = 26;
+        RecordingGetInfoResponseParam recording_get_info = 27;
+        SensingGetInfoResponseParam sensing_get_info = 28;
+        RecordingGetFreeSpaceResponseParam recording_get_free_space = 29;
+        VersionGetResponseParam version_get = 30;
+    }
+}
+
+message TestDataOne {
+    bytes my_data_one = 200;
+}
+
+message TestDataTwo {
+    uint32 foo = 200;
+    bytes my_data_two = 201;
+}
+
+message MotionSamples {
+    repeated sint32 accel_x = 1;
+    repeated sint32 accel_y = 2;
+    repeated sint32 accel_z = 3;
+    repeated sint32 gyro_x = 4;
+    repeated sint32 gyro_y = 5;
+    repeated sint32 gyro_z = 6;
+    repeated sint32 mag_x = 30;
+    repeated sint32 mag_y = 31;
+    repeated sint32 mag_z = 32;
+}
+
+message RotationSamples {
+    repeated float quat_a = 1;
+    repeated float quat_b = 2;
+    repeated float quat_c = 3;
+    repeated float quat_d = 4;
+}
+
+message AFE4900Samples {
+    repeated sint32 ecg = 1;
+    repeated sint32 ppg = 2;
+    repeated sint32 ambient = 3;
+}
+
+message EnvironmentSamples {
+    repeated float lux = 1;
+    repeated float pascals = 2;
+    repeated float temperature_c = 3;
+}
+
+message AD5940Samples {
+    repeated float z_mag = 1;
+    repeated float z_phase = 2;
+}
+
+message StreamingSamples {
+    uint64 timestamp_us = 1;
+    oneof samples {
+        MotionSamples motion = 20;
+        AFE4900Samples afe4900 = 21;
+        EnvironmentSamples environment = 22;
+        RotationSamples rotation = 23;
+        AD5940Samples ad5940 = 24;
+    }
+}
+
+enum StreamingType {
+    STREAMING_TYPE_UNDEFINED = 0;
+    MOTION = 1;
+    AFE4900 = 2;
+    ENVIRONMENT = 3;
+    AD5940 = 4;
+}
+
+message StreamingInfo {
+    float accel_g_scale = 1;
+    float gyro_dps_scale = 2;
+    float afe4900_ecg_v_scale = 3;
+    float mag_ut_scale = 4;
+}
+
+message DataMessage {
+    oneof data {
+        TestDataOne test_data_one = 100;
+        TestDataTwo test_data_two = 101;
+        StreamingSamples streaming_samples = 102;
+        TimestampTestMessage timestamp_test = 104;
+    }
+    repeated RecordingPage recording_pages = 103;
+}
+
+message SensorConfig {
+    bool recording_enabled = 3;
+    MotionConfig motion = 1;
+    AFE4900Config afe4900 = 2;
+    EnvironmentConfig environment = 4;
+    AD5940Config ad5940 = 5;
+}
+
+enum AD5940Mode {
+    AD5940_MODE_UNDEFINED = 0;
+    EDA = 1;
+}
+
+message AD5940Config {
+    AD5940Mode mode = 1;
+    bool measure_baseline = 30;
+}
+
+enum AFE4900Mode {
+    AFE4900_MODE_UNDEFINED = 0;
+    ECG = 1;
+    PPG = 2;
+    PTT = 3;
+}
+
+enum AFE4900ECGGain {
+    AFE4900ECGGAIN_UNDEFINED = 0;
+    GAIN_2 = 1;
+    GAIN_3 = 2;
+    GAIN_4 = 3;
+    GAIN_5 = 4;
+    GAIN_6 = 5;
+    GAIN_9 = 6;
+    GAIN_12 = 7;
+}
+
+enum AFE4900Color {
+    AFE4900COLOR_UNDEFINED = 0;
+    GREEN = 1;
+    RED = 2;
+    INFRARED = 3;
+}
+
+enum AFE4900Photodiode {
+    AFE4900PHOTODIODE_UNDEFINED = 0;
+    PD1 = 1;
+    PD2 = 2;
+}
+
+enum AFE4900TIAGain {
+    AFE4900TIAGAIN_UNDEFINED = 0;
+    TIA_GAIN_10KOHM = 1;
+    TIA_GAIN_25KOHM = 2;
+    TIA_GAIN_50KOHM = 3;
+    TIA_GAIN_100KOHM = 4;
+    TIA_GAIN_250KOHM = 5;
+    TIA_GAIN_500KOHM = 6;
+    TIA_GAIN_1000KOHM = 7;
+    TIA_GAIN_1500KOHM = 8;
+    TIA_GAIN_2000KOHM = 9;
+}
+
+enum AFE4900OffdacScale {
+    AFE4900OFFDACSCALE_UNDEFINED = 0;
+    OFFDAC_SCALE_1X = 1;
+    OFFDAC_SCALE_2X = 2;
+    OFFDAC_SCALE_4X = 3;
+    OFFDAC_SCALE_8X = 4;
+}
+
+message AFE4900Dynamic {
+    AFE4900TIAGain tia_gain = 1;
+    uint32 led_current = 2;
+    int32 offdac_current = 3;
+    bool photodiode_disconnect = 4;
+    int32 offdac_current_ambient = 5;
+    AFE4900OffdacScale offdac_scale = 6;
+}
+
+message AFE4900Config {
+    AFE4900Mode mode = 1;
+    AFE4900ECGGain ecg_gain = 2;
+    AFE4900Color color = 3;
+    AFE4900Photodiode photodiode = 4;
+}
+
+enum EnvironmentMode {
+    ENVIRONMENTMODE_UNDEFINED = 0;
+    ALL = 1;
+}
+
+message EnvironmentConfig {
+    EnvironmentMode mode = 1;
+    uint32 sampling_period_us = 2;
+}
+
+enum MotionMode {
+    MOTION_MODE_UNDEFINED = 0;
+    ACCEL = 1;
+    ACCEL_GYRO = 2;
+    COMPASS = 3;
+    ROTATION = 4;
+}
+
+enum MotionRotationType {
+    MOTIONROTATIONTYPE_UNDEFINED = 0;
+    ROT_ACCEL_GYRO = 1;
+    ROT_ACCEL_GYRO_MAG = 2;
+    ROT_ACCEL_MAG = 3;
+}
+
+message MotionConfig {
+    uint32 sampling_period_us = 1;
+    uint32 accel_g_range = 2;
+    uint32 gyro_dps_range = 3;
+    MotionMode mode = 4;
+    MotionRotationType rotation_type = 5;
+}
+
+message RecordingInfo {
+    uint32 recording_id = 1;
+    uint32 num_pages = 2;
+    uint32 size_bytes = 6;
+    uint32 timestamp_start = 3;
+    uint32 duration_sec = 4;
+    SensorConfig sensor_config = 5;
+    RawDataInfo raw_data_info = 8;
+    bool in_progress = 7;
+}
+
+message RawDataInfo {
+    float timestamp_scale = 1;
+    float sampling_period_scale = 2;
+    float accel_g_scale = 3;
+    float gyro_dps_scale = 4;
+    float afe4900_ecg_v_scale = 5;
+}
+
+message RecordingPage {
+    uint32 page_number = 1;
+    uint64 timestamp = 2;
+    uint32 sampling_period = 3;
+    oneof samples {
+        MotionSamples motion = 4;
+        AFE4900Samples afe4900 = 5;
+        AD5940Samples ad5940 = 6;
+    }
+}
+
+message TimestampTestMessage {
+    uint64 timestamp = 1;
+}
+

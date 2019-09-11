@@ -3,6 +3,7 @@ package com.mc10inc.biostamp3.sdk;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.mc10inc.biostamp3.sdk.ble.SensorBle;
 import com.mc10inc.biostamp3.sdk.task.Task;
 
@@ -47,6 +48,16 @@ public class BioStampImpl implements BioStamp {
 
     }
 
+    public Brc3.Response execute(Brc3.Request request) throws BleException {
+        byte[] respBytes = ble.execute(request.toByteArray());
+        try {
+            return Brc3.Response.parseFrom(respBytes);
+        } catch (InvalidProtocolBufferException e) {
+            Timber.e(e);
+            throw new BleException();
+        }
+    }
+
     private void executeTask(Task task) {
         if (state == State.CONNECTED) {
             taskQueue.add(task);
@@ -70,9 +81,11 @@ public class BioStampImpl implements BioStamp {
             @Override
             public void doTask() {
                 try {
-                    byte[] cmd = new byte[]{0x08, 0x66};
-                    byte[] resp = ble.execute(cmd);
-                    Timber.i("resp %s", resp.toString());
+                    Brc3.Request req = Brc3.Request.newBuilder()
+                            .setCommand(Brc3.Command.BLINK_LEDS)
+                            .build();
+                    Brc3.Response resp = execute(req);
+                    Timber.i("Resp %s", resp.toString());
                     success(null);
                 } catch (BleException e) {
                     error(e);
