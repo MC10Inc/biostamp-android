@@ -11,11 +11,15 @@ import androidx.core.content.ContextCompat;
 
 import com.fitbit.bluetooth.fbgatt.FitbitGatt;
 import com.fitbit.bluetooth.fbgatt.GattConnection;
+import com.mc10inc.biostamp3.sdk.ble.SensorBle;
+import com.mc10inc.biostamp3.sdk.ble.SensorBleBitgatt;
 import com.mc10inc.biostamp3.sdk.ble.StatusBroadcast;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import timber.log.Timber;
 
 public class BioStampManager {
     private static BioStampManager INSTANCE;
@@ -79,10 +83,20 @@ public class BioStampManager {
     public Map<String, SensorStatus> getScanResults() {
         Map<String, SensorStatus> results = new HashMap<>();
         for (ScannedSensor ss : scannedSensors.values()) {
-            String name = ss.conn.getDevice().getName();
-            results.put(name, new SensorStatus(ss.conn));
+            String serial = ss.conn.getDevice().getName();
+            results.put(serial, new SensorStatus(ss.conn));
         }
         return results;
+    }
+
+    public BioStamp getBioStamp(String serial) {
+        ScannedSensor ss = scannedSensors.get(serial);
+        if (ss == null) {
+            return null;
+        }
+
+        SensorBle sensorBle = new SensorBleBitgatt(ss.conn);
+        return new BioStampImpl(this, sensorBle);
     }
 
     private final FitbitGatt.FitbitGattCallback callback = new FitbitGatt.FitbitGattCallback() {

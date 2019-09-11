@@ -10,9 +10,11 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.mc10inc.biostamp3.sdk.BioStamp;
 import com.mc10inc.biostamp3.sdk.BioStampManager;
 import com.mc10inc.biostamp3.sdk.SensorStatus;
 
+import java.util.Iterator;
 import java.util.Map;
 
 import butterknife.ButterKnife;
@@ -49,6 +51,27 @@ public class ControlsFragment extends BaseFragment {
             bs.stopScanning();
             Map<String, SensorStatus> results = bs.getScanResults();
             Timber.i(results.toString());
+            if (!results.isEmpty()) {
+                Iterator<SensorStatus> iter = results.values().iterator();
+                SensorStatus s = iter.next();
+                BioStamp b = bs.getBioStamp(s.getSerial());
+                b.connect(new BioStamp.ConnectListener() {
+                    @Override
+                    public void connected() {
+                        Timber.i("connected");
+                    }
+
+                    @Override
+                    public void connectFailed() {
+                        Timber.i("connect failed");
+                    }
+
+                    @Override
+                    public void disconnected() {
+                        Timber.i("disconnected");
+                    }
+                });
+           }
         }, 3000);
 
         bs.startScanning();
