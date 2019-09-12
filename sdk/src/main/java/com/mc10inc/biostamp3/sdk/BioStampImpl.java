@@ -61,8 +61,20 @@ public class BioStampImpl implements BioStamp {
         return handler;
     }
 
-    private void handleData(ByteString data) {
-        Timber.i("Received %d bytes", data.size());
+    private void handleData(ByteString dataBytes) {
+        Brc3.DataMessage dm;
+        try {
+            dm = Brc3.DataMessage.parseFrom(dataBytes);
+        } catch (InvalidProtocolBufferException e) {
+            Timber.e(e);
+            return;
+        }
+
+        if (dm.hasTestDataTwo()) {
+            Timber.e("Received %d bytes of test data", dm.getTestDataTwo().getMyDataTwo().size());
+        } else {
+            Timber.e("Unknown data message: %s", dm);
+        }
     }
 
     private void handleDisconnect() {
