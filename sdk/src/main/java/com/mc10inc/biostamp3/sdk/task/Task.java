@@ -2,7 +2,7 @@ package com.mc10inc.biostamp3.sdk.task;
 
 import com.mc10inc.biostamp3.sdk.BioStamp;
 import com.mc10inc.biostamp3.sdk.BioStampImpl;
-import com.mc10inc.biostamp3.sdk.BleException;
+import com.mc10inc.biostamp3.sdk.exception.BleException;
 
 public abstract class Task<T> {
     protected BioStampImpl bs;

@@ -1,7 +1,7 @@
 package com.mc10inc.biostamp3.sdk.ble;
 
 import com.google.protobuf.ByteString;
-import com.mc10inc.biostamp3.sdk.BleException;
+import com.mc10inc.biostamp3.sdk.exception.BleException;
 
 /**
  * BioStamp Sensor BLE Interface

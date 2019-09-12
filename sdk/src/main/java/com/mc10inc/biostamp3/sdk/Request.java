@@ -2,6 +2,8 @@ package com.mc10inc.biostamp3.sdk;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.mc10inc.biostamp3.sdk.ble.SensorBle;
+import com.mc10inc.biostamp3.sdk.exception.BleException;
+import com.mc10inc.biostamp3.sdk.exception.RequestException;
 
 import timber.log.Timber;
 
@@ -47,7 +49,7 @@ public class Request<TC, TR> {
         }
 
         if (resp.getError() != Brc3.ErrorCode.SUCCESS) {
-            throw new RequestException(resp.getError(), resp.getErrorMessage());
+            throw RequestException.forResponse(resp);
         }
 
         if (responseParamGetter != null) {

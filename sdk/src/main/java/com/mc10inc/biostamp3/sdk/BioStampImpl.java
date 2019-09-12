@@ -6,6 +6,8 @@ import android.os.Looper;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.mc10inc.biostamp3.sdk.ble.SensorBle;
+import com.mc10inc.biostamp3.sdk.exception.BleException;
+import com.mc10inc.biostamp3.sdk.exception.RequestException;
 import com.mc10inc.biostamp3.sdk.task.Task;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -90,12 +92,6 @@ public class BioStampImpl implements BioStamp {
                 try {
                     try {
                         Request.blinkLeds.execute(ble);
-                        Request.testData.execute(ble, Brc3.TestDataCommandParam.newBuilder()
-                                .setNumBytes(2000));
-                        Request.setTime.execute(ble, Brc3.TimeSetCommandParam.newBuilder()
-                                .setTimestamp((double)System.currentTimeMillis() / 1000.0));
-                        Brc3.TimeGetResponseParam t = Request.getTime.execute(ble);
-                        Timber.i(t.toString());
                     } catch (RequestException e) {
                         Timber.e(e);
                     }

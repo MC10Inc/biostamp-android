@@ -22,7 +22,7 @@ import com.fitbit.bluetooth.fbgatt.tx.SubscribeToCharacteristicNotificationsTran
 import com.fitbit.bluetooth.fbgatt.tx.WriteGattCharacteristicTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.WriteGattDescriptorTransaction;
 import com.google.protobuf.ByteString;
-import com.mc10inc.biostamp3.sdk.BleException;
+import com.mc10inc.biostamp3.sdk.exception.BleException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
