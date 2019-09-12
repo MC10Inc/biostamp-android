@@ -49,16 +49,6 @@ public class BioStampImpl implements BioStamp {
 
     }
 
-    public Brc3.Response execute(Brc3.Request request) throws BleException {
-        byte[] respBytes = ble.execute(request.toByteArray());
-        try {
-            return Brc3.Response.parseFrom(respBytes);
-        } catch (InvalidProtocolBufferException e) {
-            Timber.e(e);
-            throw new BleException();
-        }
-    }
-
     private void executeTask(Task task) {
         if (state == State.CONNECTED) {
             taskQueue.add(task);
@@ -86,13 +76,17 @@ public class BioStampImpl implements BioStamp {
             @Override
             public void doTask() {
                 try {
-                    Brc3.Request req = Brc3.Request.newBuilder()
-                            .setCommand(Brc3.Command.TEST_DATA)
-                            .setTestData(Brc3.TestDataCommandParam.newBuilder()
-                                    .setNumBytes(2000))
-                            .build();
-                    Brc3.Response resp = execute(req);
-                    Timber.i("Resp %s", resp.toString());
+                    try {
+                        Request.blinkLeds.execute(ble);
+                        Request.testData.execute(ble, Brc3.TestDataCommandParam.newBuilder()
+                                .setNumBytes(2000));
+                        Request.setTime.execute(ble, Brc3.TimeSetCommandParam.newBuilder()
+                                .setTimestamp((double)System.currentTimeMillis() / 1000.0));
+                        Brc3.TimeGetResponseParam t = Request.getTime.execute(ble);
+                        Timber.i(t.toString());
+                    } catch (RequestException e) {
+                        Timber.e(e);
+                    }
                     success(null);
                 } catch (BleException e) {
                     error(e);

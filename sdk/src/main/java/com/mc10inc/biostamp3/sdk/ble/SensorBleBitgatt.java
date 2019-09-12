@@ -194,7 +194,7 @@ public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
                 throw new BleException();
             }
             synchronized (this) {
-                return new byte[0];
+                return response;
             }
         } finally {
             busySemaphore.release();
