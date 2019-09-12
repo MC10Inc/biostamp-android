@@ -1,6 +1,5 @@
 package com.mc10inc.biostamp3.sdk.ble;
 
-import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
@@ -16,6 +15,7 @@ import com.fitbit.bluetooth.fbgatt.GattTransactionCallback;
 import com.fitbit.bluetooth.fbgatt.TransactionResult;
 import com.fitbit.bluetooth.fbgatt.tx.GattClientDiscoverServicesTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.GattConnectTransaction;
+import com.fitbit.bluetooth.fbgatt.tx.GattDisconnectTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.ReadGattCharacteristicTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.SetClientConnectionStateTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.SubscribeToCharacteristicNotificationsTransaction;
@@ -119,7 +119,21 @@ public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
 
     @Override
     public void disconnect() throws BleException {
-
+        if (state == State.DISCONNECTED
+                || state == State.DISCONNECTING
+                || state == State.CONNECTING) {
+            throw new BleException();
+        }
+        state = State.DISCONNECTING;
+        GattDisconnectTransaction tx = new GattDisconnectTransaction(
+                conn, GattState.DISCONNECTED);
+        runTx(tx, result -> {
+            if (result.getResultStatus().equals(TransactionResult.TransactionResultStatus.SUCCESS)) {
+                Timber.i("Disconnect transaction succeeded");
+            } else {
+                Timber.e("Failed to disconnect: %s", result);
+            }
+        });
     }
 
     private void disconnectForErrorDuringConnect(TransactionResult origResult) {
