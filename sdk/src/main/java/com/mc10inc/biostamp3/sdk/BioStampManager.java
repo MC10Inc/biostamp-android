@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.SystemClock;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -15,8 +14,9 @@ import com.mc10inc.biostamp3.sdk.ble.SensorBle;
 import com.mc10inc.biostamp3.sdk.ble.SensorBleBitgatt;
 import com.mc10inc.biostamp3.sdk.ble.StatusBroadcast;
 
-import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import timber.log.Timber;
@@ -36,20 +36,9 @@ public class BioStampManager {
         return INSTANCE;
     }
 
-    private class ScannedSensor {
-        final GattConnection conn;
-        final long scannedTime;
-
-        ScannedSensor(GattConnection conn) {
-            this.conn = conn;
-            scannedTime = SystemClock.elapsedRealtime();
-        }
-    }
-
     private static final FitbitGatt gatt = FitbitGatt.getInstance();
 
     private final Context applicationContext;
-    private final Map<String, ScannedSensor> scannedSensors = new HashMap<>();
 
     private BioStampManager(Context context) {
         this.applicationContext = context;
@@ -82,29 +71,32 @@ public class BioStampManager {
 
     public Map<String, SensorStatus> getScanResults() {
         Map<String, SensorStatus> results = new HashMap<>();
-        for (ScannedSensor ss : scannedSensors.values()) {
-            String serial = ss.conn.getDevice().getName();
-            results.put(serial, new SensorStatus(ss.conn));
+        List<GattConnection> conns = gatt.getMatchingConnectionsForDeviceNames(null);
+        for (GattConnection conn : conns) {
+            String serial = conn.getDevice().getName();
+            results.put(serial, new SensorStatus(conn));
         }
         return results;
     }
 
     public BioStamp getBioStamp(String serial) {
-        ScannedSensor ss = scannedSensors.get(serial);
-        if (ss == null) {
+        List<GattConnection> conns = gatt.getMatchingConnectionsForDeviceNames(
+                Collections.singletonList(serial));
+        if (conns.isEmpty()) {
             return null;
         }
+        if (conns.size() > 1) {
+            Timber.e("Found %d connections matching name %s", conns.size(), serial);
+        }
 
-        SensorBle sensorBle = new SensorBleBitgatt(ss.conn);
+        SensorBle sensorBle = new SensorBleBitgatt(conns.get(0));
         return new BioStampImpl(this, sensorBle);
     }
 
     private final FitbitGatt.FitbitGattCallback callback = new FitbitGatt.FitbitGattCallback() {
         @Override
         public void onBluetoothPeripheralDiscovered(GattConnection connection) {
-            synchronized (scannedSensors) {
-                scannedSensors.put(connection.getDevice().getName(), new ScannedSensor(connection));
-            }
+
         }
 
         @Override
