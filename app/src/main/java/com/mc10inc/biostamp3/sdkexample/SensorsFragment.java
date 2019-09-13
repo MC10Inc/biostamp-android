@@ -21,12 +21,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class ScanFragment extends BaseFragment {
+public class SensorsFragment extends BaseFragment {
     @BindView(R.id.sensorList)
     RecyclerView sensorList;
 
     private BioStampManager bs;
-    private ScanSensorAdapter sensorAdapter;
+    private SensorAdapter sensorAdapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -37,58 +37,46 @@ public class ScanFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_scan, container, false);
+        View view = inflater.inflate(R.layout.fragment_sensors, container, false);
         unbinder = ButterKnife.bind(this, view);
 
         sensorList.setLayoutManager(new LinearLayoutManager(getContext()));
-        sensorAdapter = new ScanSensorAdapter();
+        sensorAdapter = new SensorAdapter();
         sensorList.setAdapter(sensorAdapter);
 
+        bs.getProvisionedSensors().observe(getViewLifecycleOwner(), sensors -> {
+            List<String> ss = new ArrayList<>(sensors);
+            Collections.sort(ss);
+            sensorAdapter.setSensorSerials(ss);
+        });
         return view;
     }
 
-    @OnClick(R.id.startButton) void startButton() {
-        if (!bs.hasPermissions()) {
-            if (getActivity() != null) {
-                bs.requestPermissions(getActivity());
-            }
-            return;
-        }
+    @OnClick(R.id.connectButton) void connectButton() {
 
-        bs.startScanning(this::updateSensorList);
     }
 
-    @OnClick(R.id.stopButton) void stopButton() {
-        bs.stopScanning();
-    }
-
-    @OnClick(R.id.provisionButton) void provisionButton() {
+    @OnClick(R.id.deprovisionButton) void deprovisionButton() {
         String serial = sensorAdapter.getSelectedItem();
         if (serial != null) {
-            bs.provisionSensor(serial);
+            bs.deprovisionSensor(serial);
         }
     }
 
-    private void updateSensorList() {
-        List<String> serials = new ArrayList<>(bs.getScanResults().keySet());
-        Collections.sort(serials);
-        sensorAdapter.setSensorSerials(serials);
-    }
-
-    private class ScanSensorAdapter extends RecyclerView.Adapter<ScanSensorViewHolder> {
+    private class SensorAdapter extends RecyclerView.Adapter<SensorViewHolder> {
         private int selection = RecyclerView.NO_POSITION;
         private List<String> sensorSerials = Collections.emptyList();
 
         @NonNull
         @Override
-        public ScanSensorViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        public SensorViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View v = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.list_item_sensor, parent, false);
-            return new ScanSensorViewHolder(v, this::setSelected);
+            return new SensorViewHolder(v, this::setSelected);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull ScanSensorViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull SensorViewHolder holder, int position) {
             holder.textView.setText(sensorSerials.get(position));
             holder.view.setSelected(position == selection);
         }
@@ -105,6 +93,7 @@ public class ScanFragment extends BaseFragment {
 
         private void setSensorSerials(List<String> sensorSerials) {
             if (!this.sensorSerials.equals(sensorSerials)) {
+                selection = RecyclerView.NO_POSITION;
                 this.sensorSerials = sensorSerials;
                 notifyDataSetChanged();
             }
@@ -119,7 +108,7 @@ public class ScanFragment extends BaseFragment {
         }
     }
 
-    static class ScanSensorViewHolder extends RecyclerView.ViewHolder {
+    static class SensorViewHolder extends RecyclerView.ViewHolder {
         interface SelectListener {
             void selected(int position);
         }
@@ -129,7 +118,7 @@ public class ScanFragment extends BaseFragment {
         @BindView(R.id.textView)
         TextView textView;
 
-        ScanSensorViewHolder(View view, SelectListener listener) {
+        SensorViewHolder(View view, SensorViewHolder.SelectListener listener) {
             super(view);
             this.view = view;
             ButterKnife.bind(this, view);

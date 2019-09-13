@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
                 case 0:
                     return new ScanFragment();
                 case 1:
+                    return new SensorsFragment();
+                case 2:
                 default:
                     return new ControlsFragment();
             }
@@ -60,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
                 case 0:
                     return "Scan";
                 case 1:
+                    return "Sensors";
+                case 2:
                     return "Controls";
                 default:
                     return null;
@@ -68,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return 2;
+            return 3;
         }
     }
 }

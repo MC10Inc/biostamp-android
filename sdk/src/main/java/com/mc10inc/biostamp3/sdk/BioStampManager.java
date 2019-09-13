@@ -4,22 +4,32 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import com.fitbit.bluetooth.fbgatt.FitbitGatt;
 import com.fitbit.bluetooth.fbgatt.GattConnection;
 import com.mc10inc.biostamp3.sdk.ble.SensorBle;
 import com.mc10inc.biostamp3.sdk.ble.SensorBleBitgatt;
 import com.mc10inc.biostamp3.sdk.ble.StatusBroadcast;
+import com.mc10inc.biostamp3.sdk.db.BioStampDatabase;
+import com.mc10inc.biostamp3.sdk.db.ProvisionedSensor;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import timber.log.Timber;
 
@@ -42,10 +52,14 @@ public class BioStampManager {
 
     private final Context applicationContext;
     private Runnable discoveryListener;
+    private Executor dbExecutor = Executors.newSingleThreadExecutor();
     private Handler handler = new Handler(Looper.getMainLooper());
+    private MutableLiveData<Set<String>> provisionedSensors = new MutableLiveData<>();
 
     private BioStampManager(Context context) {
         this.applicationContext = context;
+
+        updateProvisionedSensors();
     }
 
     private void start() {
@@ -97,6 +111,38 @@ public class BioStampManager {
 
         SensorBle sensorBle = new SensorBleBitgatt(conns.get(0));
         return new BioStampImpl(this, sensorBle);
+    }
+
+    private BioStampDatabase getDb() {
+        return BioStampDatabase.getDatabase(applicationContext);
+    }
+
+    public LiveData<Set<String>> getProvisionedSensors() {
+        return provisionedSensors;
+    }
+
+    public void provisionSensor(String sensor) {
+        dbExecutor.execute(() -> {
+            ProvisionedSensor ps = new ProvisionedSensor(sensor);
+            getDb().provisionedSensorDao().insert(ps);
+            updateProvisionedSensors();
+        });
+    }
+
+    public void deprovisionSensor(String sensor) {
+        dbExecutor.execute(() -> {
+            ProvisionedSensor ps = new ProvisionedSensor(sensor);
+            getDb().provisionedSensorDao().delete(ps);
+            updateProvisionedSensors();
+        });
+    }
+
+    private void updateProvisionedSensors() {
+        dbExecutor.execute(() -> {
+            List<ProvisionedSensor> sensors = getDb().provisionedSensorDao().getAll();
+            Set<String> ps = sensors.stream().map(ProvisionedSensor::getSerial).collect(Collectors.toSet());
+            provisionedSensors.postValue(ps);
+        });
     }
 
     private final FitbitGatt.FitbitGattCallback callback = new FitbitGatt.FitbitGattCallback() {
