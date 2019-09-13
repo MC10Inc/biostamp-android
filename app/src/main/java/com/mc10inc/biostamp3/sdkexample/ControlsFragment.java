@@ -75,6 +75,6 @@ public class ControlsFragment extends BaseFragment {
            }
         }, 3000);
 
-        bs.startScanning();
+        bs.startScanning(null);
     }
 }

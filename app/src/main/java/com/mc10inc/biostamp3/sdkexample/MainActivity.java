@@ -46,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
+                    return new ScanFragment();
+                case 1:
                 default:
                     return new ControlsFragment();
             }
@@ -56,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
+                    return "Scan";
+                case 1:
                     return "Controls";
                 default:
                     return null;
@@ -64,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return 1;
+            return 2;
         }
     }
 }

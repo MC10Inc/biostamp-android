@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -39,6 +41,8 @@ public class BioStampManager {
     private static final FitbitGatt gatt = FitbitGatt.getInstance();
 
     private final Context applicationContext;
+    private Runnable discoveryListener;
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     private BioStampManager(Context context) {
         this.applicationContext = context;
@@ -61,11 +65,13 @@ public class BioStampManager {
                 0);
     }
 
-    public void startScanning() {
+    public void startScanning(Runnable discoveryListener) {
+        this.discoveryListener = discoveryListener;
         gatt.startHighPriorityScan(applicationContext);
     }
 
     public void stopScanning() {
+        this.discoveryListener = null;
         gatt.cancelScan(applicationContext);
     }
 
@@ -96,7 +102,10 @@ public class BioStampManager {
     private final FitbitGatt.FitbitGattCallback callback = new FitbitGatt.FitbitGattCallback() {
         @Override
         public void onBluetoothPeripheralDiscovered(GattConnection connection) {
-
+            Runnable dl = discoveryListener;
+            if (dl != null) {
+                handler.post(dl);
+            }
         }
 
         @Override
