@@ -5,7 +5,7 @@ public interface BioStamp {
 
     void disconnect();
 
-    void test();
+    void blinkLed(Listener<Void> listener);
 
     interface ConnectListener {
         void connected();

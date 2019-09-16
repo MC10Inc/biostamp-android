@@ -92,16 +92,12 @@ public class BioStampImpl implements BioStamp {
     }
 
     @Override
-    public void test() {
-        executeTask(new Task<Void>(this, (error, result) -> {}) {
+    public void blinkLed(Listener<Void> listener) {
+        executeTask(new Task<Void>(this, listener) {
             @Override
             public void doTask() {
                 try {
-                    try {
-                        Request.blinkLeds.execute(ble);
-                    } catch (RequestException e) {
-                        Timber.e(e);
-                    }
+                    Request.blinkLeds.execute(ble);
                     success(null);
                 } catch (BleException e) {
                     error(e);

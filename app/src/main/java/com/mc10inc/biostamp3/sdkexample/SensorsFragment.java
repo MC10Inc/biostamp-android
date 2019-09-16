@@ -60,7 +60,8 @@ public class SensorsFragment extends BaseFragment {
             bs.getBioStamp(serial).connect(new BioStamp.ConnectListener() {
                 @Override
                 public void connected() {
-                    Timber.i("Connected successfully");
+                    Timber.i("Connected to %s", serial);
+                    viewModel.setSensor(bs.getBioStamp(serial));
                 }
 
                 @Override
@@ -71,6 +72,7 @@ public class SensorsFragment extends BaseFragment {
                 @Override
                 public void disconnected() {
                     Timber.i("Disconnected");
+                    viewModel.setSensor(null);
                 }
             });
         }
