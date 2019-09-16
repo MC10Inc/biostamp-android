@@ -106,6 +106,21 @@ public class BioStampImpl implements BioStamp {
         });
     }
 
+    @Override
+    public <TC, TR> void execute(Request<TC, TR> request, TC param, Listener<TR> listener) {
+        executeTask(new Task<TR>(this, listener) {
+            @Override
+            public void doTask() {
+                try {
+                    TR response = request.execute(ble);
+                    success(response);
+                } catch (BleException e) {
+                    error(e);
+                }
+            }
+        });
+    }
+
     private class SensorThread extends Thread {
         @Override
         public void run() {
