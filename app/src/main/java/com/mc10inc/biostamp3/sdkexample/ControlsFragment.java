@@ -47,6 +47,7 @@ public class ControlsFragment extends BaseFragment {
             return;
         }
 
+        /*
         handler.postDelayed(() -> {
             bs.stopScanning();
             Map<String, SensorStatus> results = bs.getSensorsInRange();
@@ -74,7 +75,7 @@ public class ControlsFragment extends BaseFragment {
                 });
            }
         }, 3000);
-
+*/
         bs.startScanning();
     }
 }

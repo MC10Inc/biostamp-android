@@ -26,12 +26,13 @@ public class BioStampImpl implements BioStamp {
     private ConnectListener connectListener;
     private Handler handler = new Handler(Looper.getMainLooper());
     private SensorThread sensorThread;
+    private String serial;
     private State state;
     private LinkedBlockingQueue<Task> taskQueue;
 
-    BioStampImpl(BioStampManager bioStampManager, SensorBle ble) {
+    BioStampImpl(BioStampManager bioStampManager, String serial) {
         this.bioStampManager = bioStampManager;
-        this.ble = ble;
+        this.serial = serial;
         state = State.DISCONNECTED;
     }
 
@@ -40,6 +41,12 @@ public class BioStampImpl implements BioStamp {
         if (state != State.DISCONNECTED) {
             throw new IllegalStateException("Not disconnected");
         }
+        SensorBle newBle = bioStampManager.getSensorBle(serial);
+        if (newBle == null) {
+            handler.post(connectListener::connectFailed);
+            return;
+        }
+        ble = newBle;
         this.connectListener = connectListener;
         taskQueue = new LinkedBlockingQueue<>();
         sensorThread = new SensorThread();

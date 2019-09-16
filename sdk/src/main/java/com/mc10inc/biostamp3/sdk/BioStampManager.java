@@ -20,6 +20,7 @@ import com.mc10inc.biostamp3.sdk.ble.StatusBroadcast;
 import com.mc10inc.biostamp3.sdk.db.BioStampDatabase;
 import com.mc10inc.biostamp3.sdk.db.ProvisionedSensor;
 
+import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.collections4.map.PassiveExpiringMap;
 
 import java.util.Collections;
@@ -56,6 +57,7 @@ public class BioStampManager {
     private static final FitbitGatt gatt = FitbitGatt.getInstance();
 
     private final Context applicationContext;
+    private final Map<String, BioStampImpl> biostamps = new HashMap<>();
     private Executor dbExecutor = Executors.newSingleThreadExecutor();
     private Handler handler = new Handler(Looper.getMainLooper());
     private MutableLiveData<Set<String>> provisionedSensors = new MutableLiveData<>();
@@ -100,6 +102,12 @@ public class BioStampManager {
     }
 
     public BioStamp getBioStamp(String serial) {
+        synchronized (biostamps) {
+            return biostamps.get(serial);
+        }
+    }
+
+    SensorBle getSensorBle(String serial) {
         List<GattConnection> conns = gatt.getMatchingConnectionsForDeviceNames(
                 Collections.singletonList(serial));
         if (conns.isEmpty()) {
@@ -109,8 +117,7 @@ public class BioStampManager {
             Timber.e("Found %d connections matching name %s", conns.size(), serial);
         }
 
-        SensorBle sensorBle = new SensorBleBitgatt(conns.get(0));
-        return new BioStampImpl(this, sensorBle);
+        return new SensorBleBitgatt(conns.get(0));
     }
 
     private BioStampDatabase getDb() {
@@ -141,6 +148,17 @@ public class BioStampManager {
         dbExecutor.execute(() -> {
             List<ProvisionedSensor> sensors = getDb().provisionedSensorDao().getAll();
             Set<String> ps = sensors.stream().map(ProvisionedSensor::getSerial).collect(Collectors.toSet());
+            synchronized (biostamps) {
+                Set<String> toAdd = SetUtils.difference(ps, biostamps.keySet()).toSet();
+                Set<String> toRemove = SetUtils.difference(biostamps.keySet(), ps);
+                for (String s : toAdd) {
+                    biostamps.put(s, new BioStampImpl(this, s));
+                }
+                for (String s : toRemove) {
+                    // TODO Disconnect if connected
+                    biostamps.remove(s);
+                }
+            }
             provisionedSensors.postValue(ps);
         });
     }

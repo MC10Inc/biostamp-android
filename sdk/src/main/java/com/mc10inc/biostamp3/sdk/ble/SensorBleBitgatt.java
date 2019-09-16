@@ -379,7 +379,16 @@ public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
 
     @Override
     public void onClientConnectionStateChanged(@NonNull TransactionResult result, @NonNull GattConnection connection) {
-
+        if (result.getResultState().equals(GattState.DISCONNECTED)) {
+            conn.unregisterConnectionEventListener(this);
+            state = State.DISCONNECTED;
+            Timber.i("Set disconnected for result state %s", result.getResultState());
+            done();
+            if (disconnectListener != null) {
+                disconnectListener.disconnected();
+                disconnectListener = null;
+            }
+        }
     }
 
     @Override

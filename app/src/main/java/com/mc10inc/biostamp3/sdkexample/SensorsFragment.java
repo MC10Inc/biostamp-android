@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.mc10inc.biostamp3.sdk.BioStamp;
 import com.mc10inc.biostamp3.sdk.BioStampManager;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import timber.log.Timber;
 
 public class SensorsFragment extends BaseFragment {
     @BindView(R.id.sensorList)
@@ -53,7 +55,25 @@ public class SensorsFragment extends BaseFragment {
     }
 
     @OnClick(R.id.connectButton) void connectButton() {
+        String serial = sensorAdapter.getSelectedItem();
+        if (serial != null) {
+            bs.getBioStamp(serial).connect(new BioStamp.ConnectListener() {
+                @Override
+                public void connected() {
+                    Timber.i("Connected successfully");
+                }
 
+                @Override
+                public void connectFailed() {
+                    Timber.i("Failed to connect");
+                }
+
+                @Override
+                public void disconnected() {
+                    Timber.i("Disconnected");
+                }
+            });
+        }
     }
 
     @OnClick(R.id.deprovisionButton) void deprovisionButton() {
