@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -21,7 +20,6 @@ import com.mc10inc.biostamp3.sdk.ble.StatusBroadcast;
 import com.mc10inc.biostamp3.sdk.db.BioStampDatabase;
 import com.mc10inc.biostamp3.sdk.db.ProvisionedSensor;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -36,14 +34,17 @@ import timber.log.Timber;
 public class BioStampManager {
     private static BioStampManager INSTANCE;
 
-    public static BioStampManager getInstance(Context context) {
+    public static void initialize(Context context) {
+        if (INSTANCE != null) {
+            throw new IllegalStateException("BioStampManager is already initialized!");
+        }
+        INSTANCE = new BioStampManager(context.getApplicationContext());
+        INSTANCE.start();
+    }
+
+    public static BioStampManager getInstance() {
         if (INSTANCE == null) {
-            synchronized (BioStampManager.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = new BioStampManager(context.getApplicationContext());
-                    INSTANCE.start();
-                }
-            }
+            throw new IllegalStateException("BioStampManager is not initialized!");
         }
         return INSTANCE;
     }
@@ -58,11 +59,10 @@ public class BioStampManager {
 
     private BioStampManager(Context context) {
         this.applicationContext = context;
-
-        updateProvisionedSensors();
     }
 
     private void start() {
+        updateProvisionedSensors();
         gatt.startWithScanFilters(applicationContext, StatusBroadcast.getScanFilters(), callback);
     }
 

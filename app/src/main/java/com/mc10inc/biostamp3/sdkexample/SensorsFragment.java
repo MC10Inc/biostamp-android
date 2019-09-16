@@ -31,7 +31,7 @@ public class SensorsFragment extends BaseFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        bs = BioStampManager.getInstance(requireActivity());
+        bs = BioStampManager.getInstance();
     }
 
     @Nullable
