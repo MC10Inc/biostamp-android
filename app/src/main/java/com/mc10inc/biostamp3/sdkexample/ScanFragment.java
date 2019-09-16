@@ -1,6 +1,8 @@
 package com.mc10inc.biostamp3.sdkexample;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +28,16 @@ public class ScanFragment extends BaseFragment {
     RecyclerView sensorList;
 
     private BioStampManager bs;
+    private Handler handler = new Handler(Looper.getMainLooper());
     private ScanSensorAdapter sensorAdapter;
+
+    private final Runnable updateSensorListRunnable = new Runnable() {
+        @Override
+        public void run() {
+            updateSensorList();
+            handler.postDelayed(updateSensorListRunnable, 1000);
+        }
+    };
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,11 +66,13 @@ public class ScanFragment extends BaseFragment {
             return;
         }
 
-        bs.startScanning(this::updateSensorList);
+        bs.startScanning();
+        handler.post(updateSensorListRunnable);
     }
 
     @OnClick(R.id.stopButton) void stopButton() {
         bs.stopScanning();
+        handler.removeCallbacks(updateSensorListRunnable);
     }
 
     @OnClick(R.id.provisionButton) void provisionButton() {
@@ -70,7 +83,7 @@ public class ScanFragment extends BaseFragment {
     }
 
     private void updateSensorList() {
-        List<String> serials = new ArrayList<>(bs.getScanResults().keySet());
+        List<String> serials = new ArrayList<>(bs.getSensorsInRange().keySet());
         Collections.sort(serials);
         sensorAdapter.setSensorSerials(serials);
     }

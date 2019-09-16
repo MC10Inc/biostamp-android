@@ -49,7 +49,7 @@ public class ControlsFragment extends BaseFragment {
 
         handler.postDelayed(() -> {
             bs.stopScanning();
-            Map<String, SensorStatus> results = bs.getScanResults();
+            Map<String, SensorStatus> results = bs.getSensorsInRange();
             Timber.i(results.toString());
             if (!results.isEmpty()) {
                 Iterator<SensorStatus> iter = results.values().iterator();
@@ -75,6 +75,6 @@ public class ControlsFragment extends BaseFragment {
            }
         }, 3000);
 
-        bs.startScanning(null);
+        bs.startScanning();
     }
 }

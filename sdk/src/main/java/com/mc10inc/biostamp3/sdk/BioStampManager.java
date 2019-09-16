@@ -20,6 +20,8 @@ import com.mc10inc.biostamp3.sdk.ble.StatusBroadcast;
 import com.mc10inc.biostamp3.sdk.db.BioStampDatabase;
 import com.mc10inc.biostamp3.sdk.db.ProvisionedSensor;
 
+import org.apache.commons.collections4.map.PassiveExpiringMap;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -49,13 +51,17 @@ public class BioStampManager {
         return INSTANCE;
     }
 
+    private static final int SENSOR_IN_RANGE_TTL = 10000;
+
     private static final FitbitGatt gatt = FitbitGatt.getInstance();
 
     private final Context applicationContext;
-    private Runnable discoveryListener;
     private Executor dbExecutor = Executors.newSingleThreadExecutor();
     private Handler handler = new Handler(Looper.getMainLooper());
     private MutableLiveData<Set<String>> provisionedSensors = new MutableLiveData<>();
+    private final Map<String, SensorStatus> sensorsInRange =
+            new PassiveExpiringMap<>(SENSOR_IN_RANGE_TTL, new HashMap<>());
+
 
     private BioStampManager(Context context) {
         this.applicationContext = context;
@@ -79,24 +85,18 @@ public class BioStampManager {
                 0);
     }
 
-    public void startScanning(Runnable discoveryListener) {
-        this.discoveryListener = discoveryListener;
+    public void startScanning() {
         gatt.startHighPriorityScan(applicationContext);
     }
 
     public void stopScanning() {
-        this.discoveryListener = null;
-        gatt.cancelScan(applicationContext);
+        gatt.cancelHighPriorityScan(applicationContext);
     }
 
-    public Map<String, SensorStatus> getScanResults() {
-        Map<String, SensorStatus> results = new HashMap<>();
-        List<GattConnection> conns = gatt.getMatchingConnectionsForDeviceNames(null);
-        for (GattConnection conn : conns) {
-            String serial = conn.getDevice().getName();
-            results.put(serial, new SensorStatus(conn));
+    public Map<String, SensorStatus> getSensorsInRange() {
+        synchronized (sensorsInRange) {
+            return new HashMap<>(sensorsInRange);
         }
-        return results;
     }
 
     public BioStamp getBioStamp(String serial) {
@@ -148,10 +148,8 @@ public class BioStampManager {
     private final FitbitGatt.FitbitGattCallback callback = new FitbitGatt.FitbitGattCallback() {
         @Override
         public void onBluetoothPeripheralDiscovered(GattConnection connection) {
-            Runnable dl = discoveryListener;
-            if (dl != null) {
-                handler.post(dl);
-            }
+            String serial = connection.getDevice().getName();
+            sensorsInRange.put(serial, new SensorStatus(connection));
         }
 
         @Override
