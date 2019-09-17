@@ -70,4 +70,13 @@ public class Request<TC, TR> {
 
     public static final Request<Brc3.TimeSetCommandParam.Builder, Void> setTime =
             new Request<>(Brc3.Command.TIME_SET, Brc3.Request.Builder::setTimeSet, null);
+
+    public static final Request<Brc3.SensingStartCommandParam.Builder, Void> startSensing =
+            new Request<>(Brc3.Command.SENSING_START, Brc3.Request.Builder::setSensingStart, null);
+
+    public static final Request<Void, Void> stopSensing =
+            new Request<>(Brc3.Command.SENSING_STOP, null, null);
+
+    public static final Request<Void, Brc3.SensingGetInfoResponseParam> getSensingInfo =
+            new Request<>(Brc3.Command.SENSING_GET_INFO, null, Brc3.Response::getSensingGetInfo);
 }

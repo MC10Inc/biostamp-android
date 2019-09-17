@@ -15,4 +15,30 @@
         android:text="Blink LED"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/startSensingButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start Sensing"
+        app:layout_constraintStart_toStartOf="@+id/blinkLedButton"
+        app:layout_constraintTop_toBottomOf="@+id/blinkLedButton" />
+
+    <Button
+        android:id="@+id/stopSensingButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Stop"
+        app:layout_constraintStart_toEndOf="@+id/startSensingButton"
+        app:layout_constraintTop_toBottomOf="@+id/blinkLedButton" />
+
+    <Button
+        android:id="@+id/getSensingConfigButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Get Config"
+        app:layout_constraintStart_toEndOf="@+id/stopSensingButton"
+        app:layout_constraintTop_toBottomOf="@+id/blinkLedButton" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,8 +6,9 @@ import android.os.Looper;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.mc10inc.biostamp3.sdk.ble.SensorBle;
+import com.mc10inc.biostamp3.sdk.sensing.SensingInfo;
+import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
 import com.mc10inc.biostamp3.sdk.exception.BleException;
-import com.mc10inc.biostamp3.sdk.exception.RequestException;
 import com.mc10inc.biostamp3.sdk.task.Task;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -114,6 +115,55 @@ public class BioStampImpl implements BioStamp {
                 try {
                     TR response = request.execute(ble);
                     success(response);
+                } catch (BleException e) {
+                    error(e);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void startSensing(SensorConfig sensorConfig, Listener<Void> listener) {
+        executeTask(new Task<Void>(this, listener) {
+            @Override
+            public void doTask() {
+                try {
+                    double ts = System.currentTimeMillis() / 1000.0;
+                    Request.setTime.execute(ble, Brc3.TimeSetCommandParam.newBuilder()
+                            .setTimestamp(ts));
+                    Request.startSensing.execute(ble, Brc3.SensingStartCommandParam.newBuilder()
+                            .setConfig(sensorConfig.getMsg()));
+                    success(null);
+                } catch (BleException e) {
+                    error(e);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void stopSensing(Listener<Void> listener) {
+        executeTask(new Task<Void>(this, listener) {
+            @Override
+            public void doTask() {
+                try {
+                    Request.stopSensing.execute(ble);
+                    success(null);
+                } catch (BleException e) {
+                    error(e);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void getSensingInfo(Listener<SensingInfo> listener) {
+        executeTask(new Task<SensingInfo>(this, listener) {
+            @Override
+            public void doTask() {
+                try {
+                    Brc3.SensingGetInfoResponseParam resp = Request.getSensingInfo.execute(ble);
+                    success(new SensingInfo(resp));
                 } catch (BleException e) {
                     error(e);
                 }
