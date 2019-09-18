@@ -50,8 +50,10 @@ public class MainActivity extends AppCompatActivity {
                 case 1:
                     return new SensorsFragment();
                 case 2:
-                default:
                     return new ControlsFragment();
+                case 3:
+                default:
+                    return new StreamingFragment();
             }
         }
 
@@ -65,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
                     return "Sensors";
                 case 2:
                     return "Controls";
+                case 3:
+                    return "Streaming";
                 default:
                     return null;
             }
@@ -72,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return 3;
+            return 4;
         }
     }
 }

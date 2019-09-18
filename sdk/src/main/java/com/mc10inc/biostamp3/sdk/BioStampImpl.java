@@ -9,6 +9,9 @@ import com.mc10inc.biostamp3.sdk.ble.SensorBle;
 import com.mc10inc.biostamp3.sdk.sensing.SensingInfo;
 import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
 import com.mc10inc.biostamp3.sdk.exception.BleException;
+import com.mc10inc.biostamp3.sdk.sensing.Streaming;
+import com.mc10inc.biostamp3.sdk.sensing.StreamingListener;
+import com.mc10inc.biostamp3.sdk.sensing.StreamingType;
 import com.mc10inc.biostamp3.sdk.task.Task;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -29,6 +32,7 @@ public class BioStampImpl implements BioStamp {
     private SensorThread sensorThread;
     private String serial;
     private State state;
+    private Streaming streaming = new Streaming();
     private LinkedBlockingQueue<Task> taskQueue;
 
     BioStampImpl(BioStampManager bioStampManager, String serial) {
@@ -82,6 +86,8 @@ public class BioStampImpl implements BioStamp {
 
         if (dm.hasTestDataTwo()) {
             Timber.e("Received %d bytes of test data", dm.getTestDataTwo().getMyDataTwo().size());
+        } else if (dm.hasStreamingSamples()) {
+            streaming.handleStreamingSamples(dm.getStreamingSamples());
         } else {
             Timber.e("Unknown data message: %s", dm);
         }
@@ -169,6 +175,51 @@ public class BioStampImpl implements BioStamp {
                 }
             }
         });
+    }
+
+    @Override
+    public void startStreaming(StreamingType type, Listener<Void> listener) {
+        executeTask(new Task<Void>(this, listener) {
+            @Override
+            public void doTask() {
+                try {
+                    Brc3.StreamingType msgType = type.getMsgType();
+                    Brc3.StreamingStartResponseParam resp = Request.startStreaming.execute(ble,
+                            Brc3.StreamingStartCommandParam.newBuilder().setType(msgType).build());
+                    streaming.setStreamingInfo(type, resp.getInfo());
+                    success(null);
+                } catch (BleException e) {
+                    error(e);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void stopStreaming(StreamingType type, Listener<Void> listener) {
+        executeTask(new Task<Void>(this, listener) {
+            @Override
+            public void doTask() {
+                try {
+                    Brc3.StreamingType msgType = type.getMsgType();
+                    Request.stopStreaming.execute(ble,
+                            Brc3.StreamingStopCommandParam.newBuilder().setType(msgType).build());
+                    success(null);
+                } catch (BleException e) {
+                    error(e);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void addStreamingListener(StreamingType type, StreamingListener streamingListener) {
+        streaming.addStreamingListener(type, streamingListener);
+    }
+
+    @Override
+    public void removeStreamingListener(StreamingType type, StreamingListener streamingListener) {
+        streaming.removeStreamingListener(type, streamingListener);
     }
 
     private class SensorThread extends Thread {

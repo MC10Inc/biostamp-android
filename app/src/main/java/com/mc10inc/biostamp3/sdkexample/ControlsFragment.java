@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import com.mc10inc.biostamp3.sdk.BioStamp;
 import com.mc10inc.biostamp3.sdk.sensing.PredefinedConfigs;
 import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
+import com.mc10inc.biostamp3.sdk.sensing.StreamingType;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;

@@ -9,6 +9,9 @@ public class PredefinedConfigs {
                         .setMode(Brc3.MotionMode.ACCEL)
                         .setSamplingPeriodUs(10000)
                         .setAccelGRange(16))
+                .setEnvironment(Brc3.EnvironmentConfig.newBuilder()
+                        .setMode(Brc3.EnvironmentMode.ALL)
+                        .setSamplingPeriodUs(1000000))
                 .build());
     }
 }

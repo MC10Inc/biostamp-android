@@ -79,4 +79,11 @@ public class Request<TC, TR> {
 
     public static final Request<Void, Brc3.SensingGetInfoResponseParam> getSensingInfo =
             new Request<>(Brc3.Command.SENSING_GET_INFO, null, Brc3.Response::getSensingGetInfo);
+
+    public static final Request<Brc3.StreamingStartCommandParam, Brc3.StreamingStartResponseParam> startStreaming =
+            new Request<>(Brc3.Command.STREAMING_START,
+                    Brc3.Request.Builder::setStreamingStart, Brc3.Response::getStreamingStart);
+
+    public static final Request<Brc3.StreamingStopCommandParam, Void> stopStreaming =
+            new Request<>(Brc3.Command.STREAMING_STOP, Brc3.Request.Builder::setStreamingStop, null);
 }
