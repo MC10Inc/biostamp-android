@@ -80,10 +80,16 @@ public class Request<TC, TR> {
     public static final Request<Void, Brc3.SensingGetInfoResponseParam> getSensingInfo =
             new Request<>(Brc3.Command.SENSING_GET_INFO, null, Brc3.Response::getSensingGetInfo);
 
-    public static final Request<Brc3.StreamingStartCommandParam, Brc3.StreamingStartResponseParam> startStreaming =
+    public static final Request<Brc3.StreamingStartCommandParam.Builder, Brc3.StreamingStartResponseParam> startStreaming =
             new Request<>(Brc3.Command.STREAMING_START,
                     Brc3.Request.Builder::setStreamingStart, Brc3.Response::getStreamingStart);
 
-    public static final Request<Brc3.StreamingStopCommandParam, Void> stopStreaming =
+    public static final Request<Brc3.StreamingStopCommandParam.Builder, Void> stopStreaming =
             new Request<>(Brc3.Command.STREAMING_STOP, Brc3.Request.Builder::setStreamingStop, null);
+
+    public static final Request<Brc3.RecordingGetInfoCommandParam.Builder, Brc3.RecordingGetInfoResponseParam> getRecordingInfo =
+            new Request<>(Brc3.Command.RECORDING_GET_INFO, Brc3.Request.Builder::setRecordingGetInfo, Brc3.Response::getRecordingGetInfo);
+
+    public static final Request<Void, Void> clearAllRecordings =
+            new Request<>(Brc3.Command.CLEAR_ALL_RECORDINGS, null, null);
 }

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,11 +14,15 @@ import com.mc10inc.biostamp3.sdk.sensing.PredefinedConfigs;
 import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
 import com.mc10inc.biostamp3.sdk.sensing.StreamingType;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import timber.log.Timber;
 
 public class ControlsFragment extends BaseFragment {
+    @BindView(R.id.enableRecordingCheckBox)
+    CheckBox enableRecordingCheckBox;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -44,6 +49,7 @@ public class ControlsFragment extends BaseFragment {
             return;
         }
         SensorConfig sc = PredefinedConfigs.getAccel();
+        sc.setRecordingEnabled(enableRecordingCheckBox.isChecked());
         s.startSensing(sc, (error, result) -> {
             if (error != null) {
                 Timber.e(error);

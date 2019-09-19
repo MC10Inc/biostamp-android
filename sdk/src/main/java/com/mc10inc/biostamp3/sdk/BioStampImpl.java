@@ -6,14 +6,17 @@ import android.os.Looper;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.mc10inc.biostamp3.sdk.ble.SensorBle;
+import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
 import com.mc10inc.biostamp3.sdk.sensing.SensingInfo;
 import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
 import com.mc10inc.biostamp3.sdk.exception.BleException;
 import com.mc10inc.biostamp3.sdk.sensing.Streaming;
 import com.mc10inc.biostamp3.sdk.sensing.StreamingListener;
 import com.mc10inc.biostamp3.sdk.sensing.StreamingType;
+import com.mc10inc.biostamp3.sdk.task.GetRecordingList;
 import com.mc10inc.biostamp3.sdk.task.Task;
 
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import timber.log.Timber;
@@ -69,6 +72,10 @@ public class BioStampImpl implements BioStamp {
         } else {
             task.disconnected();
         }
+    }
+
+    public SensorBle getBle() {
+        return ble;
     }
 
     public Handler getHandler() {
@@ -185,7 +192,7 @@ public class BioStampImpl implements BioStamp {
                 try {
                     Brc3.StreamingType msgType = type.getMsgType();
                     Brc3.StreamingStartResponseParam resp = Request.startStreaming.execute(ble,
-                            Brc3.StreamingStartCommandParam.newBuilder().setType(msgType).build());
+                            Brc3.StreamingStartCommandParam.newBuilder().setType(msgType));
                     streaming.setStreamingInfo(type, resp.getInfo());
                     success(null);
                 } catch (BleException e) {
@@ -203,7 +210,7 @@ public class BioStampImpl implements BioStamp {
                 try {
                     Brc3.StreamingType msgType = type.getMsgType();
                     Request.stopStreaming.execute(ble,
-                            Brc3.StreamingStopCommandParam.newBuilder().setType(msgType).build());
+                            Brc3.StreamingStopCommandParam.newBuilder().setType(msgType));
                     success(null);
                 } catch (BleException e) {
                     error(e);
@@ -220,6 +227,26 @@ public class BioStampImpl implements BioStamp {
     @Override
     public void removeStreamingListener(StreamingType type, StreamingListener streamingListener) {
         streaming.removeStreamingListener(type, streamingListener);
+    }
+
+    @Override
+    public void getRecordingList(Listener<List<RecordingInfo>> listener) {
+        executeTask(new GetRecordingList(this, listener));
+    }
+
+    @Override
+    public void clearAllRecordings(Listener<Void> listener) {
+        executeTask(new Task<Void>(this, listener) {
+            @Override
+            public void doTask() {
+                try {
+                    Request.clearAllRecordings.execute(ble);
+                    success(null);
+                } catch (BleException e) {
+                    error(e);
+                }
+            }
+        });
     }
 
     private class SensorThread extends Thread {

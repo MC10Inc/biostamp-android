@@ -1,9 +1,12 @@
 package com.mc10inc.biostamp3.sdk;
 
+import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
 import com.mc10inc.biostamp3.sdk.sensing.SensingInfo;
 import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
 import com.mc10inc.biostamp3.sdk.sensing.StreamingListener;
 import com.mc10inc.biostamp3.sdk.sensing.StreamingType;
+
+import java.util.List;
 
 public interface BioStamp {
     void connect(ConnectListener connectListener);
@@ -27,6 +30,10 @@ public interface BioStamp {
     void addStreamingListener(StreamingType type, StreamingListener streamingListener);
 
     void removeStreamingListener(StreamingType type, StreamingListener streamingListener);
+
+    void getRecordingList(Listener<List<RecordingInfo>> listener);
+
+    void clearAllRecordings(Listener<Void> listener);
 
     interface ConnectListener {
         void connected();
