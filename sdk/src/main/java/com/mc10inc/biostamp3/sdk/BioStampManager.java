@@ -17,7 +17,7 @@ import com.fitbit.bluetooth.fbgatt.GattConnection;
 import com.mc10inc.biostamp3.sdk.ble.SensorBle;
 import com.mc10inc.biostamp3.sdk.ble.SensorBleBitgatt;
 import com.mc10inc.biostamp3.sdk.ble.StatusBroadcast;
-import com.mc10inc.biostamp3.sdk.db.BioStampDatabase;
+import com.mc10inc.biostamp3.sdk.db.BioStampDb;
 import com.mc10inc.biostamp3.sdk.db.ProvisionedSensor;
 
 import org.apache.commons.collections4.SetUtils;
@@ -58,6 +58,7 @@ public class BioStampManager {
 
     private final Context applicationContext;
     private final Map<String, BioStampImpl> biostamps = new HashMap<>();
+    private final BioStampDb db;
     private Executor dbExecutor = Executors.newSingleThreadExecutor();
     private Handler handler = new Handler(Looper.getMainLooper());
     private MutableLiveData<Set<String>> provisionedSensors = new MutableLiveData<>();
@@ -67,6 +68,7 @@ public class BioStampManager {
 
     private BioStampManager(Context context) {
         this.applicationContext = context;
+        db = new BioStampDb(context);
     }
 
     private void start() {
@@ -120,10 +122,6 @@ public class BioStampManager {
         return new SensorBleBitgatt(conns.get(0));
     }
 
-    private BioStampDatabase getDb() {
-        return BioStampDatabase.getDatabase(applicationContext);
-    }
-
     public LiveData<Set<String>> getProvisionedSensors() {
         return provisionedSensors;
     }
@@ -131,7 +129,7 @@ public class BioStampManager {
     public void provisionSensor(String sensor) {
         dbExecutor.execute(() -> {
             ProvisionedSensor ps = new ProvisionedSensor(sensor);
-            getDb().provisionedSensorDao().insert(ps);
+            db.insertProvisionedSensor(ps);
             updateProvisionedSensors();
         });
     }
@@ -139,14 +137,14 @@ public class BioStampManager {
     public void deprovisionSensor(String sensor) {
         dbExecutor.execute(() -> {
             ProvisionedSensor ps = new ProvisionedSensor(sensor);
-            getDb().provisionedSensorDao().delete(ps);
+            db.deleteProvisionedSensor(ps);
             updateProvisionedSensors();
         });
     }
 
     private void updateProvisionedSensors() {
         dbExecutor.execute(() -> {
-            List<ProvisionedSensor> sensors = getDb().provisionedSensorDao().getAll();
+            List<ProvisionedSensor> sensors = db.getProvisionedSensors();
             Set<String> ps = sensors.stream().map(ProvisionedSensor::getSerial).collect(Collectors.toSet());
             synchronized (biostamps) {
                 Set<String> toAdd = SetUtils.difference(ps, biostamps.keySet()).toSet();
