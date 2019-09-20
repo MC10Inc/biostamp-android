@@ -33,9 +33,7 @@ public class SensorConfig {
     public String toString() {
         StringBuilder s = new StringBuilder();
         if (msg.getRecordingEnabled()) {
-            s.append("Recording enabled\n");
-        } else {
-            s.append("Streaming\n");
+            s.append("Rec\n");
         }
         if (msg.hasMotion()) {
             describeMotion(s, msg.getMotion());
@@ -54,7 +52,7 @@ public class SensorConfig {
 
     @SuppressLint("DefaultLocale")
     private void describeMotion(StringBuilder s, Brc3.MotionConfig c) {
-        s.append("Motion ");
+        s.append("Motion(");
         if (c.getMode() == Brc3.MotionMode.ACCEL) {
             s.append("Accel");
         } else if (c.getMode() == Brc3.MotionMode.ACCEL_GYRO) {
@@ -78,17 +76,17 @@ public class SensorConfig {
             s.append(" ");
             s.append(String.format("+/-%ddps", c.getGyroDpsRange()));
         }
-        s.append(" ").append(rate(c.getSamplingPeriodUs())).append("\n");
+        s.append(" ").append(rate(c.getSamplingPeriodUs())).append(") ");
     }
 
     private void describeEnvironment(StringBuilder s, Brc3.EnvironmentConfig c) {
-        s.append("Environment ");
+        s.append("Environment(");
         s.append(rate(c.getSamplingPeriodUs()));
-        s.append("\n");
+        s.append(") ");
     }
 
     private void describeAfe4900(StringBuilder s, Brc3.AFE4900Config c) {
-        s.append("AFE ");
+        s.append("AFE(");
         if (c.getMode() == Brc3.AFE4900Mode.ECG) {
             s.append("ECG");
         } else if (c.getMode() == Brc3.AFE4900Mode.PPG) {
@@ -96,12 +94,11 @@ public class SensorConfig {
         } else if (c.getMode() == Brc3.AFE4900Mode.PTT) {
             s.append("ECG+PPG");
         }
-        s.append("\n");
+        s.append(")");
     }
 
     private void describeAd5940(StringBuilder s, Brc3.AD5940Config c) {
-        s.append("AD5940 EDA");
-        s.append("\n");
+        s.append("AD5940(EDA) ");
     }
 
     private String rate(int periodUs) {

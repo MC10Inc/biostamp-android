@@ -26,7 +26,7 @@ public class GetRecordingList extends Task<List<RecordingInfo>> {
                     Brc3.RecordingGetInfoResponseParam resp = Request.getRecordingInfo.execute(
                             bs.getBle(),
                             Brc3.RecordingGetInfoCommandParam.newBuilder().setIndex(i));
-                    recs.add(new RecordingInfo(resp.getInfo()));
+                    recs.add(new RecordingInfo(resp.getInfo(), bs.getBle().getSerial()));
                     i++;
                 } catch (SensorRecordingNotFoundException e) {
                     break;
