@@ -13,6 +13,7 @@ import com.mc10inc.biostamp3.sdk.exception.BleException;
 import com.mc10inc.biostamp3.sdk.sensing.Streaming;
 import com.mc10inc.biostamp3.sdk.sensing.StreamingListener;
 import com.mc10inc.biostamp3.sdk.sensing.StreamingType;
+import com.mc10inc.biostamp3.sdk.task.DownloadRecording;
 import com.mc10inc.biostamp3.sdk.task.GetRecordingList;
 import com.mc10inc.biostamp3.sdk.task.Task;
 
@@ -22,6 +23,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import timber.log.Timber;
 
 public class BioStampImpl implements BioStamp {
+    public interface RecordingPagesListener {
+        void handleRecordingPages(List<Brc3.RecordingPage> recordingPages);
+    }
+
     private enum State {
         DISCONNECTED,
         CONNECTING,
@@ -32,6 +37,7 @@ public class BioStampImpl implements BioStamp {
     private SensorBle ble;
     private ConnectListener connectListener;
     private Handler handler = new Handler(Looper.getMainLooper());
+    private volatile RecordingPagesListener recordingPagesListener;
     private SensorThread sensorThread;
     private String serial;
     private State state;
@@ -82,6 +88,10 @@ public class BioStampImpl implements BioStamp {
         return handler;
     }
 
+    public void setRecordingPagesListener(RecordingPagesListener recordingPagesListener) {
+        this.recordingPagesListener = recordingPagesListener;
+    }
+
     private void handleData(ByteString dataBytes) {
         Brc3.DataMessage dm;
         try {
@@ -95,6 +105,12 @@ public class BioStampImpl implements BioStamp {
             Timber.e("Received %d bytes of test data", dm.getTestDataTwo().getMyDataTwo().size());
         } else if (dm.hasStreamingSamples()) {
             streaming.handleStreamingSamples(dm.getStreamingSamples());
+        } else if (dm.getRecordingPagesCount() > 0) {
+            if (recordingPagesListener != null) {
+                RecordingPagesListener l = recordingPagesListener;
+                recordingPagesListener = null;
+                l.handleRecordingPages(dm.getRecordingPagesList());
+            }
         } else {
             Timber.e("Unknown data message: %s", dm);
         }
@@ -247,6 +263,12 @@ public class BioStampImpl implements BioStamp {
                 }
             }
         });
+    }
+
+    @Override
+    public void downloadRecording(RecordingInfo recording, Listener<Void> listener,
+                                  ProgressListener progressListener) {
+        executeTask(new DownloadRecording(this, listener, progressListener, recording));
     }
 
     private class SensorThread extends Thread {

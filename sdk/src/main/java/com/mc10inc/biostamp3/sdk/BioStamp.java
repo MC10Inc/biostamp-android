@@ -35,6 +35,9 @@ public interface BioStamp {
 
     void clearAllRecordings(Listener<Void> listener);
 
+    void downloadRecording(RecordingInfo recording, Listener<Void> listener,
+                           ProgressListener progressListener);
+
     interface ConnectListener {
         void connected();
         void connectFailed();

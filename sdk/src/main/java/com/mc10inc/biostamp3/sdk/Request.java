@@ -28,7 +28,7 @@ public class Request<TC, TR> {
         this.responseParamGetter = responseParamGetter;
     }
 
-    public TR execute(SensorBle ble) throws BleException, RequestException {
+    public TR execute(SensorBle ble) throws BleException {
         return execute(ble, null);
     }
 
@@ -92,4 +92,7 @@ public class Request<TC, TR> {
 
     public static final Request<Void, Void> clearAllRecordings =
             new Request<>(Brc3.Command.CLEAR_ALL_RECORDINGS, null, null);
+
+    public static final Request<Brc3.RecordingReadCommandParam.Builder, Void> readRecording =
+            new Request<>(Brc3.Command.RECORDING_READ, Brc3.Request.Builder::setRecordingRead, null);
 }

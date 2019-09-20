@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,6 +29,12 @@ public class DownloadFragment extends BaseFragment {
     @BindView(R.id.recordingList)
     RecyclerView recordingList;
 
+    @BindView(R.id.downloadProgressBar)
+    ProgressBar progressBar;
+
+    @BindView(R.id.cancelButton)
+    Button cancelButton;
+
     private RecordingAdapter recordingAdapter;
 
     @Nullable
@@ -42,6 +50,19 @@ public class DownloadFragment extends BaseFragment {
         viewModel.getRecordingList().observe(getViewLifecycleOwner(), recordings -> {
             updateRecordingList(recordings);
         });
+
+        viewModel.getDownloadInProgress().observe(getViewLifecycleOwner(), inProgress -> {
+            if (inProgress) {
+                progressBar.setVisibility(View.VISIBLE);
+                cancelButton.setVisibility(View.VISIBLE);
+            } else {
+                progressBar.setVisibility(View.INVISIBLE);
+                cancelButton.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        viewModel.getDownloadProgress().observe(getViewLifecycleOwner(), progress ->
+                progressBar.setProgress((int)(progressBar.getMax() * progress)));
 
         return view;
     }
@@ -95,5 +116,28 @@ public class DownloadFragment extends BaseFragment {
                     .collect(Collectors.toList());
             recordingAdapter.setRecordings(items);
         }
+    }
+
+    @OnClick(R.id.downloadButton) void downloadButton() {
+        BioStamp sensor = viewModel.getSensor();
+        if (sensor == null) {
+            return;
+        }
+        RecordingAdapter.RecordingItem item = recordingAdapter.getSelectedItem();
+        if (item == null) {
+            errorPopup("Please select a recording to download");
+            return;
+        }
+        if (item.getRecordingInfo().isInProgress()) {
+            errorPopup("The selected recording is in progress; stop it before downloading.");
+            return;
+        }
+        sensor.downloadRecording(item.getRecordingInfo(), (error, result) -> {
+            viewModel.setDownloadInProgress(false);
+            if (error != null) {
+                Timber.e(error);
+            }
+        }, progress -> viewModel.setDownloadProgress(progress));
+        viewModel.setDownloadInProgress(true);
     }
 }

@@ -1,5 +1,6 @@
 package com.mc10inc.biostamp3.sdkexample;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -22,5 +23,15 @@ public class BaseFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         unbinder.unbind();
+    }
+
+    protected void errorPopup(String message) {
+        if (getActivity() == null || getActivity().isFinishing()) {
+            return;
+        }
+        new AlertDialog.Builder(getActivity())
+                .setMessage(message)
+                .create()
+                .show();
     }
 }

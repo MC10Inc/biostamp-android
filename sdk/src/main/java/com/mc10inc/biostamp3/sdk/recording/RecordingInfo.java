@@ -30,6 +30,10 @@ public class RecordingInfo {
         return msg.getNumPages();
     }
 
+    public int getRecordingId() {
+        return msg.getRecordingId();
+    }
+
     public SensorConfig getSensorConfig() {
         return new SensorConfig(msg.getSensorConfig());
     }
