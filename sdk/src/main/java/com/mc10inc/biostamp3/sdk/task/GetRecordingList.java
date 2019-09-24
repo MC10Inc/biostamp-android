@@ -2,8 +2,10 @@ package com.mc10inc.biostamp3.sdk.task;
 
 import com.mc10inc.biostamp3.sdk.BioStamp;
 import com.mc10inc.biostamp3.sdk.BioStampImpl;
+import com.mc10inc.biostamp3.sdk.BioStampManager;
 import com.mc10inc.biostamp3.sdk.Brc3;
 import com.mc10inc.biostamp3.sdk.Request;
+import com.mc10inc.biostamp3.sdk.db.BioStampDb;
 import com.mc10inc.biostamp3.sdk.exception.BleException;
 import com.mc10inc.biostamp3.sdk.exception.SensorRecordingNotFoundException;
 import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
@@ -18,6 +20,7 @@ public class GetRecordingList extends Task<List<RecordingInfo>> {
 
     @Override
     public void doTask() {
+        BioStampDb db = BioStampManager.getInstance().getDb();
         try {
             List<RecordingInfo> recs = new ArrayList<>();
             int i = 0;
@@ -26,7 +29,9 @@ public class GetRecordingList extends Task<List<RecordingInfo>> {
                     Brc3.RecordingGetInfoResponseParam resp = Request.getRecordingInfo.execute(
                             bs.getBle(),
                             Brc3.RecordingGetInfoCommandParam.newBuilder().setIndex(i));
-                    recs.add(new RecordingInfo(resp.getInfo(), bs.getBle().getSerial()));
+                    RecordingInfo recInfo = new RecordingInfo(resp.getInfo(), bs.getBle().getSerial());
+                    recInfo.setDownloadStatus(db.getRecordingDownloadStatus(recInfo));
+                    recs.add(recInfo);
                     i++;
                 } catch (SensorRecordingNotFoundException e) {
                     break;

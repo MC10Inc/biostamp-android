@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.mc10inc.biostamp3.sdk.recording.DownloadStatus;
 import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
 
 import java.util.Collections;
@@ -77,6 +78,17 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.Reco
                 rec.getSensorConfig().toString()));
         if (rec.isInProgress()) {
             s.append("<br />Recording in progress...");
+        } else {
+            DownloadStatus ds = rec.getDownloadStatus();
+            if (ds != null) {
+                if (ds.isComplete()) {
+                    s.append("<br />Download complete");
+                } else {
+                    s.append(String.format("<br />%d of %d pages downloaded",
+                            ds.getDownloadedPages(),
+                            ds.getNumPages()));
+                }
+            }
         }
         holder.textView.setText(Html.fromHtml(s.toString(), 0));
         holder.view.setSelected(position == selection);
