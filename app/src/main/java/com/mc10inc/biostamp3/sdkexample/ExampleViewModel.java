@@ -13,6 +13,7 @@ public class ExampleViewModel extends ViewModel {
     private MutableLiveData<Boolean> downloadInProgress = new MutableLiveData<>();
     private MutableLiveData<Double> downloadProgress = new MutableLiveData<>();
     private MutableLiveData<List<RecordingInfo>> recordingList = new MutableLiveData<>();
+    private MutableLiveData<List<RecordingInfo>> localRecordingList = new MutableLiveData<>();
     private BioStamp sensor;
 
     LiveData<Boolean> getDownloadInProgress() {
@@ -37,6 +38,14 @@ public class ExampleViewModel extends ViewModel {
 
     void setRecordingList(List<RecordingInfo> recordingList) {
         this.recordingList.setValue(recordingList);
+    }
+
+    LiveData<List<RecordingInfo>> getLocalRecordingList() {
+        return localRecordingList;
+    }
+
+    void setLocalRecordingList(List<RecordingInfo> localRecordingList) {
+        this.localRecordingList.setValue(localRecordingList);
     }
 
     public BioStamp getSensor() {

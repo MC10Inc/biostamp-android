@@ -6,17 +6,26 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.os.Handler;
+import android.os.Looper;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.mc10inc.biostamp3.sdk.Brc3;
 import com.mc10inc.biostamp3.sdk.recording.DownloadStatus;
 import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import timber.log.Timber;
 
 public class BioStampDb {
+    public interface RecordingUpdateListener {
+        void recordingsDbUpdated();
+    }
+
     private static final int DB_VERSION = 1;
     private static final String DB_NAME = "BioStamp.db";
 
@@ -76,9 +85,19 @@ public class BioStampDb {
     }
 
     private DbHelper dbHelper;
+    private Handler handler = new Handler(Looper.getMainLooper());
+    private Set<RecordingUpdateListener> recordingUpdateListeners = new CopyOnWriteArraySet<>();
 
     public BioStampDb(Context context) {
-        dbHelper = new DbHelper((context));
+        dbHelper = new DbHelper(context);
+    }
+
+    public void addRecordingUpdateListener(RecordingUpdateListener listener) {
+        recordingUpdateListeners.add(listener);
+    }
+
+    public void removeRecordingUpdateListener(RecordingUpdateListener listener) {
+        recordingUpdateListeners.remove(listener);
     }
 
     public List<ProvisionedSensor> getProvisionedSensors() {
@@ -125,6 +144,13 @@ public class BioStampDb {
         cv.put("info_msg", recording.getMsg().toByteArray());
         long id = db.insertWithOnConflict("recordings", null, cv,
                 SQLiteDatabase.CONFLICT_FAIL);
+        notifyRecordingUpdate();
+    }
+
+    public void deleteAllRecordings() {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.delete("recordings", null, null);
+        notifyRecordingUpdate();
     }
 
     public void deleteRecording(RecordingKey recordingKey) {
@@ -134,6 +160,38 @@ public class BioStampDb {
                 new String[]{
                         recordingKey.getSerial(),
                         String.valueOf(recordingKey.getRecordingId())});
+        notifyRecordingUpdate();
+    }
+
+    public List<RecordingInfo> getRecordings() {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        List<RecordingInfo> recs = new ArrayList<>();
+        try (Cursor cursor = db.query("recordings",
+                new String[]{"serial", "info_msg"},
+                null,
+                null,
+                null,
+                null,
+                "recording_id ASC",
+                null)) {
+            while (cursor.moveToNext()) {
+                Brc3.RecordingInfo msg;
+                String serial = cursor.getString(0);
+                try {
+                    msg = Brc3.RecordingInfo.parseFrom(cursor.getBlob(1));
+                } catch (InvalidProtocolBufferException e) {
+                    Timber.e(e);
+                    continue;
+                }
+                RecordingInfo recInfo = new RecordingInfo(msg, serial);
+                recs.add(recInfo);
+            }
+        }
+        for (RecordingInfo recInfo : recs) {
+            DownloadStatus ds = getRecordingDownloadStatus(recInfo);
+            recInfo.setDownloadStatus(ds);
+        }
+        return recs;
     }
 
     private DbRecInfo getDbRecInfo(RecordingKey recordingKey) {
@@ -177,6 +235,7 @@ public class BioStampDb {
         } finally {
             db.endTransaction();
         }
+        notifyRecordingUpdate();
     }
 
     public DownloadStatus getRecordingDownloadStatus(RecordingKey key) {
@@ -195,6 +254,12 @@ public class BioStampDb {
                 Timber.e("Downloaded recording is missing pages");
             }
             return new DownloadStatus(dbRecInfo.numPages, false, downloadedPages);
+        }
+    }
+
+    private void notifyRecordingUpdate() {
+        for (RecordingUpdateListener listener : recordingUpdateListeners) {
+            handler.post(listener::recordingsDbUpdated);
         }
     }
 }

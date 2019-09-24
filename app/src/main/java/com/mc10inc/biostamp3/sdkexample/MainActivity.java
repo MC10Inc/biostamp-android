@@ -54,8 +54,10 @@ public class MainActivity extends AppCompatActivity {
                 case 3:
                     return new StreamingFragment();
                 case 4:
-                default:
                     return new DownloadFragment();
+                case 5:
+                default:
+                    return new RecordingsFragment();
             }
         }
 
@@ -73,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
                     return "Streaming";
                 case 4:
                     return "Download";
+                case 5:
+                    return "Recordings";
                 default:
                     return null;
             }
@@ -80,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return 5;
+            return 6;
         }
     }
 }
