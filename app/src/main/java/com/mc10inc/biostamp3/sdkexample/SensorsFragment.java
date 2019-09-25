@@ -78,6 +78,13 @@ public class SensorsFragment extends BaseFragment {
         }
     }
 
+    @OnClick(R.id.disconnectButton) void disconnectButton() {
+        BioStamp sensor = sensorAdapter.getSelectedItem();
+        if (sensor != null) {
+            sensor.disconnect();
+        }
+    }
+
     @OnClick(R.id.deprovisionButton) void deprovisionButton() {
         BioStamp sensor = sensorAdapter.getSelectedItem();
         if (sensor != null) {

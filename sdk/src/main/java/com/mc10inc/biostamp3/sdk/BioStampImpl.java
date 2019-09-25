@@ -78,7 +78,13 @@ public class BioStampImpl implements BioStamp {
 
     @Override
     public void disconnect() {
-
+        if (ble != null) {
+            try {
+                ble.disconnect();
+            } catch (BleException e) {
+                Timber.e(e);
+            }
+        }
     }
 
     private void executeTask(Task task) {

@@ -102,7 +102,7 @@ public class ScanFragment extends BaseFragment {
 
         @Override
         public void onBindViewHolder(@NonNull ScanSensorViewHolder holder, int position) {
-            holder.textView.setText(sensorSerials.get(position));
+            holder.serialTextView.setText(sensorSerials.get(position));
             holder.view.setSelected(position == selection);
         }
 
@@ -139,8 +139,8 @@ public class ScanFragment extends BaseFragment {
 
         View view;
 
-        @BindView(R.id.textView)
-        TextView textView;
+        @BindView(R.id.serialTextView)
+        TextView serialTextView;
 
         ScanSensorViewHolder(View view, SelectListener listener) {
             super(view);
