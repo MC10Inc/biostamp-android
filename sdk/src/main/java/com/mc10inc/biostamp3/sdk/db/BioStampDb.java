@@ -252,9 +252,61 @@ public class BioStampDb {
             int lastDownloadedPageNum = cursor.getInt(1);
             if (lastDownloadedPageNum != downloadedPages - 1) {
                 Timber.e("Downloaded recording is missing pages");
+                // TODO handle error
             }
             return new DownloadStatus(dbRecInfo.numPages, false, downloadedPages);
         }
+    }
+
+    public class RecordingPagesLoader implements AutoCloseable {
+        private Cursor cursor;
+
+        RecordingPagesLoader(Cursor cursor) {
+            this.cursor = cursor;
+        }
+
+        public Brc3.RecordingPage getNext() {
+            if (cursor.moveToNext()) {
+                try {
+                    return Brc3.RecordingPage.parseFrom(cursor.getBlob(0));
+                } catch (InvalidProtocolBufferException e) {
+                    Timber.e(e);
+                    // TODO handle error
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        public void close() {
+            cursor.close();
+        }
+    }
+
+    public RecordingPagesLoader getRecordingPages(RecordingKey key) {
+        return getRecordingPages(key, 0, Integer.MAX_VALUE);
+    }
+
+    public RecordingPagesLoader getRecordingPages(RecordingKey key, int startPage, int endPage) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        DbRecInfo dbRecInfo = getDbRecInfo(key);
+        if (dbRecInfo == null) {
+            return null;
+        }
+        Cursor cursor = db.query("pages",
+                new String[]{"page_msg"},
+                "recording = ? AND page_number >= ? AND page_number < ?",
+                new String[]{
+                        String.valueOf(dbRecInfo.id),
+                        String.valueOf(startPage),
+                        String.valueOf(endPage)},
+                null,
+                null,
+                "page_number ASC",
+                null);
+        return new RecordingPagesLoader(cursor);
     }
 
     private void notifyRecordingUpdate() {

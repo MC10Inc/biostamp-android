@@ -70,6 +70,18 @@ public class RecordingsFragment extends BaseFragment {
         BioStampManager.getInstance().getDb().removeRecordingUpdateListener(updateListener);
     }
 
+    @OnClick(R.id.decodeButton) void decodeButton() {
+        if (getActivity() == null || getActivity().isFinishing()) {
+            return;
+        }
+        RecordingAdapter.RecordingItem recordingItem = recordingAdapter.getSelectedItem();
+        if (recordingItem == null) {
+            errorPopup("Please select a recording to decode");
+            return;
+        }
+        new DecodeRecordingTask(recordingItem.getRecordingInfo()).execute();
+    }
+
     @OnClick(R.id.deleteButton) void deleteButton() {
         if (getActivity() == null || getActivity().isFinishing()) {
             return;

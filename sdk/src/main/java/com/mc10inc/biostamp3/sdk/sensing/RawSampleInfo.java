@@ -18,6 +18,13 @@ public class RawSampleInfo {
         ecgVScale = streamingInfo.getAfe4900EcgVScale();
     }
 
+    public RawSampleInfo(Brc3.RawDataInfo rawDataInfo) {
+        samplingPeriod = rawDataInfo.getSamplingPeriodScale();
+        accelGScale = rawDataInfo.getAccelGScale();
+        gyroDpsScale = rawDataInfo.getGyroDpsScale();
+        ecgVScale = rawDataInfo.getAfe4900EcgVScale();
+    }
+
     public double getSamplingPeriod() {
         return samplingPeriod;
     }
