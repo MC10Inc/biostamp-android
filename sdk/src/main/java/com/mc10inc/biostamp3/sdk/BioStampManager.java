@@ -58,10 +58,10 @@ public class BioStampManager {
 
     private final Context applicationContext;
     private final Map<String, BioStampImpl> biostamps = new HashMap<>();
+    private final MutableLiveData<Map<String, BioStamp>> biostampsLiveData = new MutableLiveData<>();
     private final BioStampDb db;
     private Executor dbExecutor = Executors.newSingleThreadExecutor();
     private Handler handler = new Handler(Looper.getMainLooper());
-    private MutableLiveData<Set<String>> provisionedSensors = new MutableLiveData<>();
     private final Map<String, SensorStatus> sensorsInRange =
             new PassiveExpiringMap<>(SENSOR_IN_RANGE_TTL, new HashMap<>());
 
@@ -109,6 +109,10 @@ public class BioStampManager {
         }
     }
 
+    public LiveData<Map<String, BioStamp>> getBioStampsLiveData() {
+        return biostampsLiveData;
+    }
+
     public BioStampDb getDb() {
         return db;
     }
@@ -124,10 +128,6 @@ public class BioStampManager {
         }
 
         return new SensorBleBitgatt(conns.get(0));
-    }
-
-    public LiveData<Set<String>> getProvisionedSensors() {
-        return provisionedSensors;
     }
 
     public void provisionSensor(String sensor) {
@@ -161,8 +161,16 @@ public class BioStampManager {
                     biostamps.remove(s);
                 }
             }
-            provisionedSensors.postValue(ps);
+            updateBioStampLiveData();
         });
+    }
+
+    private void updateBioStampLiveData() {
+        biostampsLiveData.postValue(new HashMap<>(biostamps));
+    }
+
+    void notifyConnStateChange() {
+        updateBioStampLiveData();
     }
 
     private final FitbitGatt.FitbitGattCallback callback = new FitbitGatt.FitbitGattCallback() {

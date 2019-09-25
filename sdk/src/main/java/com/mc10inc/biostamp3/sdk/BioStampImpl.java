@@ -27,12 +27,6 @@ public class BioStampImpl implements BioStamp {
         void handleRecordingPages(List<Brc3.RecordingPage> recordingPages);
     }
 
-    private enum State {
-        DISCONNECTED,
-        CONNECTING,
-        CONNECTED
-    }
-
     private BioStampManager bioStampManager;
     private SensorBle ble;
     private ConnectListener connectListener;
@@ -40,7 +34,7 @@ public class BioStampImpl implements BioStamp {
     private volatile RecordingPagesListener recordingPagesListener;
     private SensorThread sensorThread;
     private String serial;
-    private State state;
+    private volatile State state;
     private Streaming streaming = new Streaming();
     private LinkedBlockingQueue<Task> taskQueue;
 
@@ -48,6 +42,21 @@ public class BioStampImpl implements BioStamp {
         this.bioStampManager = bioStampManager;
         this.serial = serial;
         state = State.DISCONNECTED;
+    }
+
+    @Override
+    public String getSerial() {
+        return serial;
+    }
+
+    @Override
+    public State getState() {
+        return state;
+    }
+
+    private void setState(State state) {
+        this.state = state;
+        bioStampManager.notifyConnStateChange();
     }
 
     @Override
@@ -275,16 +284,16 @@ public class BioStampImpl implements BioStamp {
         @Override
         public void run() {
             Timber.i("Connecting to sensor");
-            state = BioStampImpl.State.CONNECTING;
+            setState(BioStamp.State.CONNECTING);
             try {
                 ble.connect(BioStampImpl.this::handleDisconnect, BioStampImpl.this::handleData);
                 Timber.i("Connected to sensor %s", ble.getSerial());
             } catch (BleException e) {
-                state = BioStampImpl.State.DISCONNECTED;
+                setState(BioStamp.State.DISCONNECTED);
                 handler.post(() -> connectListener.connectFailed());
                 return;
             }
-            state = BioStampImpl.State.CONNECTED;
+            setState(BioStamp.State.CONNECTED);
             handler.post(() -> connectListener.connected());
 
             while (!Thread.interrupted()) {
@@ -296,7 +305,7 @@ public class BioStampImpl implements BioStamp {
                 }
                 task.doTask();
             }
-            state = BioStampImpl.State.DISCONNECTED;
+            setState(BioStamp.State.DISCONNECTED);
             Timber.i("Sensor thread loop done");
 
             for (Task task : taskQueue) {

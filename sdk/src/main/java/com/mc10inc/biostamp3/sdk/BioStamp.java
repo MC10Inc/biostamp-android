@@ -13,6 +13,10 @@ public interface BioStamp {
 
     void disconnect();
 
+    String getSerial();
+
+    State getState();
+
     void blinkLed(Listener<Void> listener);
 
     <TC, TR> void execute(Request<TC, TR> request, TC param, Listener<TR> listener);
@@ -37,6 +41,12 @@ public interface BioStamp {
 
     void downloadRecording(RecordingInfo recording, Listener<Void> listener,
                            ProgressListener progressListener);
+
+    enum State {
+        DISCONNECTED,
+        CONNECTING,
+        CONNECTED
+    }
 
     interface ConnectListener {
         void connected();

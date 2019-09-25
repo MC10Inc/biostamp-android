@@ -46,22 +46,22 @@ public class SensorsFragment extends BaseFragment {
         sensorAdapter = new SensorAdapter();
         sensorList.setAdapter(sensorAdapter);
 
-        bs.getProvisionedSensors().observe(getViewLifecycleOwner(), sensors -> {
-            List<String> ss = new ArrayList<>(sensors);
-            Collections.sort(ss);
-            sensorAdapter.setSensorSerials(ss);
+        bs.getBioStampsLiveData().observe(getViewLifecycleOwner(), sensors -> {
+            List<BioStamp> ss = new ArrayList<>(sensors.values());
+            Collections.sort(ss, (c1, c2) -> c1.getSerial().compareTo(c2.getSerial()));
+            sensorAdapter.setSensors(ss);
         });
         return view;
     }
 
     @OnClick(R.id.connectButton) void connectButton() {
-        String serial = sensorAdapter.getSelectedItem();
-        if (serial != null) {
-            bs.getBioStamp(serial).connect(new BioStamp.ConnectListener() {
+        BioStamp sensor = sensorAdapter.getSelectedItem();
+        if (sensor != null) {
+            sensor.connect(new BioStamp.ConnectListener() {
                 @Override
                 public void connected() {
-                    Timber.i("Connected to %s", serial);
-                    viewModel.setSensor(bs.getBioStamp(serial));
+                    Timber.i("Connected to %s", sensor.getSerial());
+                    viewModel.setSensor(sensor);
                 }
 
                 @Override
@@ -79,15 +79,15 @@ public class SensorsFragment extends BaseFragment {
     }
 
     @OnClick(R.id.deprovisionButton) void deprovisionButton() {
-        String serial = sensorAdapter.getSelectedItem();
-        if (serial != null) {
-            bs.deprovisionSensor(serial);
+        BioStamp sensor = sensorAdapter.getSelectedItem();
+        if (sensor != null) {
+            bs.deprovisionSensor(sensor.getSerial());
         }
     }
 
     private class SensorAdapter extends RecyclerView.Adapter<SensorViewHolder> {
         private int selection = RecyclerView.NO_POSITION;
-        private List<String> sensorSerials = Collections.emptyList();
+        private List<BioStamp> sensors = Collections.emptyList();
 
         @NonNull
         @Override
@@ -99,13 +99,27 @@ public class SensorsFragment extends BaseFragment {
 
         @Override
         public void onBindViewHolder(@NonNull SensorViewHolder holder, int position) {
-            holder.textView.setText(sensorSerials.get(position));
+            BioStamp sensor = sensors.get(position);
+            holder.serialTextView.setText(sensor.getSerial());
+            String status = "";
+            switch (sensor.getState()) {
+                case CONNECTED:
+                    status = "Connected";
+                    break;
+                case DISCONNECTED:
+                    status = "";
+                    break;
+                case CONNECTING:
+                    status = "Connecting…";
+                    break;
+            }
+            holder.statusTextView.setText(status);
             holder.view.setSelected(position == selection);
         }
 
         @Override
         public int getItemCount() {
-            return sensorSerials.size();
+            return sensors.size();
         }
 
         private void setSelected(int position) {
@@ -113,19 +127,17 @@ public class SensorsFragment extends BaseFragment {
             notifyDataSetChanged();
         }
 
-        private void setSensorSerials(List<String> sensorSerials) {
-            if (!this.sensorSerials.equals(sensorSerials)) {
-                selection = RecyclerView.NO_POSITION;
-                this.sensorSerials = sensorSerials;
-                notifyDataSetChanged();
-            }
+        private void setSensors(List<BioStamp> sensors) {
+            selection = RecyclerView.NO_POSITION;
+            this.sensors = sensors;
+            notifyDataSetChanged();
         }
 
-        public String getSelectedItem() {
+        public BioStamp getSelectedItem() {
             if (selection == RecyclerView.NO_POSITION) {
                 return null;
             } else {
-                return sensorSerials.get(selection);
+                return sensors.get(selection);
             }
         }
     }
@@ -137,8 +149,11 @@ public class SensorsFragment extends BaseFragment {
 
         View view;
 
-        @BindView(R.id.textView)
-        TextView textView;
+        @BindView(R.id.serialTextView)
+        TextView serialTextView;
+
+        @BindView(R.id.statusTextView)
+        TextView statusTextView;
 
         SensorViewHolder(View view, SensorViewHolder.SelectListener listener) {
             super(view);
