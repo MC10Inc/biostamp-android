@@ -46,7 +46,7 @@ public class DownloadRecording extends Task<Void> {
             } else {
                 pageNum = downloadStatus.getDownloadedPages();
             }
-            while (pageNum < recordingInfo.getNumPages()) {
+            while (!canceled && pageNum < recordingInfo.getNumPages()) {
                 CountDownLatch latch = new CountDownLatch(1);
                 bs.setRecordingPagesListener(p -> {
                     recordingPages = p;

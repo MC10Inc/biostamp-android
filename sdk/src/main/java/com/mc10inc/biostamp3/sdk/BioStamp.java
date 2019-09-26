@@ -17,6 +17,8 @@ public interface BioStamp {
 
     State getState();
 
+    void cancelTask();
+
     void blinkLed(Listener<Void> listener);
 
     <TC, TR> void execute(Request<TC, TR> request, TC param, Listener<TR> listener);

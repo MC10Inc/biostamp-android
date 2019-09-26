@@ -30,6 +30,7 @@ public class BioStampImpl implements BioStamp {
     private BioStampManager bioStampManager;
     private SensorBle ble;
     private ConnectListener connectListener;
+    private volatile Task currentTask;
     private Handler handler = new Handler(Looper.getMainLooper());
     private volatile RecordingPagesListener recordingPagesListener;
     private SensorThread sensorThread;
@@ -134,6 +135,14 @@ public class BioStampImpl implements BioStamp {
     private void handleDisconnect() {
         Timber.i("Disconnected, stopping sensor thread");
         sensorThread.interrupt();
+    }
+
+    @Override
+    public void cancelTask() {
+        Task task = currentTask;
+        if (task != null) {
+            task.cancel();
+        }
     }
 
     @Override
@@ -303,14 +312,15 @@ public class BioStampImpl implements BioStamp {
             handler.post(() -> connectListener.connected());
 
             while (!Thread.interrupted()) {
-                Task task;
                 try {
-                    task = taskQueue.take();
+                    currentTask = taskQueue.take();
                 } catch (InterruptedException e) {
                     break;
                 }
-                task.doTask();
+                currentTask.doTask();
+                currentTask = null;
             }
+            currentTask = null;
             setState(BioStamp.State.DISCONNECTED);
             Timber.i("Sensor thread loop done");
 

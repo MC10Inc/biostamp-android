@@ -140,4 +140,12 @@ public class DownloadFragment extends BaseFragment {
         }, progress -> viewModel.setDownloadProgress(progress));
         viewModel.setDownloadInProgress(true);
     }
+
+    @OnClick(R.id.cancelButton) void cancelButton() {
+        BioStamp sensor = viewModel.getSensor();
+        if (sensor == null) {
+            return;
+        }
+        sensor.cancelTask();
+    }
 }

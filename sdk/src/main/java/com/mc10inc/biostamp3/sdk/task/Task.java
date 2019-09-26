@@ -6,6 +6,7 @@ import com.mc10inc.biostamp3.sdk.exception.BleException;
 
 public abstract class Task<T> {
     protected BioStampImpl bs;
+    protected volatile boolean canceled = false;
     private BioStamp.Listener<T> taskListener;
     private BioStamp.ProgressListener progressListener;
 
@@ -21,6 +22,10 @@ public abstract class Task<T> {
     }
 
     public abstract void doTask();
+
+    public void cancel() {
+        canceled = true;
+    }
 
     public void disconnected() {
         error(new BleException());
