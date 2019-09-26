@@ -117,6 +117,10 @@ public class BioStampManager {
         return db;
     }
 
+    public void dbExecute(Runnable runnable) {
+        dbExecutor.execute(runnable);
+    }
+
     SensorBle getSensorBle(String serial) {
         List<GattConnection> conns = gatt.getMatchingConnectionsForDeviceNames(
                 Collections.singletonList(serial));

@@ -61,8 +61,8 @@ public class DownloadRecording extends Task<Void> {
                     throw new BleException("Timeout waiting for recording page data");
                 }
                 Timber.i("Received %d pages", recordingPages.size());
-                // TODO Do this on another thread to speed up download
-                db.insertRecordingPages(recordingInfo, recordingPages);
+                BioStampManager.getInstance().dbExecute(() ->
+                        db.insertRecordingPages(recordingInfo, recordingPages));
                 pageNum = recordingPages.get(recordingPages.size() - 1).getPageNumber() + 1;
                 progress((double)pageNum / recordingInfo.getNumPages());
             }

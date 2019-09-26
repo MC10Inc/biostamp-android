@@ -250,7 +250,7 @@ public class BioStampDb {
             cursor.moveToNext();
             int downloadedPages = cursor.getInt(0);
             int lastDownloadedPageNum = cursor.getInt(1);
-            if (lastDownloadedPageNum != downloadedPages - 1) {
+            if (downloadedPages > 0 && lastDownloadedPageNum != downloadedPages - 1) {
                 Timber.e("Downloaded recording is missing pages");
                 // TODO handle error
             }
