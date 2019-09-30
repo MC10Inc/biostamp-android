@@ -28,6 +28,71 @@ public class SensorConfig {
 
     }
 
+    public boolean hasAd5940() {
+        return msg.hasAd5940();
+    }
+
+    public boolean hasAd5940Z() {
+        if (msg.hasAd5940()) {
+            return msg.getAd5940().getMode() == Brc3.AD5940Mode.EDA;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean hasAfe4900() {
+        return msg.hasAfe4900();
+    }
+
+    public boolean hasAfe4900Ecg() {
+        if (hasAfe4900()) {
+            return msg.getAfe4900().getMode() == Brc3.AFE4900Mode.ECG
+                    || msg.getAfe4900().getMode() == Brc3.AFE4900Mode.PTT;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean hasAfe4900Ppg() {
+        if (hasAfe4900()) {
+            return msg.getAfe4900().getMode() == Brc3.AFE4900Mode.PPG
+                    || msg.getAfe4900().getMode() == Brc3.AFE4900Mode.PTT;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean hasMotion() {
+        return msg.hasMotion();
+    }
+
+    public boolean hasMotionAccel() {
+        if (hasMotion()) {
+            switch (msg.getMotion().getMode()) {
+                case ACCEL:
+                case ACCEL_GYRO:
+                    return true;
+                default:
+                    return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    public boolean hasMotionGyro() {
+        if (hasMotion()) {
+            switch (msg.getMotion().getMode()) {
+                case ACCEL_GYRO:
+                    return true;
+                default:
+                    return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
     @NotNull
     @Override
     public String toString() {

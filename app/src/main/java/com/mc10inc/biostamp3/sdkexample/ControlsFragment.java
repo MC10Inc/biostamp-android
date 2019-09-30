@@ -4,7 +4,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,11 +27,20 @@ public class ControlsFragment extends BaseFragment {
     @BindView(R.id.enableRecordingCheckBox)
     CheckBox enableRecordingCheckBox;
 
+    @BindView(R.id.sensorConfigSpinner)
+    Spinner sensorConfigSpinner;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_controls, container, false);
         unbinder = ButterKnife.bind(this, view);
+
+        SpinnerAdapter sensorConfigAdapter = new ArrayAdapter<>(getContext(),
+                R.layout.list_item_sensor_config,
+                PredefinedConfigs.getConfigs());
+        sensorConfigSpinner.setAdapter(sensorConfigAdapter);
+
         return view;
     }
 
@@ -48,7 +61,7 @@ public class ControlsFragment extends BaseFragment {
         if (s == null) {
             return;
         }
-        SensorConfig sc = PredefinedConfigs.getAccel();
+        SensorConfig sc = (SensorConfig)sensorConfigSpinner.getSelectedItem();
         sc.setRecordingEnabled(enableRecordingCheckBox.isChecked());
         s.startSensing(sc, (error, result) -> {
             if (error != null) {
