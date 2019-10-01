@@ -11,13 +11,15 @@ public class RawSamplesDataSeries implements XYSeries {
     private String title;
     private int samplingPeriodUs;
     private RawSamples.ColumnType column;
+    private double scale;
     private CircularFifoQueue<Double> samples;
 
     public RawSamplesDataSeries(String title, int samplingPeriodUs, int durationUs,
-                                RawSamples.ColumnType column) {
+                                RawSamples.ColumnType column, double scale) {
         this.title = title;
         this.samplingPeriodUs = samplingPeriodUs;
         this.column = column;
+        this.scale = scale;
         int numSamples = durationUs / samplingPeriodUs;
         samples = new CircularFifoQueue<>(numSamples);
     }
@@ -37,7 +39,7 @@ public class RawSamplesDataSeries implements XYSeries {
         if (index >= samples.size()) {
             return null;
         } else {
-            return samples.get(index);
+            return samples.get(index) * scale;
         }
     }
 

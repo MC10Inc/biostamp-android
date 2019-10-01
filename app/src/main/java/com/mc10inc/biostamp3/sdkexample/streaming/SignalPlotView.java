@@ -29,6 +29,7 @@ import butterknife.ButterKnife;
 
 public class SignalPlotView extends FrameLayout implements StreamingListener, StreamingPlot {
     private static final int DURATION_SEC = 6;
+    private static final double VOLTS_TO_MV = 1000;
 
     @BindView(R.id.plot)
     XYPlot plot;
@@ -65,6 +66,9 @@ public class SignalPlotView extends FrameLayout implements StreamingListener, St
             case GYRO:
                 initGyro(sensorConfig);
                 break;
+            case BIOPOTENTIAL:
+                initBiopotential(sensorConfig);
+                break;
         }
     }
 
@@ -78,11 +82,11 @@ public class SignalPlotView extends FrameLayout implements StreamingListener, St
 
         int samplingPeriodUs = sensorConfig.getMotionSamplingPeriodUs();
         RawSamplesDataSeries seriesX = new RawSamplesDataSeries("X", samplingPeriodUs,
-                getDurationSec() * 1000000, RawSamples.ColumnType.ACCEL_X);
+                getDurationSec() * 1000000, RawSamples.ColumnType.ACCEL_X, 1);
         RawSamplesDataSeries seriesY = new RawSamplesDataSeries("Y", samplingPeriodUs,
-                getDurationSec() * 1000000, RawSamples.ColumnType.ACCEL_Y);
+                getDurationSec() * 1000000, RawSamples.ColumnType.ACCEL_Y, 1);
         RawSamplesDataSeries seriesZ = new RawSamplesDataSeries("Z", samplingPeriodUs,
-                getDurationSec() * 1000000, RawSamples.ColumnType.ACCEL_Z);
+                getDurationSec() * 1000000, RawSamples.ColumnType.ACCEL_Z, 1);
         dataSeriesList.add(seriesX);
         dataSeriesList.add(seriesY);
         dataSeriesList.add(seriesZ);
@@ -103,11 +107,11 @@ public class SignalPlotView extends FrameLayout implements StreamingListener, St
 
         int samplingPeriodUs = sensorConfig.getMotionSamplingPeriodUs();
         RawSamplesDataSeries seriesX = new RawSamplesDataSeries("X", samplingPeriodUs,
-                getDurationSec() * 1000000, RawSamples.ColumnType.GYRO_X);
+                getDurationSec() * 1000000, RawSamples.ColumnType.GYRO_X, 1);
         RawSamplesDataSeries seriesY = new RawSamplesDataSeries("Y", samplingPeriodUs,
-                getDurationSec() * 1000000, RawSamples.ColumnType.GYRO_Y);
+                getDurationSec() * 1000000, RawSamples.ColumnType.GYRO_Y, 1);
         RawSamplesDataSeries seriesZ = new RawSamplesDataSeries("Z", samplingPeriodUs,
-                getDurationSec() * 1000000, RawSamples.ColumnType.GYRO_Z);
+                getDurationSec() * 1000000, RawSamples.ColumnType.GYRO_Z, 1);
         dataSeriesList.add(seriesX);
         dataSeriesList.add(seriesY);
         dataSeriesList.add(seriesZ);
@@ -115,6 +119,23 @@ public class SignalPlotView extends FrameLayout implements StreamingListener, St
         plot.addSeries(seriesX, getLineAndPointFormatter(Color.rgb(0, 0, 200)));
         plot.addSeries(seriesY, getLineAndPointFormatter(Color.rgb(200, 0, 0)));
         plot.addSeries(seriesZ, getLineAndPointFormatter(Color.rgb(0, 200, 0)));
+        plot.redraw();
+    }
+
+    private void initBiopotential(SensorConfig sensorConfig) {
+        genericPlotSetup(plot);
+        plot.setTitle("AFE4900 Biopotential");
+
+        plot.setRangeLabel("Voltage (mV)");
+        plot.setRangeBoundaries(0, 0, BoundaryMode.AUTO);
+        plot.setRangeStep(StepMode.SUBDIVIDE, 5);
+
+        int samplingPeriodUs = 1000000 / 250; // TODO Add to sensor config
+        RawSamplesDataSeries series = new RawSamplesDataSeries("Voltage", samplingPeriodUs,
+                getDurationSec() * 1000000, RawSamples.ColumnType.ECG, VOLTS_TO_MV);
+        dataSeriesList.add(series);
+
+        plot.addSeries(series, getLineAndPointFormatter(Color.rgb(0, 0, 200)));
         plot.redraw();
     }
 
