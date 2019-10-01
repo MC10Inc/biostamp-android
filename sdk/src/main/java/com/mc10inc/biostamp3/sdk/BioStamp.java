@@ -35,7 +35,7 @@ public interface BioStamp {
 
     void addStreamingListener(StreamingType type, StreamingListener streamingListener);
 
-    void removeStreamingListener(StreamingType type, StreamingListener streamingListener);
+    void removeStreamingListener(StreamingListener streamingListener);
 
     void getRecordingList(Listener<List<RecordingInfo>> listener);
 

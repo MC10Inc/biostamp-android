@@ -92,7 +92,9 @@ public class Streaming {
         Objects.requireNonNull(listeners.get(type)).add(streamingListener);
     }
 
-    public void removeStreamingListener(StreamingType type, StreamingListener streamingListener) {
-        Objects.requireNonNull(listeners.get(type)).remove(streamingListener);
+    public void removeStreamingListener(StreamingListener streamingListener) {
+        for (Set<StreamingListener> listenerSet : listeners.values()) {
+            listenerSet.remove(streamingListener);
+        }
     }
 }

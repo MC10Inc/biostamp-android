@@ -1,5 +1,6 @@
 package com.mc10inc.biostamp3.sdkexample.streaming;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.mc10inc.biostamp3.sdk.BioStamp;
+import com.mc10inc.biostamp3.sdk.BioStampManager;
+import com.mc10inc.biostamp3.sdk.exception.SensorCannotStartException;
 import com.mc10inc.biostamp3.sdk.sensing.RawSamples;
 import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
 import com.mc10inc.biostamp3.sdk.sensing.StreamingListener;
@@ -17,8 +20,11 @@ import com.mc10inc.biostamp3.sdk.sensing.StreamingType;
 import com.mc10inc.biostamp3.sdkexample.BaseFragment;
 import com.mc10inc.biostamp3.sdkexample.R;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -39,18 +45,7 @@ public class StreamingFragment extends BaseFragment implements SignalPlotView.Li
         return view;
     }
 
-    private final StreamingListener motionListener = samples -> {
-        Timber.i("Received %d samples %f", samples.getSize(), samples.getValue(RawSamples.ColumnType.ACCEL_X, 0));
-    };
-
-    private final StreamingListener environmentListener = samples -> {
-        Timber.i("Env lux=%f pressure=%f temp=%f",
-                samples.getValue(RawSamples.ColumnType.LUX, 0),
-                samples.getValue(RawSamples.ColumnType.PASCALS, 0),
-                samples.getValue(RawSamples.ColumnType.TEMPERATURE, 0));
-    };
-
-    @OnClick(R.id.startStreamingButton) void startStreamingButton() {
+    @OnClick(R.id.addPlotButton) void addPlotButton() {
         BioStamp s = viewModel.getSensor();
         if (s == null) {
             return;
@@ -58,7 +53,7 @@ public class StreamingFragment extends BaseFragment implements SignalPlotView.Li
         s.getSensingInfo((error, result) -> {
             if (error == null) {
                 if (result.isEnabled()) {
-                    addPlots(s, result.getSensorConfig());
+                    selectPlotType(s, result.getSensorConfig());
                 } else {
                     errorPopup("Sensing is not enabled");
                 }
@@ -66,66 +61,69 @@ public class StreamingFragment extends BaseFragment implements SignalPlotView.Li
                 Timber.e(error);
             }
         });
-        /*
-        s.startStreaming(StreamingType.MOTION, (error, result) -> {
-            if (error != null) {
-                Timber.e(error);
-            }
-        });
-        s.addStreamingListener(StreamingType.MOTION, motionListener);
-        s.startStreaming(StreamingType.ENVIRONMENT, (error, result) -> {
-            if (error != null) {
-                Timber.e(error);
-            }
-        });
-        s.addStreamingListener(StreamingType.ENVIRONMENT, environmentListener);
-         */
     }
 
-    @OnClick(R.id.stopStreamingButton) void stopStreamingButton() {
-        BioStamp s = viewModel.getSensor();
-        if (s == null) {
+    private void selectPlotType(BioStamp s, SensorConfig sensorConfig) {
+        if (getActivity() == null || getActivity().isFinishing()) {
             return;
         }
-        s.stopStreaming(StreamingType.MOTION, (error, result) -> {
-            if (error != null) {
-                Timber.e(error);
-            }
-        });
-        s.removeStreamingListener(StreamingType.MOTION, motionListener);
-        s.stopStreaming(StreamingType.ENVIRONMENT, (error, result) -> {
-            if (error != null) {
-                Timber.e(error);
-            }
-        });
-        s.removeStreamingListener(StreamingType.ENVIRONMENT, environmentListener);
-    }
 
-    private void addPlots(BioStamp s, SensorConfig sensorConfig) {
-        if (getContext() == null) {
-            return;
-        }
+        List<PlotType> plotTypes = new ArrayList<>();
         if (sensorConfig.hasMotionAccel()) {
-            PlotKey key = new PlotKey(s.getSerial(), PlotType.ACCEL);
-            if (!plots.containsKey(key)) {
-                SignalPlotView plot = new SignalPlotView(getContext());
-                plots.put(key, plot);
-                plot.init(key, sensorConfig, this);
-                plotGroup.addView(plot);
-                s.addStreamingListener(StreamingType.MOTION, plot);
+            plotTypes.add(PlotType.ACCEL);
+        }
+
+        CharSequence[] items = plotTypes.stream()
+                .map(Enum::toString)
+                .toArray(CharSequence[]::new);
+        new AlertDialog.Builder(getActivity())
+                .setTitle("Select a plot type:")
+                .setItems(items, (dialog, which) -> {
+                    addPlot(s, sensorConfig, plotTypes.get(which));
+                })
+                .setCancelable(true)
+                .show();
+    }
+
+    private void addPlot(BioStamp s, SensorConfig sensorConfig, PlotType plotType) {
+        if (getActivity() == null || getActivity().isFinishing()) {
+            return;
+        }
+        switch (plotType) {
+            case ACCEL:
+                addPlotAccel(s, sensorConfig);
+                break;
+        }
+    }
+
+    private void addPlotAccel(BioStamp s, SensorConfig sensorConfig) {
+        PlotKey key = new PlotKey(s.getSerial(), PlotType.ACCEL);
+        if (!plots.containsKey(key)) {
+            SignalPlotView plot = new SignalPlotView(getContext());
+            plots.put(key, plot);
+            plot.init(key, sensorConfig, this);
+            plotGroup.addView(plot);
+            s.addStreamingListener(StreamingType.MOTION, plot);
+        }
+        enableStreaming(s, StreamingType.MOTION);
+    }
+
+    private void enableStreaming(BioStamp s, StreamingType streamingType) {
+        s.startStreaming(streamingType, (error, result) -> {
+            if (error != null && !(error instanceof SensorCannotStartException)) {
+                Timber.e(error);
             }
-        }
-        if (sensorConfig.hasMotion()) {
-            s.startStreaming(StreamingType.MOTION, (error, result) -> {
-                if (error != null) {
-                    Timber.e(error);
-                }
-            });
-        }
+        });
     }
 
     @Override
     public void closeSignalPlot(PlotKey key) {
-        Timber.i("Close %s", key);
+        SignalPlotView plot = plots.get(key);
+        BioStamp s = BioStampManager.getInstance().getBioStamp(key.getSerial());
+        if (s != null) {
+            s.removeStreamingListener(plot);
+        }
+        plotGroup.removeView(plot);
+        plots.remove(key);
     }
 }

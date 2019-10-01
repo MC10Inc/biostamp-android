@@ -7,23 +7,14 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/startStreamingButton"
+        android:id="@+id/addPlotButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Start Streaming"
+        android:text="Add Plot"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/stopStreamingButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="Stop"
-        app:layout_constraintStart_toEndOf="@+id/startStreamingButton"
-        app:layout_constraintTop_toTopOf="@+id/startStreamingButton" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -32,7 +23,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/startStreamingButton">
+        app:layout_constraintTop_toBottomOf="@+id/addPlotButton">
 
         <LinearLayout
             android:id="@+id/plotGroup"

@@ -265,8 +265,8 @@ public class BioStampImpl implements BioStamp {
     }
 
     @Override
-    public void removeStreamingListener(StreamingType type, StreamingListener streamingListener) {
-        streaming.removeStreamingListener(type, streamingListener);
+    public void removeStreamingListener(StreamingListener streamingListener) {
+        streaming.removeStreamingListener(streamingListener);
     }
 
     @Override

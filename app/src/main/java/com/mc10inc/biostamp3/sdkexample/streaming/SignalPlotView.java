@@ -71,6 +71,8 @@ public class SignalPlotView extends ConstraintLayout implements StreamingListene
         this.key = key;
         this.listener = listener;
 
+        titleText.setText(key.getSerial());
+
         genericPlotSetup(plot);
         switch (key.getPlotType()) {
             case ACCEL:

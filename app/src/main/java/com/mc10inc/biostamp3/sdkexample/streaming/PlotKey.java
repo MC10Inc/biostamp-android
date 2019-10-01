@@ -19,6 +19,10 @@ public class PlotKey {
         return plotType;
     }
 
+    public String getSerial() {
+        return serial;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
