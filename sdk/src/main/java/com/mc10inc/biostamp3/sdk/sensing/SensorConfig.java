@@ -101,6 +101,10 @@ public class SensorConfig {
         return msg.getMotion().getAccelGRange();
     }
 
+    public int getGyroDpsRange() {
+        return msg.getMotion().getGyroDpsRange();
+    }
+
     public int getMotionSamplingPeriodUs() {
         return msg.getMotion().getSamplingPeriodUs();
     }

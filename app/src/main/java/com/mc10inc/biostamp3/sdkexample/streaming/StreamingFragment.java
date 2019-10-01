@@ -69,6 +69,9 @@ public class StreamingFragment extends BaseFragment implements PlotContainer.Lis
         if (sensorConfig.hasMotionAccel()) {
             plotTypes.add(PlotType.ACCEL);
         }
+        if (sensorConfig.hasMotionGyro()) {
+            plotTypes.add(PlotType.GYRO);
+        }
         if (sensorConfig.hasEnvironment()) {
             plotTypes.add(PlotType.ENVIRONMENT);
         }
@@ -93,6 +96,9 @@ public class StreamingFragment extends BaseFragment implements PlotContainer.Lis
             case ACCEL:
                 addPlotAccel(s, sensorConfig);
                 break;
+            case GYRO:
+                addPlotGyro(s, sensorConfig);
+                break;
             case ENVIRONMENT:
                 addPlotEnvironment(s, sensorConfig);
                 break;
@@ -108,6 +114,17 @@ public class StreamingFragment extends BaseFragment implements PlotContainer.Lis
 
     private void addPlotAccel(BioStamp s, SensorConfig sensorConfig) {
         PlotKey key = new PlotKey(s.getSerial(), PlotType.ACCEL);
+        if (!plotContainers.containsKey(key)) {
+            SignalPlotView plot = new SignalPlotView(getContext());
+            plot.init(key, sensorConfig);
+            addPlotContainer(key, plot);
+            s.addStreamingListener(StreamingType.MOTION, plot);
+        }
+        enableStreaming(s, StreamingType.MOTION);
+    }
+
+    private void addPlotGyro(BioStamp s, SensorConfig sensorConfig) {
+        PlotKey key = new PlotKey(s.getSerial(), PlotType.GYRO);
         if (!plotContainers.containsKey(key)) {
             SignalPlotView plot = new SignalPlotView(getContext());
             plot.init(key, sensorConfig);

@@ -62,6 +62,9 @@ public class SignalPlotView extends FrameLayout implements StreamingListener, St
             case ACCEL:
                 initAccel(sensorConfig);
                 break;
+            case GYRO:
+                initGyro(sensorConfig);
+                break;
         }
     }
 
@@ -80,6 +83,31 @@ public class SignalPlotView extends FrameLayout implements StreamingListener, St
                 getDurationSec() * 1000000, RawSamples.ColumnType.ACCEL_Y);
         RawSamplesDataSeries seriesZ = new RawSamplesDataSeries("Z", samplingPeriodUs,
                 getDurationSec() * 1000000, RawSamples.ColumnType.ACCEL_Z);
+        dataSeriesList.add(seriesX);
+        dataSeriesList.add(seriesY);
+        dataSeriesList.add(seriesZ);
+
+        plot.addSeries(seriesX, getLineAndPointFormatter(Color.rgb(0, 0, 200)));
+        plot.addSeries(seriesY, getLineAndPointFormatter(Color.rgb(200, 0, 0)));
+        plot.addSeries(seriesZ, getLineAndPointFormatter(Color.rgb(0, 200, 0)));
+        plot.redraw();
+    }
+
+    private void initGyro(SensorConfig sensorConfig) {
+        plot.setTitle("Gyroscope");
+
+        int dpsRange = sensorConfig.getGyroDpsRange();
+        plot.setRangeLabel("Angular rate (dps)");
+        plot.setRangeBoundaries(-dpsRange, dpsRange, BoundaryMode.FIXED);
+        plot.setRangeStep(StepMode.SUBDIVIDE, 5);
+
+        int samplingPeriodUs = sensorConfig.getMotionSamplingPeriodUs();
+        RawSamplesDataSeries seriesX = new RawSamplesDataSeries("X", samplingPeriodUs,
+                getDurationSec() * 1000000, RawSamples.ColumnType.GYRO_X);
+        RawSamplesDataSeries seriesY = new RawSamplesDataSeries("Y", samplingPeriodUs,
+                getDurationSec() * 1000000, RawSamples.ColumnType.GYRO_Y);
+        RawSamplesDataSeries seriesZ = new RawSamplesDataSeries("Z", samplingPeriodUs,
+                getDurationSec() * 1000000, RawSamples.ColumnType.GYRO_Z);
         dataSeriesList.add(seriesX);
         dataSeriesList.add(seriesY);
         dataSeriesList.add(seriesZ);
