@@ -27,7 +27,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class SignalPlotView extends FrameLayout implements StreamingListener {
+public class SignalPlotView extends FrameLayout implements StreamingListener, StreamingPlot {
     private static final int DURATION_SEC = 6;
 
     @BindView(R.id.plot)
@@ -55,6 +55,7 @@ public class SignalPlotView extends FrameLayout implements StreamingListener {
         ButterKnife.bind(this, view);
     }
 
+    @Override
     public void init(PlotKey key, SensorConfig sensorConfig) {
         genericPlotSetup(plot);
         switch (key.getPlotType()) {
@@ -122,5 +123,10 @@ public class SignalPlotView extends FrameLayout implements StreamingListener {
         }
 
         plot.redraw();
+    }
+
+    @Override
+    public View getView() {
+        return this;
     }
 }

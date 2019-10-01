@@ -28,7 +28,7 @@ public class PlotContainer extends ConstraintLayout {
 
     private Listener listener;
     private PlotKey key;
-    private SignalPlotView plot;
+    private StreamingPlot plot;
 
     public PlotContainer(Context context) {
         super(context);
@@ -50,21 +50,21 @@ public class PlotContainer extends ConstraintLayout {
         ButterKnife.bind(this, view);
     }
 
-    public void init(PlotKey key, Listener listener, SignalPlotView plot) {
+    public void init(PlotKey key, Listener listener, StreamingPlot plot) {
         this.key = key;
         this.listener = listener;
         this.plot = plot;
 
         titleText.setText(key.getSerial());
 
-        container.addView(plot);
+        container.addView(plot.getView());
     }
 
     @OnClick(R.id.closeButton) void closeButton() {
         listener.closePlot(key);
     }
 
-    public SignalPlotView getPlot() {
+    public StreamingPlot getPlot() {
         return plot;
     }
 }
