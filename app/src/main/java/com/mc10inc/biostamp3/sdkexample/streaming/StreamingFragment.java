@@ -13,9 +13,7 @@ import androidx.annotation.Nullable;
 import com.mc10inc.biostamp3.sdk.BioStamp;
 import com.mc10inc.biostamp3.sdk.BioStampManager;
 import com.mc10inc.biostamp3.sdk.exception.SensorCannotStartException;
-import com.mc10inc.biostamp3.sdk.sensing.RawSamples;
 import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
-import com.mc10inc.biostamp3.sdk.sensing.StreamingListener;
 import com.mc10inc.biostamp3.sdk.sensing.StreamingType;
 import com.mc10inc.biostamp3.sdkexample.BaseFragment;
 import com.mc10inc.biostamp3.sdkexample.R;
@@ -24,18 +22,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import timber.log.Timber;
 
-public class StreamingFragment extends BaseFragment implements SignalPlotView.Listener {
+public class StreamingFragment extends BaseFragment implements PlotContainer.Listener {
     @BindView(R.id.plotGroup)
     LinearLayout plotGroup;
 
-    private Map<PlotKey, SignalPlotView> plots = new HashMap<>();
+    private Map<PlotKey, PlotContainer> plotContainers = new HashMap<>();
 
     @Nullable
     @Override
@@ -96,13 +93,19 @@ public class StreamingFragment extends BaseFragment implements SignalPlotView.Li
         }
     }
 
+    private void addPlotContainer(PlotKey key, SignalPlotView plot) {
+        PlotContainer plotContainer = new PlotContainer(getContext());
+        plotContainer.init(key, this, plot);
+        plotContainers.put(key, plotContainer);
+        plotGroup.addView(plotContainer);
+    }
+
     private void addPlotAccel(BioStamp s, SensorConfig sensorConfig) {
         PlotKey key = new PlotKey(s.getSerial(), PlotType.ACCEL);
-        if (!plots.containsKey(key)) {
+        if (!plotContainers.containsKey(key)) {
             SignalPlotView plot = new SignalPlotView(getContext());
-            plots.put(key, plot);
-            plot.init(key, sensorConfig, this);
-            plotGroup.addView(plot);
+            plot.init(key, sensorConfig);
+            addPlotContainer(key, plot);
             s.addStreamingListener(StreamingType.MOTION, plot);
         }
         enableStreaming(s, StreamingType.MOTION);
@@ -117,13 +120,17 @@ public class StreamingFragment extends BaseFragment implements SignalPlotView.Li
     }
 
     @Override
-    public void closeSignalPlot(PlotKey key) {
-        SignalPlotView plot = plots.get(key);
+    public void closePlot(PlotKey key) {
+        PlotContainer plotContainer = plotContainers.get(key);
+        if (plotContainer == null) {
+            Timber.e("Plot container %s not found", key);
+            return;
+        }
         BioStamp s = BioStampManager.getInstance().getBioStamp(key.getSerial());
         if (s != null) {
-            s.removeStreamingListener(plot);
+            s.removeStreamingListener(plotContainer.getPlot());
         }
-        plotGroup.removeView(plot);
-        plots.remove(key);
+        plotGroup.removeView(plotContainer);
+        plotContainers.remove(key);
     }
 }

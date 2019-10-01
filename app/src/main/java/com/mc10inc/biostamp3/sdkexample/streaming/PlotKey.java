@@ -1,7 +1,5 @@
 package com.mc10inc.biostamp3.sdkexample.streaming;
 
-import com.mc10inc.biostamp3.sdk.sensing.StreamingType;
-
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

@@ -7,9 +7,7 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.TextView;
-
-import androidx.constraintlayout.widget.ConstraintLayout;
+import android.widget.FrameLayout;
 
 import com.androidplot.util.PixelUtils;
 import com.androidplot.xy.BoundaryMode;
@@ -28,23 +26,13 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
-public class SignalPlotView extends ConstraintLayout implements StreamingListener {
-    public interface Listener {
-        void closeSignalPlot(PlotKey key);
-    }
-
+public class SignalPlotView extends FrameLayout implements StreamingListener {
     private static final int DURATION_SEC = 6;
 
     @BindView(R.id.plot)
     XYPlot plot;
 
-    @BindView(R.id.titleText)
-    TextView titleText;
-
-    private Listener listener;
-    private PlotKey key;
     private List<RawSamplesDataSeries> dataSeriesList = new ArrayList<>();
 
     public SignalPlotView(Context context) {
@@ -67,12 +55,7 @@ public class SignalPlotView extends ConstraintLayout implements StreamingListene
         ButterKnife.bind(this, view);
     }
 
-    public void init(PlotKey key, SensorConfig sensorConfig, Listener listener) {
-        this.key = key;
-        this.listener = listener;
-
-        titleText.setText(key.getSerial());
-
+    public void init(PlotKey key, SensorConfig sensorConfig) {
         genericPlotSetup(plot);
         switch (key.getPlotType()) {
             case ACCEL:
@@ -126,10 +109,6 @@ public class SignalPlotView extends ConstraintLayout implements StreamingListene
         f.getLinePaint().setStrokeJoin(Paint.Join.ROUND);
         f.getLinePaint().setStrokeWidth(3);
         return f;
-    }
-
-    @OnClick(R.id.closeButton) void closeButton() {
-        listener.closeSignalPlot(key);
     }
 
     public int getDurationSec() {
