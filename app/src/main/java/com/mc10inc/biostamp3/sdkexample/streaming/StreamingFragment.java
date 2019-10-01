@@ -69,6 +69,9 @@ public class StreamingFragment extends BaseFragment implements PlotContainer.Lis
         if (sensorConfig.hasMotionAccel()) {
             plotTypes.add(PlotType.ACCEL);
         }
+        if (sensorConfig.hasEnvironment()) {
+            plotTypes.add(PlotType.ENVIRONMENT);
+        }
 
         CharSequence[] items = plotTypes.stream()
                 .map(Enum::toString)
@@ -90,10 +93,13 @@ public class StreamingFragment extends BaseFragment implements PlotContainer.Lis
             case ACCEL:
                 addPlotAccel(s, sensorConfig);
                 break;
+            case ENVIRONMENT:
+                addPlotEnvironment(s, sensorConfig);
+                break;
         }
     }
 
-    private void addPlotContainer(PlotKey key, SignalPlotView plot) {
+    private void addPlotContainer(PlotKey key, StreamingPlot plot) {
         PlotContainer plotContainer = new PlotContainer(getContext());
         plotContainer.init(key, this, plot);
         plotContainers.put(key, plotContainer);
@@ -109,6 +115,17 @@ public class StreamingFragment extends BaseFragment implements PlotContainer.Lis
             s.addStreamingListener(StreamingType.MOTION, plot);
         }
         enableStreaming(s, StreamingType.MOTION);
+    }
+
+    private void addPlotEnvironment(BioStamp s, SensorConfig sensorConfig) {
+        PlotKey key = new PlotKey(s.getSerial(), PlotType.ENVIRONMENT);
+        if (!plotContainers.containsKey(key)) {
+            EnvironmentPlotView plot = new EnvironmentPlotView(getContext());
+            plot.init(key, sensorConfig);
+            addPlotContainer(key, plot);
+            s.addStreamingListener(StreamingType.ENVIRONMENT, plot);
+        }
+        enableStreaming(s, StreamingType.ENVIRONMENT);
     }
 
     private void enableStreaming(BioStamp s, StreamingType streamingType) {

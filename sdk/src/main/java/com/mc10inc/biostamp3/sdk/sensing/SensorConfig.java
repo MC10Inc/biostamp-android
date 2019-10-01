@@ -62,6 +62,10 @@ public class SensorConfig {
         }
     }
 
+    public boolean hasEnvironment() {
+        return msg.hasEnvironment();
+    }
+
     public boolean hasMotion() {
         return msg.hasMotion();
     }

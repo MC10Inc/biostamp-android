@@ -31,6 +31,16 @@ public class PredefinedConfigs {
                 .build()));
 
         configs.add(new SensorConfig(Brc3.SensorConfig.newBuilder()
+                .setMotion(Brc3.MotionConfig.newBuilder()
+                        .setMode(Brc3.MotionMode.ACCEL)
+                        .setSamplingPeriodUs(10000)
+                        .setAccelGRange(16))
+                .setEnvironment(Brc3.EnvironmentConfig.newBuilder()
+                        .setMode(Brc3.EnvironmentMode.ALL)
+                        .setSamplingPeriodUs(1000000))
+                .build()));
+
+        configs.add(new SensorConfig(Brc3.SensorConfig.newBuilder()
                 .setAd5940(Brc3.AD5940Config.newBuilder()
                         .setMode(Brc3.AD5940Mode.EDA))
                 .build()));
