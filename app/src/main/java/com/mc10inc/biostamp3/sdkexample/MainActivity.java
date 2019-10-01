@@ -9,6 +9,8 @@ import androidx.viewpager.widget.ViewPager;
 
 import android.os.Bundle;
 
+import com.mc10inc.biostamp3.sdkexample.streaming.StreamingFragment;
+
 import org.jetbrains.annotations.NotNull;
 
 import butterknife.BindView;

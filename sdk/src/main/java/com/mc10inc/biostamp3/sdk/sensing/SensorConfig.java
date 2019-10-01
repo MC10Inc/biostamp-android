@@ -93,6 +93,14 @@ public class SensorConfig {
         }
     }
 
+    public int getAccelGRange() {
+        return msg.getMotion().getAccelGRange();
+    }
+
+    public int getMotionSamplingPeriodUs() {
+        return msg.getMotion().getSamplingPeriodUs();
+    }
+
     @NotNull
     @Override
     public String toString() {

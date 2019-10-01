@@ -78,7 +78,6 @@ public class DecodeRecordingTask extends AsyncTask<Void, Void, Void> {
         RecordingDecoder decoder = new RecordingDecoder(recordingInfo);
         boolean ecg = recordingInfo.getSensorConfig().hasAfe4900Ecg();
         boolean ppg = recordingInfo.getSensorConfig().hasAfe4900Ppg();
-        final RawSamples.ColumnType[] cols;
         if (ecg && ppg) {
             bos.write("timestamp,ecg_uv,ppg\n".getBytes(StandardCharsets.US_ASCII));
         } else if (ecg) {
