@@ -39,4 +39,4 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
     implementation "com.androidplot:androidplot-core:1.5.6"
     implementation 'org.apache.commons:commons-collections4:4.4'
-}
+    implementation "org.rajawali3d:rajawali:1.1.970"}

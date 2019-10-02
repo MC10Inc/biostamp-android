@@ -4,5 +4,6 @@ public enum PlotType {
     ACCEL,
     GYRO,
     ENVIRONMENT,
-    BIOPOTENTIAL
+    BIOPOTENTIAL,
+    ROTATION
 }

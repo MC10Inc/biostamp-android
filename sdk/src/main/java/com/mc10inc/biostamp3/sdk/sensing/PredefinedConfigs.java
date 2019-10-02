@@ -24,6 +24,15 @@ public class PredefinedConfigs {
 
         configs.add(new SensorConfig(Brc3.SensorConfig.newBuilder()
                 .setMotion(Brc3.MotionConfig.newBuilder()
+                        .setMode(Brc3.MotionMode.ROTATION)
+                        .setRotationType(Brc3.MotionRotationType.ROT_ACCEL_GYRO_MAG)
+                        .setSamplingPeriodUs(50000)
+                        .setAccelGRange(16)
+                        .setGyroDpsRange(500))
+                .build()));
+
+        configs.add(new SensorConfig(Brc3.SensorConfig.newBuilder()
+                .setMotion(Brc3.MotionConfig.newBuilder()
                         .setMode(Brc3.MotionMode.ACCEL_GYRO)
                         .setSamplingPeriodUs(10000)
                         .setAccelGRange(16)

@@ -72,6 +72,9 @@ public class StreamingFragment extends BaseFragment implements PlotContainer.Lis
         if (sensorConfig.hasMotionGyro()) {
             plotTypes.add(PlotType.GYRO);
         }
+        if (sensorConfig.hasMotionRotation()) {
+            plotTypes.add(PlotType.ROTATION);
+        }
         if (sensorConfig.hasEnvironment()) {
             plotTypes.add(PlotType.ENVIRONMENT);
         }
@@ -101,6 +104,9 @@ public class StreamingFragment extends BaseFragment implements PlotContainer.Lis
                 break;
             case GYRO:
                 addPlotGyro(s, sensorConfig);
+                break;
+            case ROTATION:
+                addPlotRotation(s, sensorConfig);
                 break;
             case ENVIRONMENT:
                 addPlotEnvironment(s, sensorConfig);
@@ -138,6 +144,17 @@ public class StreamingFragment extends BaseFragment implements PlotContainer.Lis
             s.addStreamingListener(StreamingType.MOTION, plot);
         }
         enableStreaming(s, StreamingType.MOTION);
+    }
+
+    private void addPlotRotation(BioStamp s, SensorConfig sensorConfig) {
+        PlotKey key = new PlotKey(s.getSerial(), PlotType.ROTATION);
+        if (!plotContainers.containsKey(key)) {
+            RotationPlotView plot = new RotationPlotView(getContext());
+            plot.init(key, sensorConfig);
+            addPlotContainer(key, plot);
+            s.addStreamingListener(StreamingType.ROTATION, plot);
+        }
+        enableStreaming(s, StreamingType.ROTATION);
     }
 
     private void addPlotEnvironment(BioStamp s, SensorConfig sensorConfig) {

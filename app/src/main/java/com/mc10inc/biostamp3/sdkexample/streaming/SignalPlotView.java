@@ -27,7 +27,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class SignalPlotView extends FrameLayout implements StreamingListener, StreamingPlot {
+public class SignalPlotView extends FrameLayout implements StreamingPlot {
     private static final int DURATION_SEC = 6;
     private static final double VOLTS_TO_MV = 1000;
 

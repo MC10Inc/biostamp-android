@@ -97,6 +97,19 @@ public class SensorConfig {
         }
     }
 
+    public boolean hasMotionRotation() {
+        if (hasMotion()) {
+            switch (msg.getMotion().getMode()) {
+                case ROTATION:
+                    return true;
+                default:
+                    return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
     public int getAccelGRange() {
         return msg.getMotion().getAccelGRange();
     }
