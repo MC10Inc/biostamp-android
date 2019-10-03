@@ -1,41 +1,81 @@
 package com.mc10inc.biostamp3.sdkexample;
 
+import android.os.Bundle;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.viewpager.widget.ViewPager;
 
-import android.os.Bundle;
-
+import com.mc10inc.biostamp3.sdk.BioStamp;
+import com.mc10inc.biostamp3.sdk.BioStampManager;
 import com.mc10inc.biostamp3.sdkexample.streaming.StreamingFragment;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnItemSelected;
 import butterknife.Unbinder;
 
 public class MainActivity extends AppCompatActivity {
-    private Unbinder unbinder;
-
     @BindView(R.id.pager)
     ViewPager pager;
+
+    @BindView(R.id.selectedSensorSpinner)
+    Spinner selectedSensorSpinner;
+
+    private Unbinder unbinder;
+    private ExampleViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         unbinder = ButterKnife.bind(this);
+        viewModel = ViewModelProviders.of(this).get(ExampleViewModel.class);
 
         pager.setAdapter(new PagesAdapter(getSupportFragmentManager()));
+
+        BioStampManager.getInstance().getBioStampsLiveData().observe(this, sensors -> {
+            List<String> connectedSensors = sensors.values().stream()
+                    .filter(s -> s.getState() == BioStamp.State.CONNECTED)
+                    .map(BioStamp::getSerial)
+                    .sorted()
+                    .collect(Collectors.toList());
+            String previousSelection = (String)selectedSensorSpinner.getSelectedItem();
+            selectedSensorSpinner.setAdapter(new ArrayAdapter<>(this,
+                    android.R.layout.simple_spinner_dropdown_item, connectedSensors));
+            if (previousSelection != null && connectedSensors.contains(previousSelection)) {
+                selectedSensorSpinner.setSelection(connectedSensors.indexOf(previousSelection));
+            }
+            if (connectedSensors.isEmpty()) {
+                viewModel.setSelectedSensor(null);
+            }
+        });
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         unbinder.unbind();
+    }
+
+    @OnItemSelected(R.id.selectedSensorSpinner) void onSensorSelected(int position) {
+        viewModel.setSelectedSensor((String)selectedSensorSpinner.getItemAtPosition(position));
+    }
+
+    @OnItemSelected(value = R.id.selectedSensorSpinner, callback = OnItemSelected.Callback.NOTHING_SELECTED)
+    void onSensorNothingSelected() {
+        viewModel.setSelectedSensor(null);
     }
 
     private static class PagesAdapter extends FragmentPagerAdapter {

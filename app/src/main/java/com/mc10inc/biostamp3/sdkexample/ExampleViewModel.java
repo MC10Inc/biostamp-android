@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.mc10inc.biostamp3.sdk.BioStamp;
+import com.mc10inc.biostamp3.sdk.BioStampManager;
 import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public class ExampleViewModel extends ViewModel {
     private MutableLiveData<Double> downloadProgress = new MutableLiveData<>();
     private MutableLiveData<List<RecordingInfo>> recordingList = new MutableLiveData<>();
     private MutableLiveData<List<RecordingInfo>> localRecordingList = new MutableLiveData<>();
-    private BioStamp sensor;
+    private String selectedSensor;
 
     LiveData<Boolean> getDownloadInProgress() {
         return downloadInProgress;
@@ -49,10 +50,14 @@ public class ExampleViewModel extends ViewModel {
     }
 
     public BioStamp getSensor() {
-        return sensor;
+        if (selectedSensor == null) {
+            return null;
+        } else {
+            return BioStampManager.getInstance().getBioStamp(selectedSensor);
+        }
     }
 
-    public void setSensor(BioStamp sensor) {
-        this.sensor = sensor;
+    public void setSelectedSensor(String serial) {
+        this.selectedSensor = serial;
     }
 }

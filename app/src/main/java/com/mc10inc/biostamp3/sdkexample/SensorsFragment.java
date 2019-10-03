@@ -61,7 +61,6 @@ public class SensorsFragment extends BaseFragment {
                 @Override
                 public void connected() {
                     Timber.i("Connected to %s", sensor.getSerial());
-                    viewModel.setSensor(sensor);
                 }
 
                 @Override
@@ -72,7 +71,6 @@ public class SensorsFragment extends BaseFragment {
                 @Override
                 public void disconnected() {
                     Timber.i("Disconnected");
-                    viewModel.setSensor(null);
                 }
             });
         }
