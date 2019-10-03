@@ -1,14 +1,15 @@
 package com.mc10inc.biostamp3.sdkexample;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,7 +17,6 @@ import androidx.annotation.Nullable;
 import com.mc10inc.biostamp3.sdk.BioStamp;
 import com.mc10inc.biostamp3.sdk.sensing.PredefinedConfigs;
 import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
-import com.mc10inc.biostamp3.sdk.sensing.StreamingType;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,6 +29,9 @@ public class ControlsFragment extends BaseFragment {
 
     @BindView(R.id.sensorConfigSpinner)
     Spinner sensorConfigSpinner;
+
+    @BindView(R.id.statusText)
+    TextView statusText;
 
     @Nullable
     @Override
@@ -83,14 +86,25 @@ public class ControlsFragment extends BaseFragment {
         });
     }
 
-    @OnClick(R.id.getSensingConfigButton) void getSensingConfigButton() {
+    @SuppressLint("DefaultLocale")
+    @OnClick(R.id.getStatusButton) void getStatusButton() {
         BioStamp s = viewModel.getSensor();
         if (s == null) {
             return;
         }
-        s.getSensingInfo((error, result) -> {
+        s.getSensorStatus((error, result) -> {
             if (error == null) {
-                Timber.i(result.toString());
+                StringBuilder sb = new StringBuilder();
+                sb.append(String.format("Batt %d%% %s Uptime %ds\n",
+                        result.getBatteryPercent(),
+                        result.isCharging() ? "charging" : "",
+                        result.getUptime()));
+                if (result.getSensingInfo().isEnabled()) {
+                    sb.append(result.getSensingInfo().toString());
+                } else {
+                    sb.append("Sensing is idle\n");
+                }
+                statusText.setText(sb.toString());
             } else {
                 Timber.e(error);
             }

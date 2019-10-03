@@ -29,6 +29,8 @@ public interface BioStamp {
 
     void getSensingInfo(Listener<SensingInfo> listener);
 
+    void getSensorStatus(Listener<SensorStatus> listener);
+
     void startStreaming(StreamingType type, Listener<Void> listener);
 
     void stopStreaming(StreamingType type, Listener<Void> listener);

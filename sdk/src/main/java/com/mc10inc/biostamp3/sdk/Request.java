@@ -95,4 +95,7 @@ public class Request<TC, TR> {
 
     public static final Request<Brc3.RecordingReadCommandParam.Builder, Void> readRecording =
             new Request<>(Brc3.Command.RECORDING_READ, Brc3.Request.Builder::setRecordingRead, null);
+
+    public static final Request<Void, Brc3.SystemStatusResponseParam> getSystemStatus =
+            new Request<>(Brc3.Command.SYSTEM_STATUS, null, Brc3.Response::getSystemStatus);
 }

@@ -226,6 +226,24 @@ public class BioStampImpl implements BioStamp {
     }
 
     @Override
+    public void getSensorStatus(Listener<SensorStatus> listener) {
+        executeTask(new Task<SensorStatus>(this, listener) {
+            @Override
+            public void doTask() {
+                try {
+                    Brc3.SystemStatusResponseParam systemStatusResp = Request.getSystemStatus.execute(ble);
+                    Brc3.SensingGetInfoResponseParam sensingInfoResp = Request.getSensingInfo.execute(ble);
+                    SensingInfo sensingInfo = new SensingInfo(sensingInfoResp);
+                    SensorStatus ss = new SensorStatus(systemStatusResp, sensingInfo);
+                    success(ss);
+                } catch (BleException e) {
+                    error(e);
+                }
+            }
+        });
+    }
+
+    @Override
     public void startStreaming(StreamingType type, Listener<Void> listener) {
         executeTask(new Task<Void>(this, listener) {
             @Override

@@ -62,7 +62,7 @@ public class BioStampManager {
     private final BioStampDb db;
     private final Executor dbExecutor = Executors.newSingleThreadExecutor();
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private final Map<String, SensorStatus> sensorsInRange =
+    private final Map<String, ScannedSensorStatus> sensorsInRange =
             new PassiveExpiringMap<>(SENSOR_IN_RANGE_TTL, new HashMap<>());
     private final ThroughputStats throughputStats = new ThroughputStats();
 
@@ -106,7 +106,7 @@ public class BioStampManager {
         gatt.cancelHighPriorityScan(applicationContext);
     }
 
-    public Map<String, SensorStatus> getSensorsInRange() {
+    public Map<String, ScannedSensorStatus> getSensorsInRange() {
         synchronized (sensorsInRange) {
             return new HashMap<>(sensorsInRange);
         }
@@ -198,7 +198,7 @@ public class BioStampManager {
         @Override
         public void onBluetoothPeripheralDiscovered(GattConnection connection) {
             String serial = connection.getDevice().getName();
-            sensorsInRange.put(serial, new SensorStatus(connection));
+            sensorsInRange.put(serial, new ScannedSensorStatus(connection));
         }
 
         @Override

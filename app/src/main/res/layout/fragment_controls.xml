@@ -34,13 +34,13 @@
         app:layout_constraintTop_toBottomOf="@+id/blinkLedButton" />
 
     <Button
-        android:id="@+id/getSensingConfigButton"
+        android:id="@+id/getStatusButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="Get Config"
-        app:layout_constraintStart_toEndOf="@+id/stopSensingButton"
-        app:layout_constraintTop_toBottomOf="@+id/blinkLedButton" />
+        android:text="Get Status"
+        app:layout_constraintStart_toEndOf="@+id/blinkLedButton"
+        app:layout_constraintTop_toTopOf="@+id/blinkLedButton" />
 
     <CheckBox
         android:id="@+id/enableRecordingCheckBox"
@@ -61,4 +61,14 @@
         android:spinnerMode="dialog"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/enableRecordingCheckBox" />
+
+    <TextView
+        android:id="@+id/statusText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sensorConfigSpinner"
+        tools:text="sensor status text" />
 </androidx.constraintlayout.widget.ConstraintLayout>

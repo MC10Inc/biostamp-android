@@ -1,15 +1,29 @@
 package com.mc10inc.biostamp3.sdk;
 
-import com.fitbit.bluetooth.fbgatt.GattConnection;
+import com.mc10inc.biostamp3.sdk.sensing.SensingInfo;
 
 public class SensorStatus {
-    private String serial;
+    private final Brc3.SystemStatusResponseParam systemStatus;
+    private final SensingInfo sensingInfo;
 
-    SensorStatus(GattConnection conn) {
-        serial = conn.getDevice().getName();
+    SensorStatus(Brc3.SystemStatusResponseParam systemStatus, SensingInfo sensingInfo) {
+        this.systemStatus = systemStatus;
+        this.sensingInfo = sensingInfo;
     }
 
-    public String getSerial() {
-        return serial;
+    public SensingInfo getSensingInfo() {
+        return sensingInfo;
+    }
+
+    public boolean isCharging() {
+        return systemStatus.getChargePower();
+    }
+
+    public int getBatteryPercent() {
+        return systemStatus.getBatteryPercent();
+    }
+
+    public int getUptime() {
+        return systemStatus.getUptimeSec();
     }
 }
