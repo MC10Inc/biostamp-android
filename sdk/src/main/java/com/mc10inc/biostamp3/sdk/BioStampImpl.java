@@ -6,10 +6,10 @@ import android.os.Looper;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.mc10inc.biostamp3.sdk.ble.SensorBle;
+import com.mc10inc.biostamp3.sdk.exception.BleException;
 import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
 import com.mc10inc.biostamp3.sdk.sensing.SensingInfo;
 import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
-import com.mc10inc.biostamp3.sdk.exception.BleException;
 import com.mc10inc.biostamp3.sdk.sensing.Streaming;
 import com.mc10inc.biostamp3.sdk.sensing.StreamingListener;
 import com.mc10inc.biostamp3.sdk.sensing.StreamingType;
@@ -116,6 +116,7 @@ public class BioStampImpl implements BioStamp {
             Timber.e(e);
             return;
         }
+        bioStampManager.updateThroughput(dataBytes.size());
 
         if (dm.hasTestDataTwo()) {
             Timber.e("Received %d bytes of test data", dm.getTestDataTwo().getMyDataTwo().size());

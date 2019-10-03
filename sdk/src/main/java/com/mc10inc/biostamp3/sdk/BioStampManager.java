@@ -60,20 +60,29 @@ public class BioStampManager {
     private final Map<String, BioStampImpl> biostamps = new HashMap<>();
     private final MutableLiveData<Map<String, BioStamp>> biostampsLiveData = new MutableLiveData<>();
     private final BioStampDb db;
-    private Executor dbExecutor = Executors.newSingleThreadExecutor();
-    private Handler handler = new Handler(Looper.getMainLooper());
+    private final Executor dbExecutor = Executors.newSingleThreadExecutor();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private final Map<String, SensorStatus> sensorsInRange =
             new PassiveExpiringMap<>(SENSOR_IN_RANGE_TTL, new HashMap<>());
-
+    private final ThroughputStats throughputStats = new ThroughputStats();
 
     private BioStampManager(Context context) {
         this.applicationContext = context;
         db = new BioStampDb(context);
     }
 
+    private final Runnable updateThroughput = new Runnable() {
+        @Override
+        public void run() {
+            throughputStats.update(0);
+            handler.postDelayed(updateThroughput, 1000);
+        }
+    };
+
     private void start() {
         updateProvisionedSensors();
         gatt.startWithScanFilters(applicationContext, StatusBroadcast.getScanFilters(), callback);
+        handler.post(updateThroughput);
     }
 
     public boolean hasPermissions() {
@@ -175,6 +184,14 @@ public class BioStampManager {
 
     void notifyConnStateChange() {
         updateBioStampLiveData();
+    }
+
+    void updateThroughput(int bytes) {
+        throughputStats.update(bytes);
+    }
+
+    public LiveData<Integer> getThroughput() {
+        return throughputStats.getThroughput();
     }
 
     private final FitbitGatt.FitbitGattCallback callback = new FitbitGatt.FitbitGattCallback() {

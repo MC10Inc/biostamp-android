@@ -1,8 +1,10 @@
 package com.mc10inc.biostamp3.sdkexample;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,9 +35,13 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.selectedSensorSpinner)
     Spinner selectedSensorSpinner;
 
+    @BindView(R.id.throughputText)
+    TextView throughputText;
+
     private Unbinder unbinder;
     private ExampleViewModel viewModel;
 
+    @SuppressLint("DefaultLocale")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +65,14 @@ public class MainActivity extends AppCompatActivity {
             }
             if (connectedSensors.isEmpty()) {
                 viewModel.setSelectedSensor(null);
+            }
+        });
+
+        BioStampManager.getInstance().getThroughput().observe(this, bps -> {
+            if (bps == 0) {
+                throughputText.setText("");
+            } else {
+                throughputText.setText(String.format("%dbps", bps));
             }
         });
     }
