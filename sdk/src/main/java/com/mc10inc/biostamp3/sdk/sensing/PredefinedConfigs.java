@@ -59,5 +59,20 @@ public class PredefinedConfigs {
                         .setMode(Brc3.AFE4900Mode.ECG)
                         .setEcgGain(Brc3.AFE4900ECGGain.GAIN_12))
                 .build()));
+
+        configs.add(new SensorConfig(Brc3.SensorConfig.newBuilder()
+                .setMotion(Brc3.MotionConfig.newBuilder()
+                        .setMode(Brc3.MotionMode.ACCEL_GYRO)
+                        .setSamplingPeriodUs(10000)
+                        .setAccelGRange(16)
+                        .setGyroDpsRange(500))
+                .setAfe4900(Brc3.AFE4900Config.newBuilder()
+                        .setMode(Brc3.AFE4900Mode.ECG)
+                        .setEcgGain(Brc3.AFE4900ECGGain.GAIN_12))
+                .setEnvironment(Brc3.EnvironmentConfig.newBuilder()
+                        .setMode(Brc3.EnvironmentMode.ALL)
+                        .setSamplingPeriodUs(1000000))
+                .build()));
+
     }
 }
