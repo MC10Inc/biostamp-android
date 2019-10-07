@@ -17,12 +17,54 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
+        android:id="@+id/getStatusButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Get Status"
+        app:layout_constraintStart_toEndOf="@+id/blinkLedButton"
+        app:layout_constraintTop_toTopOf="@+id/blinkLedButton" />
+
+    <Button
+        android:id="@+id/uploadFirmwareButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Upload"
+        app:layout_constraintStart_toEndOf="@+id/selectFirmwareButton"
+        app:layout_constraintTop_toTopOf="@+id/selectFirmwareButton" />
+
+    <ProgressBar
+        android:id="@+id/firmwareProgressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:max="1000"
+        app:layout_constraintBottom_toBottomOf="@id/uploadFirmwareButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/uploadFirmwareButton"
+        app:layout_constraintTop_toTopOf="@id/uploadFirmwareButton" />
+
+    <Button
+        android:id="@+id/selectFirmwareButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Select Firmware"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/blinkLedButton" />
+
+    <Button
         android:id="@+id/startSensingButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:text="Start Sensing"
-        app:layout_constraintStart_toStartOf="@+id/blinkLedButton"
-        app:layout_constraintTop_toBottomOf="@+id/blinkLedButton" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/selectFirmwareButton" />
 
     <Button
         android:id="@+id/stopSensingButton"
@@ -31,16 +73,7 @@
         android:layout_marginStart="8dp"
         android:text="Stop"
         app:layout_constraintStart_toEndOf="@+id/startSensingButton"
-        app:layout_constraintTop_toBottomOf="@+id/blinkLedButton" />
-
-    <Button
-        android:id="@+id/getStatusButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="Get Status"
-        app:layout_constraintStart_toEndOf="@+id/blinkLedButton"
-        app:layout_constraintTop_toTopOf="@+id/blinkLedButton" />
+        app:layout_constraintTop_toTopOf="@+id/startSensingButton" />
 
     <CheckBox
         android:id="@+id/enableRecordingCheckBox"

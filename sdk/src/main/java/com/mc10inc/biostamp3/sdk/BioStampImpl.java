@@ -16,6 +16,7 @@ import com.mc10inc.biostamp3.sdk.sensing.StreamingType;
 import com.mc10inc.biostamp3.sdk.task.DownloadRecording;
 import com.mc10inc.biostamp3.sdk.task.GetRecordingList;
 import com.mc10inc.biostamp3.sdk.task.Task;
+import com.mc10inc.biostamp3.sdk.task.UploadFirmware;
 
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -312,6 +313,11 @@ public class BioStampImpl implements BioStamp {
     public void downloadRecording(RecordingInfo recording, Listener<Void> listener,
                                   ProgressListener progressListener) {
         executeTask(new DownloadRecording(this, listener, progressListener, recording));
+    }
+
+    @Override
+    public void uploadFirmware(byte[] file, Listener<Void> listener, ProgressListener progressListener) {
+        executeTask(new UploadFirmware(this, listener, progressListener, file));
     }
 
     private class SensorThread extends Thread {

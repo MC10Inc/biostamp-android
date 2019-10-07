@@ -46,6 +46,9 @@ public interface BioStamp {
     void downloadRecording(RecordingInfo recording, Listener<Void> listener,
                            ProgressListener progressListener);
 
+    void uploadFirmware(byte[] file, Listener<Void> listener,
+                           ProgressListener progressListener);
+
     enum State {
         DISCONNECTED,
         CONNECTING,

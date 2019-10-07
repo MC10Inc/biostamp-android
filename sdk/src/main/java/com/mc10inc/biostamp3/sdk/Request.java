@@ -98,4 +98,13 @@ public class Request<TC, TR> {
 
     public static final Request<Void, Brc3.SystemStatusResponseParam> getSystemStatus =
             new Request<>(Brc3.Command.SYSTEM_STATUS, null, Brc3.Response::getSystemStatus);
+
+    public static final Request<Brc3.UploadStartCommandParam.Builder, Void> uploadStart =
+            new Request<>(Brc3.Command.UPLOAD_START, Brc3.Request.Builder::setUploadStart, null);
+
+    public static final Request<Brc3.UploadWritePageCommandParam.Builder, Void> uploadWritePage =
+            new Request<>(Brc3.Command.UPLOAD_WRITE_PAGE, Brc3.Request.Builder::setUploadWritePage, null);
+
+    public static final Request<Void, Void> uploadFinish =
+            new Request<>(Brc3.Command.UPLOAD_FINISH, null, null);
 }

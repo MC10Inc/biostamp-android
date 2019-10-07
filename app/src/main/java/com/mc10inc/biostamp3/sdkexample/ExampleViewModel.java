@@ -16,6 +16,7 @@ public class ExampleViewModel extends ViewModel {
     private MutableLiveData<List<RecordingInfo>> recordingList = new MutableLiveData<>();
     private MutableLiveData<List<RecordingInfo>> localRecordingList = new MutableLiveData<>();
     private String selectedSensor;
+    private MutableLiveData<byte[]> firmwareImage = new MutableLiveData<>();
 
     LiveData<Boolean> getDownloadInProgress() {
         return downloadInProgress;
@@ -59,5 +60,13 @@ public class ExampleViewModel extends ViewModel {
 
     public void setSelectedSensor(String serial) {
         this.selectedSensor = serial;
+    }
+
+    LiveData<byte[]> getFirmwareImage() {
+        return firmwareImage;
+    }
+
+    void setFirmwareImage(byte[] firmwareImage) {
+        this.firmwareImage.setValue(firmwareImage);
     }
 }
