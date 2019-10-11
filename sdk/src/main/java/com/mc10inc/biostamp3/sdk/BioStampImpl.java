@@ -320,6 +320,36 @@ public class BioStampImpl implements BioStamp {
         executeTask(new UploadFirmware(this, listener, progressListener, file));
     }
 
+    @Override
+    public void loadFirmwareImage(Listener<Void> listener) {
+        executeTask(new Task<Void>(this, listener) {
+            @Override
+            public void doTask() {
+                try {
+                    Request.loadFirmwareImage.execute(ble);
+                    success(null);
+                } catch (BleException e) {
+                    error(e);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void reset(Listener<Void> listener) {
+        executeTask(new Task<Void>(this, listener) {
+            @Override
+            public void doTask() {
+                try {
+                    Request.reset.execute(ble);
+                    success(null);
+                } catch (BleException e) {
+                    error(e);
+                }
+            }
+        });
+    }
+
     private class SensorThread extends Thread {
         @Override
         public void run() {

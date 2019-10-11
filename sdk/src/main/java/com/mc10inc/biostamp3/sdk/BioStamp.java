@@ -49,6 +49,10 @@ public interface BioStamp {
     void uploadFirmware(byte[] file, Listener<Void> listener,
                            ProgressListener progressListener);
 
+    void loadFirmwareImage(Listener<Void> listener);
+
+    void reset(Listener<Void> listener);
+
     enum State {
         DISCONNECTED,
         CONNECTING,

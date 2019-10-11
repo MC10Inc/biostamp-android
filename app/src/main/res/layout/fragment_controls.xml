@@ -26,12 +26,30 @@
         app:layout_constraintTop_toTopOf="@+id/blinkLedButton" />
 
     <Button
+        android:id="@+id/resetButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Reset"
+        app:layout_constraintStart_toEndOf="@+id/getStatusButton"
+        app:layout_constraintTop_toTopOf="@+id/blinkLedButton" />
+
+    <Button
         android:id="@+id/uploadFirmwareButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="Upload"
         app:layout_constraintStart_toEndOf="@+id/selectFirmwareButton"
+        app:layout_constraintTop_toTopOf="@+id/selectFirmwareButton" />
+
+    <Button
+        android:id="@+id/loadImageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Load FW"
+        app:layout_constraintStart_toEndOf="@+id/uploadFirmwareButton"
         app:layout_constraintTop_toTopOf="@+id/selectFirmwareButton" />
 
     <ProgressBar
@@ -44,7 +62,7 @@
         android:max="1000"
         app:layout_constraintBottom_toBottomOf="@id/uploadFirmwareButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/uploadFirmwareButton"
+        app:layout_constraintStart_toEndOf="@id/loadImageButton"
         app:layout_constraintTop_toTopOf="@id/uploadFirmwareButton" />
 
     <Button
@@ -53,7 +71,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Select Firmware"
+        android:text="Select FW"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/blinkLedButton" />
 

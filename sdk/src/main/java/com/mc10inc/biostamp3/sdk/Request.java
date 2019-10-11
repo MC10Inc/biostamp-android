@@ -107,4 +107,10 @@ public class Request<TC, TR> {
 
     public static final Request<Void, Void> uploadFinish =
             new Request<>(Brc3.Command.UPLOAD_FINISH, null, null);
+
+    public static final Request<Void, Void> loadFirmwareImage =
+            new Request<>(Brc3.Command.LOAD_FIRMWARE_IMAGE, null, null);
+
+    public static final Request<Void, Void> reset =
+            new Request<>(Brc3.Command.RESET, null, null);
 }

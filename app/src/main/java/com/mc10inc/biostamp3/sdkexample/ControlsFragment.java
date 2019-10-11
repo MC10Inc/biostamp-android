@@ -131,6 +131,30 @@ public class ControlsFragment extends BaseFragment {
         });
     }
 
+    @OnClick(R.id.resetButton) void resetButton() {
+        BioStamp s = viewModel.getSensor();
+        if (s == null) {
+            return;
+        }
+        s.reset((error, result) -> {
+            if (error != null) {
+                Timber.e(error);
+            }
+        });
+    }
+
+    @OnClick(R.id.loadImageButton) void loadImageButton() {
+        BioStamp s = viewModel.getSensor();
+        if (s == null) {
+            return;
+        }
+        s.loadFirmwareImage((error, result) -> {
+            if (error != null) {
+                Timber.e(error);
+            }
+        });
+    }
+
     @OnClick(R.id.selectFirmwareButton) void selectFirmware() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
