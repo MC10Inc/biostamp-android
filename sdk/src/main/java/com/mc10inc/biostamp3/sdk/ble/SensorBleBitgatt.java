@@ -197,6 +197,7 @@ public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
                 throw new BleException();
             }
             synchronized (this) {
+                state = State.READY;
                 return response;
             }
         } finally {
@@ -233,7 +234,8 @@ public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
         try {
             synchronized (this) {
                 if (state != State.READY) {
-                    throw new BleException();
+                    throw new BleException(
+                            String.format("Cannot request connection speed in state %s", state));
                 }
                 doneLatch = new CountDownLatch(1);
                 state = State.BUSY;
@@ -270,7 +272,7 @@ public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
                 throw new BleException();
             }
             synchronized (this) {
-
+                state = State.READY;
             }
         } finally {
             busySemaphore.release();
