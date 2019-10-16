@@ -41,6 +41,12 @@ public interface SensorBle {
         void disconnected();
     }
 
+    enum Speed {
+        LOW_POWER,
+        BALANCED,
+        HIGH
+    }
+
     void connect(BleDisconnectListener disconnectListener, BleDataListener dataListener)
             throws BleException;
 
@@ -49,4 +55,6 @@ public interface SensorBle {
     byte[] execute(byte[] command) throws BleException;
 
     String getSerial() throws BleException;
+
+    void requestConnectionSpeed(Speed speed) throws BleException;
 }

@@ -17,6 +17,7 @@ import com.fitbit.bluetooth.fbgatt.tx.GattClientDiscoverServicesTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.GattConnectTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.GattDisconnectTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.ReadGattCharacteristicTransaction;
+import com.fitbit.bluetooth.fbgatt.tx.RequestGattConnectionIntervalTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.SetClientConnectionStateTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.SubscribeToCharacteristicNotificationsTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.WriteGattCharacteristicTransaction;
@@ -73,11 +74,13 @@ public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
     private CountDownLatch doneLatch;
     private byte[] response;
     private String serial;
+    private Speed speed;
     private State state;
 
     public SensorBleBitgatt(GattConnection conn) {
         this.conn = conn;
         this.state = State.INIT;
+        this.speed = Speed.BALANCED;
     }
 
     @Override
@@ -213,6 +216,64 @@ public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
             return serial;
         } else {
             throw new BleException();
+        }
+    }
+
+    @Override
+    public void requestConnectionSpeed(Speed newSpeed) throws BleException {
+        if (speed == newSpeed) {
+            return;
+        }
+        try {
+            busySemaphore.acquire();
+        } catch (InterruptedException e) {
+            throw new BleException();
+        }
+        Timber.i("Requesting connection speed %s", newSpeed);
+        try {
+            synchronized (this) {
+                if (state != State.READY) {
+                    throw new BleException();
+                }
+                doneLatch = new CountDownLatch(1);
+                state = State.BUSY;
+
+                RequestGattConnectionIntervalTransaction.Speed bitgattSpeed;
+                switch (newSpeed) {
+                    case LOW_POWER:
+                        bitgattSpeed = RequestGattConnectionIntervalTransaction.Speed.LOW;
+                        break;
+                    case BALANCED:
+                    default:
+                        bitgattSpeed = RequestGattConnectionIntervalTransaction.Speed.MID;
+                        break;
+                    case HIGH:
+                        bitgattSpeed = RequestGattConnectionIntervalTransaction.Speed.HIGH;
+                        break;
+                }
+                GattTransaction tx = new RequestGattConnectionIntervalTransaction(conn,
+                        GattState.REQUEST_CONNECTION_INTERVAL_SUCCESS, bitgattSpeed);
+                runTx(tx, result -> {
+                    if (result.getResultStatus().equals(TransactionResult.TransactionResultStatus.SUCCESS)) {
+                        Timber.i("Requested connection speed %s", newSpeed);
+                        speed = newSpeed;
+                    } else {
+                        Timber.e("Failed to request connection speed: %s", result);
+                        // TODO Should this be an error, or ignore?
+                    }
+                    doneLatch.countDown();
+                });
+            }
+            try {
+                doneLatch.await();
+            } catch (InterruptedException e) {
+                throw new BleException();
+            }
+            synchronized (this) {
+
+            }
+        } finally {
+            busySemaphore.release();
         }
     }
 
