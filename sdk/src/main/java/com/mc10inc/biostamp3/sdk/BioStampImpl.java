@@ -234,8 +234,9 @@ public class BioStampImpl implements BioStamp {
                 try {
                     Brc3.SystemStatusResponseParam systemStatusResp = Request.getSystemStatus.execute(ble);
                     Brc3.SensingGetInfoResponseParam sensingInfoResp = Request.getSensingInfo.execute(ble);
+                    Brc3.VersionGetResponseParam versionResp = Request.getVersion.execute(ble);
                     SensingInfo sensingInfo = new SensingInfo(sensingInfoResp);
-                    SensorStatus ss = new SensorStatus(systemStatusResp, sensingInfo);
+                    SensorStatus ss = new SensorStatus(systemStatusResp, sensingInfo, versionResp);
                     success(ss);
                 } catch (BleException e) {
                     error(e);

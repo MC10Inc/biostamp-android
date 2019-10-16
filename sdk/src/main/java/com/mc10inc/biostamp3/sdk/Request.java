@@ -113,4 +113,7 @@ public class Request<TC, TR> {
 
     public static final Request<Void, Void> reset =
             new Request<>(Brc3.Command.RESET, null, null);
+
+    public static final Request<Void, Brc3.VersionGetResponseParam> getVersion =
+            new Request<>(Brc3.Command.VERSION_GET, null, Brc3.Response::getVersionGet);
 }

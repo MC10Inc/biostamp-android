@@ -115,10 +115,11 @@ public class ControlsFragment extends BaseFragment {
         s.getSensorStatus((error, result) -> {
             if (error == null) {
                 StringBuilder sb = new StringBuilder();
-                sb.append(String.format("Batt %d%% %s Uptime %ds\n",
+                sb.append(String.format("Batt %d%% %s Uptime %ds\nFW %s\n",
                         result.getBatteryPercent(),
                         result.isCharging() ? "charging" : "",
-                        result.getUptime()));
+                        result.getUptime(),
+                        result.getFirmwareVersion()));
                 if (result.getSensingInfo().isEnabled()) {
                     sb.append(result.getSensingInfo().toString());
                 } else {
