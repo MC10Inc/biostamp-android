@@ -33,4 +33,12 @@ public class SensorStatus {
     public String getFirmwareVersion() {
         return version.getFirmwareVersion();
     }
+
+    public String getBootloaderVersion() {
+        if (version.getBootloaderVersion() == null) {
+            return "";
+        } else {
+            return version.getBootloaderVersion();
+        }
+    }
 }

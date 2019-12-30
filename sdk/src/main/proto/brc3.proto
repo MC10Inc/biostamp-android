@@ -34,6 +34,7 @@ enum Command {
     TIMESYNC_RX_ENABLE = 48;
     AFE4900_DYNAMIC_CONFIG = 49;
     LOAD_FIRMWARE_IMAGE = 50;
+    SIMULATE_FAULT = 51;
     TEST_DATA = 101;
     BLINK_LEDS = 102;
     TIMESTAMP_TEST_DISABLE = 103;
@@ -162,6 +163,7 @@ message RecordingGetFreeSpaceResponseParam {
 
 message VersionGetResponseParam {
     string firmware_version = 1;
+    string bootloader_version = 2;
 }
 
 message TimesyncTxEnableCommandParam {
@@ -177,6 +179,10 @@ message TimesyncRxEnableCommandParam {
 
 message AFE4900DynamicConfigCommandParam {
     AFE4900Dynamic dynamic = 1;
+}
+
+message SimulateFaultCommandParam {
+    SimulateFaultType fault = 1;
 }
 
 message Request {
@@ -197,6 +203,7 @@ message Request {
         TimesyncTxEnableCommandParam timesync_tx_enable = 113;
         TimesyncRxEnableCommandParam timesync_rx_enable = 114;
         AFE4900DynamicConfigCommandParam afe4900_dynamic_config = 115;
+        SimulateFaultCommandParam simulate_fault = 116;
     }
 }
 
@@ -451,5 +458,10 @@ message RecordingPage {
 
 message TimestampTestMessage {
     uint64 timestamp = 1;
+}
+
+enum SimulateFaultType {
+    SIMULATEFAULTTYPE_UNDEFINED = 0;
+    HUNG_THREAD = 1;
 }
 
