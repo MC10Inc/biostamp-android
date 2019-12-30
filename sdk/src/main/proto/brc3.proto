@@ -55,6 +55,8 @@ enum ErrorCode {
     UPLOAD_FAILED = 9;
     MEMORY_FULL = 10;
     RECORDING_NOT_FOUND = 11;
+    FIRMWARE_IMAGE_INCOMPATIBILE = 12;
+    FIRMWARE_IMAGE_INVALID = 13;
 }
 
 message FlashEraseBlockCommandParam {
