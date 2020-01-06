@@ -6,11 +6,9 @@ enum Command {
     TEMPERATURE_GET = 20;
     TIME_GET = 21;
     TIME_SET = 22;
-    FLASH_MFG_SETUP = 23;
     FLASH_ERASE_BLOCK = 24;
     FLASH_WRITE_PAGE = 25;
     FLASH_READ_DATA = 26;
-    AMBIENT_LIGHT_GET = 27;
     PRESSURE_GET = 28;
     SYSTEM_STATUS = 29;
     POWER_OFF = 30;
@@ -35,6 +33,7 @@ enum Command {
     AFE4900_DYNAMIC_CONFIG = 49;
     LOAD_FIRMWARE_IMAGE = 50;
     SIMULATE_FAULT = 51;
+    UPLOAD_WRITE_PAGES_FAST = 52;
     TEST_DATA = 101;
     BLINK_LEDS = 102;
     TIMESTAMP_TEST_DISABLE = 103;
@@ -75,10 +74,6 @@ message FlashReadDataCommandParam {
 
 message TestDataCommandParam {
     uint32 num_bytes = 100;
-}
-
-message AmbientLightGetResponseParam {
-    double lux = 1;
 }
 
 message PressureGetResponseParam {
@@ -217,7 +212,6 @@ message Response {
         TemperatureGetResponseParam temperature_get = 20;
         TimeGetResponseParam time_get = 21;
         FlashReadDataResponseParam flash_read_data = 22;
-        AmbientLightGetResponseParam ambient_light_get = 23;
         PressureGetResponseParam pressure_get = 24;
         SystemStatusResponseParam system_status = 25;
         StreamingStartResponseParam streaming_start = 26;
@@ -263,7 +257,6 @@ message AFE4900Samples {
 }
 
 message EnvironmentSamples {
-    repeated float lux = 1;
     repeated float pascals = 2;
     repeated float temperature_c = 3;
 }

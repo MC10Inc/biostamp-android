@@ -20,7 +20,6 @@ public abstract class RawSamples {
         ECG,
         PPG,
         AMBIENT,
-        LUX,
         PASCALS,
         TEMPERATURE,
         Z_MAG,

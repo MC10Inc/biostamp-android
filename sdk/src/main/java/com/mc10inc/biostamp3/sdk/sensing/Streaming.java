@@ -1,5 +1,8 @@
 package com.mc10inc.biostamp3.sdk.sensing;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import com.mc10inc.biostamp3.sdk.Brc3;
 
 import java.util.EnumMap;
@@ -11,6 +14,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import timber.log.Timber;
 
 public class Streaming {
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private final Map<StreamingType, Long> previousTimestamps = new EnumMap<>(StreamingType.class);
     private final Map<StreamingType, Brc3.StreamingInfo> streamingInfos = new EnumMap<>(StreamingType.class);
     private final Map<StreamingType, Set<StreamingListener>> listeners = new EnumMap<>(StreamingType.class);
@@ -80,7 +84,7 @@ public class Streaming {
 
         Set<StreamingListener> listenersToCall = Objects.requireNonNull(listeners.get(type));
         for (StreamingListener l : listenersToCall) {
-            l.handleRawSamples(rawSamples);
+            handler.post(() -> l.handleRawSamples(rawSamples));
         }
     }
 

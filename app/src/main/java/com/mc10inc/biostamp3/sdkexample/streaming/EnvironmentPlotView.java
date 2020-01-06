@@ -22,9 +22,6 @@ public class EnvironmentPlotView extends LinearLayout implements StreamingPlot {
     @BindView(R.id.pressureText)
     TextView pressureText;
 
-    @BindView(R.id.lightText)
-    TextView lightText;
-
     public EnvironmentPlotView(Context context) {
         super(context);
         initView(context);
@@ -62,7 +59,5 @@ public class EnvironmentPlotView extends LinearLayout implements StreamingPlot {
                 samples.getValue(RawSamples.ColumnType.TEMPERATURE, samples.getSize() - 1)));
         pressureText.setText(String.format("Pressure: %.0f pascals",
                 samples.getValue(RawSamples.ColumnType.PASCALS, samples.getSize() - 1)));
-        lightText.setText(String.format("Ambient Light: %.0f lux",
-                samples.getValue(RawSamples.ColumnType.LUX, samples.getSize() - 1)));
     }
 }

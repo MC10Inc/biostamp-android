@@ -13,14 +13,12 @@ public class EnvironmentSamples extends RawSamples {
 
     @Override
     public int getSize() {
-        return samples.getLuxCount();
+        return samples.getPascalsCount();
     }
 
     @Override
     public double getValue(ColumnType columnType, int index) {
         switch (columnType) {
-            case LUX:
-                return samples.getLux(index);
             case PASCALS:
                 return samples.getPascals(index);
             case TEMPERATURE:
