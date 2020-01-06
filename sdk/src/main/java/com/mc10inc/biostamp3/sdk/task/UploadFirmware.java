@@ -21,7 +21,10 @@ public class UploadFirmware extends Task<Void> {
     public UploadFirmware(BioStampImpl bs, BioStamp.Listener<Void> taskListener,
                           BioStamp.ProgressListener progressListener, byte[] file) {
         super(bs, taskListener, progressListener);
-        this.file = file;
+        // Pad file with zeros so that length is an integral number of flash pages
+        int paddedLen = ((file.length + PAGE_SIZE - 1) / PAGE_SIZE) * PAGE_SIZE;
+        this.file = new byte[paddedLen];
+        System.arraycopy(file, 0, this.file, 0, file.length);
     }
 
     @Override
@@ -35,18 +38,8 @@ public class UploadFirmware extends Task<Void> {
                     .setSize(file.length)
                     .setCrc(CRC16.calculateCrc(file)));
 
-            for (int addr = 0; addr < file.length; addr += PAGE_SIZE) {
-                int n;
-                if (addr + PAGE_SIZE <= file.length) {
-                    n = PAGE_SIZE;
-                } else {
-                    n = file.length - addr;
-                }
-                Request.uploadWritePage.execute(bs.getBle(), Brc3.UploadWritePageCommandParam.newBuilder()
-                        .setData(ByteString.copyFrom(file, addr, n))
-                        .setOffset(addr));
-                progress((double)addr / file.length);
-            }
+            bs.getBle().setWriteFastProgressListener(this::progress);
+            Request.uploadWritePagesFast.execute(bs.getBle(), null, file);
 
             Request.uploadFinish.execute(bs.getBle());
 

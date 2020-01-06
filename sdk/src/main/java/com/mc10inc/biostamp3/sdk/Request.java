@@ -33,13 +33,17 @@ public class Request<TC, TR> {
     }
 
     public TR execute(SensorBle ble, TC param) throws BleException, RequestException {
+        return execute(ble, param, null);
+    }
+
+    public TR execute(SensorBle ble, TC param, byte[] writeFastData) throws BleException, RequestException {
         Brc3.Request.Builder reqBuilder = Brc3.Request.newBuilder();
         reqBuilder.setCommand(command);
         if (commandParamSetter != null) {
             commandParamSetter.setCommandParam(reqBuilder, param);
         }
 
-        byte[] respBytes = ble.execute(reqBuilder.build().toByteArray());
+        byte[] respBytes = ble.execute(reqBuilder.build().toByteArray(), writeFastData);
         Brc3.Response resp;
         try {
             resp = Brc3.Response.parseFrom(respBytes);
@@ -104,6 +108,9 @@ public class Request<TC, TR> {
 
     public static final Request<Brc3.UploadWritePageCommandParam.Builder, Void> uploadWritePage =
             new Request<>(Brc3.Command.UPLOAD_WRITE_PAGE, Brc3.Request.Builder::setUploadWritePage, null);
+
+    public static final Request<Void, Void> uploadWritePagesFast =
+            new Request<>(Brc3.Command.UPLOAD_WRITE_PAGES_FAST, null, null);
 
     public static final Request<Void, Void> uploadFinish =
             new Request<>(Brc3.Command.UPLOAD_FINISH, null, null);

@@ -176,7 +176,9 @@ public class ControlsFragment extends BaseFragment {
             Timber.e("No firmware image loaded");
         }
 
+        firmwareProgressBar.setVisibility(View.VISIBLE);
         s.uploadFirmware(image, (error, result) -> {
+            firmwareProgressBar.setVisibility(View.INVISIBLE);
             if (error == null) {
                 Timber.i("Firmware upload complete");
             } else {

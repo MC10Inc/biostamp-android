@@ -41,6 +41,10 @@ public interface SensorBle {
         void disconnected();
     }
 
+    interface ProgressListener {
+        void updateProgress(double progress);
+    }
+
     enum Speed {
         LOW_POWER,
         BALANCED,
@@ -54,7 +58,11 @@ public interface SensorBle {
 
     byte[] execute(byte[] command) throws BleException;
 
+    byte[] execute(byte[] command, byte[] writeFastData) throws BleException;
+
     String getSerial() throws BleException;
 
     void requestConnectionSpeed(Speed speed) throws BleException;
+
+    void setWriteFastProgressListener(ProgressListener progressListener);
 }
