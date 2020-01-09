@@ -11,6 +11,12 @@ import com.mc10inc.biostamp3.sdk.ble.SensorBle;
 import com.mc10inc.biostamp3.sdk.exception.BleException;
 import com.mc10inc.biostamp3.sdk.util.CRC16;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 import timber.log.Timber;
 
 public class UploadFirmware extends Task<Void> {
@@ -33,13 +39,29 @@ public class UploadFirmware extends Task<Void> {
             bs.getBle().requestConnectionSpeed(SensorBle.Speed.HIGH);
             progress(0);
             long t0 = SystemClock.elapsedRealtime();
-            Request.uploadStart.execute(bs.getBle(), Brc3.UploadStartCommandParam.newBuilder()
-                    .setType(Brc3.UploadType.FIRMWARE_IMAGE)
-                    .setSize(file.length)
-                    .setCrc(CRC16.calculateCrc(file)));
+            Brc3.UploadStartResponseParam resp = Request.uploadStart.execute(bs.getBle(),
+                    Brc3.UploadStartCommandParam.newBuilder()
+                        .setType(Brc3.UploadType.FIRMWARE_IMAGE)
+                        .setSize(file.length)
+                        .setCrc(CRC16.calculateCrc(file)));
+
+            List<byte[]> packets = new LinkedList<>();
+            int payload = resp.getMaxFastWriteSize() - 4;
+            for (int i = 0; i < file.length; i += payload) {
+                int len;
+                if (i + payload <= file.length) {
+                    len = payload;
+                } else {
+                    len = file.length - i;
+                }
+                ByteBuffer packet = ByteBuffer.allocate(len + 4).order(ByteOrder.LITTLE_ENDIAN);
+                packet.putInt(i);
+                packet.put(file, i, len);
+                packets.add(packet.array());
+            }
 
             bs.getBle().setWriteFastProgressListener(this::progress);
-            Request.uploadWritePagesFast.execute(bs.getBle(), null, file);
+            Request.uploadWritePagesFast.execute(bs.getBle(), null, packets);
 
             Request.uploadFinish.execute(bs.getBle());
 

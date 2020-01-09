@@ -129,6 +129,10 @@ message UploadStartCommandParam {
     uint32 crc = 3;
 }
 
+message UploadStartResponseParam {
+    uint32 max_fast_write_size = 1;
+}
+
 message UploadWritePageCommandParam {
     uint32 offset = 1;
     bytes data = 2;
@@ -219,6 +223,7 @@ message Response {
         SensingGetInfoResponseParam sensing_get_info = 28;
         RecordingGetFreeSpaceResponseParam recording_get_free_space = 29;
         VersionGetResponseParam version_get = 30;
+        UploadStartResponseParam upload_start = 31;
     }
 }
 

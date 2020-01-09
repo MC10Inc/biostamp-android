@@ -3,6 +3,8 @@ package com.mc10inc.biostamp3.sdk.ble;
 import com.google.protobuf.ByteString;
 import com.mc10inc.biostamp3.sdk.exception.BleException;
 
+import java.util.List;
+
 /**
  * BioStamp Sensor BLE Interface
  * <p>
@@ -58,7 +60,7 @@ public interface SensorBle {
 
     byte[] execute(byte[] command) throws BleException;
 
-    byte[] execute(byte[] command, byte[] writeFastData) throws BleException;
+    byte[] execute(byte[] command, List<byte[]> writeFastData) throws BleException;
 
     String getSerial() throws BleException;
 

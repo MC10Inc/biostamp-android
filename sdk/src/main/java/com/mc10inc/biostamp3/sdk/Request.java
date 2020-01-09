@@ -5,6 +5,8 @@ import com.mc10inc.biostamp3.sdk.ble.SensorBle;
 import com.mc10inc.biostamp3.sdk.exception.BleException;
 import com.mc10inc.biostamp3.sdk.exception.RequestException;
 
+import java.util.List;
+
 import timber.log.Timber;
 
 public class Request<TC, TR> {
@@ -36,7 +38,7 @@ public class Request<TC, TR> {
         return execute(ble, param, null);
     }
 
-    public TR execute(SensorBle ble, TC param, byte[] writeFastData) throws BleException, RequestException {
+    public TR execute(SensorBle ble, TC param, List<byte[]> writeFastData) throws BleException, RequestException {
         Brc3.Request.Builder reqBuilder = Brc3.Request.newBuilder();
         reqBuilder.setCommand(command);
         if (commandParamSetter != null) {
@@ -103,8 +105,8 @@ public class Request<TC, TR> {
     public static final Request<Void, Brc3.SystemStatusResponseParam> getSystemStatus =
             new Request<>(Brc3.Command.SYSTEM_STATUS, null, Brc3.Response::getSystemStatus);
 
-    public static final Request<Brc3.UploadStartCommandParam.Builder, Void> uploadStart =
-            new Request<>(Brc3.Command.UPLOAD_START, Brc3.Request.Builder::setUploadStart, null);
+    public static final Request<Brc3.UploadStartCommandParam.Builder, Brc3.UploadStartResponseParam> uploadStart =
+            new Request<>(Brc3.Command.UPLOAD_START, Brc3.Request.Builder::setUploadStart, Brc3.Response::getUploadStart);
 
     public static final Request<Brc3.UploadWritePageCommandParam.Builder, Void> uploadWritePage =
             new Request<>(Brc3.Command.UPLOAD_WRITE_PAGE, Brc3.Request.Builder::setUploadWritePage, null);

@@ -1,6 +1,5 @@
 package com.mc10inc.biostamp3.sdk.ble;
 
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
@@ -11,11 +10,9 @@ import com.fitbit.bluetooth.fbgatt.CompositeClientTransaction;
 import com.fitbit.bluetooth.fbgatt.ConnectionEventListener;
 import com.fitbit.bluetooth.fbgatt.FitbitGatt;
 import com.fitbit.bluetooth.fbgatt.GattConnection;
-import com.fitbit.bluetooth.fbgatt.GattServerConnection;
 import com.fitbit.bluetooth.fbgatt.GattState;
 import com.fitbit.bluetooth.fbgatt.GattTransaction;
 import com.fitbit.bluetooth.fbgatt.GattTransactionCallback;
-import com.fitbit.bluetooth.fbgatt.ServerConnectionEventListener;
 import com.fitbit.bluetooth.fbgatt.TransactionResult;
 import com.fitbit.bluetooth.fbgatt.tx.GattClientDiscoverServicesTransaction;
 import com.fitbit.bluetooth.fbgatt.tx.GattConnectTransaction;
@@ -29,8 +26,6 @@ import com.fitbit.bluetooth.fbgatt.tx.WriteGattDescriptorTransaction;
 import com.google.protobuf.ByteString;
 import com.mc10inc.biostamp3.sdk.exception.BleException;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,8 +37,7 @@ import java.util.concurrent.Semaphore;
 
 import timber.log.Timber;
 
-public class SensorBleBitgatt implements
-        SensorBle, ConnectionEventListener, ServerConnectionEventListener {
+public class SensorBleBitgatt implements SensorBle, ConnectionEventListener {
     private static final UUID CLIENT_CHARACTERISTIC_CONFIG =
             UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
     private static final UUID BS_SERVICE_UUID =
@@ -80,7 +74,6 @@ public class SensorBleBitgatt implements
     private BleDataListener dataListener;
     private BleDisconnectListener disconnectListener;
     private CountDownLatch doneLatch;
-    private int mtu;
     private byte[] response;
     private String serial;
     private Speed speed;
@@ -93,8 +86,6 @@ public class SensorBleBitgatt implements
         this.conn = conn;
         this.state = State.INIT;
         this.speed = Speed.BALANCED;
-        // Until we know the MTU, initialize to the smallest default value
-        this.mtu = 23;
     }
 
     @Override
@@ -113,9 +104,6 @@ public class SensorBleBitgatt implements
                 this.disconnectListener = disconnectListener;
                 this.dataListener = dataListener;
                 state = State.CONNECTING;
-                // Register for GATT server events. This is only done so that we can get MTU changed
-                // events; the GATT server is otherwise not used.
-                FitbitGatt.getInstance().getServer().registerConnectionEventListener(this);
                 doneLatch = new CountDownLatch(1);
                 GattConnectTransaction tx = new GattConnectTransaction(conn, GattState.CONNECTED);
                 runTx(tx, result -> {
@@ -192,7 +180,7 @@ public class SensorBleBitgatt implements
     }
 
     @Override
-    public byte[] execute(byte[] command, byte[] writeFastData) throws BleException {
+    public byte[] execute(byte[] command, List<byte[]> writeFastData) throws BleException {
         try {
             busySemaphore.acquire();
         } catch (InterruptedException e) {
@@ -208,7 +196,8 @@ public class SensorBleBitgatt implements
                 runTx(tx, result -> {
                     if (result.getResultStatus().equals(TransactionResult.TransactionResultStatus.SUCCESS)) {
                         if (writeFastData != null) {
-                            setupWriteFastPackets(writeFastData);
+                            writeFastPackets = new LinkedList<>(writeFastData);
+                            writeFastCount = writeFastPackets.size();
                             sendWriteFastPacket();
                         }
                         // TODO Set a timeout waiting for the response
@@ -231,24 +220,6 @@ public class SensorBleBitgatt implements
         } finally {
             busySemaphore.release();
         }
-    }
-
-    private void setupWriteFastPackets(byte[] data) {
-        writeFastPackets = new LinkedList<>();
-        int payload = mtu - 3 - 4;
-        for (int i = 0; i < data.length; i += payload) {
-            int len;
-            if (i + payload <= data.length) {
-                len = payload;
-            } else {
-                len = data.length - i;
-            }
-            ByteBuffer packet = ByteBuffer.allocate(len + 4).order(ByteOrder.LITTLE_ENDIAN);
-            packet.putInt(i);
-            packet.put(data, i, len);
-            writeFastPackets.add(packet.array());
-        }
-        writeFastCount = writeFastPackets.size();
     }
 
     private void sendWriteFastPacket() {
@@ -521,7 +492,6 @@ public class SensorBleBitgatt implements
     public void onClientConnectionStateChanged(@NonNull TransactionResult result, @NonNull GattConnection connection) {
         if (result.getResultState().equals(GattState.DISCONNECTED)) {
             conn.unregisterConnectionEventListener(this);
-            FitbitGatt.getInstance().getServer().unregisterConnectionEventListener(this);
             state = State.DISCONNECTED;
             Timber.i("Set disconnected for result state %s", result.getResultState());
             done();
@@ -539,9 +509,7 @@ public class SensorBleBitgatt implements
 
     @Override
     public void onMtuChanged(@NonNull TransactionResult result, @NonNull GattConnection connection) {
-        // This never gets called for the initial MTU change that occurs when the connection is
-        // being set up. Therefore we don't use it and instead use the MTU changed event from the
-        // GATT server.
+
     }
 
     @Override
@@ -555,39 +523,5 @@ public class SensorBleBitgatt implements
                 callback.onTransactionComplete(result);
             }
         });
-    }
-
-    @Override
-    public void onServerMtuChanged(@NonNull BluetoothDevice device, @NonNull TransactionResult result, @NonNull GattServerConnection connection) {
-        // This listener for the GATT server receives all MTU changes for all connected devices.
-        // Check if this is an MTU change for our device.
-        if (device.getAddress().equals(conn.getDevice().getBtDevice().getAddress())) {
-            mtu = result.getMtu();
-        }
-    }
-
-    @Override
-    public void onServerConnectionStateChanged(@NonNull BluetoothDevice device, @NonNull TransactionResult result, @NonNull GattServerConnection connection) {
-
-    }
-
-    @Override
-    public void onServerCharacteristicWriteRequest(@NonNull BluetoothDevice device, @NonNull TransactionResult result, @NonNull GattServerConnection connection) {
-
-    }
-
-    @Override
-    public void onServerCharacteristicReadRequest(@NonNull BluetoothDevice device, @NonNull TransactionResult result, @NonNull GattServerConnection connection) {
-
-    }
-
-    @Override
-    public void onServerDescriptorWriteRequest(@NonNull BluetoothDevice device, @NonNull TransactionResult result, @NonNull GattServerConnection connection) {
-
-    }
-
-    @Override
-    public void onServerDescriptorReadRequest(@NonNull BluetoothDevice device, @NonNull TransactionResult result, @NonNull GattServerConnection connection) {
-
     }
 }
