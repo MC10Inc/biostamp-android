@@ -5,9 +5,9 @@ import com.mc10inc.biostamp3.sdk.Brc3;
 public class EnvironmentSamples extends RawSamples {
     private Brc3.EnvironmentSamples samples;
 
-    EnvironmentSamples(double firstTimestamp, RawSampleInfo rawSampleInfo,
+    EnvironmentSamples(long timestamp, int samplingPeriod, RawSampleInfo rawSampleInfo,
                        Brc3.EnvironmentSamples samples) {
-        super(firstTimestamp, rawSampleInfo);
+        super(timestamp, samplingPeriod, rawSampleInfo);
         this.samples = samples;
     }
 

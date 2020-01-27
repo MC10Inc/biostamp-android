@@ -15,7 +15,6 @@ import timber.log.Timber;
 
 public class Streaming {
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private final Map<StreamingType, Long> previousTimestamps = new EnumMap<>(StreamingType.class);
     private final Map<StreamingType, Brc3.StreamingInfo> streamingInfos = new EnumMap<>(StreamingType.class);
     private final Map<StreamingType, Set<StreamingListener>> listeners = new EnumMap<>(StreamingType.class);
 
@@ -27,7 +26,6 @@ public class Streaming {
 
     public void handleStreamingSamples(Brc3.StreamingSamples samples) {
         StreamingType type;
-        int numSamples = 0;
         if (samples.hasAd5940()) {
             type = StreamingType.AD5940;
         } else if (samples.hasAfe4900()) {
@@ -36,7 +34,6 @@ public class Streaming {
             type = StreamingType.ENVIRONMENT;
         } else if (samples.hasMotion()) {
             type = StreamingType.MOTION;
-            numSamples = MotionSamples.getSize(samples.getMotion());
         } else if (samples.hasRotation()) {
             type = StreamingType.ROTATION;
         } else {
@@ -50,33 +47,28 @@ public class Streaming {
             return;
         }
 
-        Long previousTimestamp = previousTimestamps.get(type);
-        if (previousTimestamp == null) {
-            previousTimestamps.put(type, samples.getTimestampUs());
-            return;
-        }
-        previousTimestamps.put(type, samples.getTimestampUs());
-
-        RawSampleInfo rsi = new RawSampleInfo(streamingInfo, previousTimestamp,
-                samples.getTimestampUs(), numSamples);
+        RawSampleInfo rsi = new RawSampleInfo(streamingInfo);
         RawSamples rawSamples;
         switch (type) {
             case AD5940:
-                rawSamples = new AD5940Samples(samples.getTimestampUs(), rsi, samples.getAd5940());
+                rawSamples = new AD5940Samples(samples.getTimestamp(), samples.getSamplingPeriod(),
+                        rsi, samples.getAd5940());
                 break;
             case AFE4900:
-                rawSamples = new AFE4900Samples(samples.getTimestampUs(), rsi, samples.getAfe4900());
+                rawSamples = new AFE4900Samples(samples.getTimestamp(), samples.getSamplingPeriod(),
+                        rsi, samples.getAfe4900());
                 break;
             case ENVIRONMENT:
-                rawSamples = new EnvironmentSamples(samples.getTimestampUs(), rsi,
-                        samples.getEnvironment());
+                rawSamples = new EnvironmentSamples(samples.getTimestamp(), samples.getSamplingPeriod(),
+                        rsi, samples.getEnvironment());
                 break;
             case MOTION:
-                rawSamples = new MotionSamples(samples.getTimestampUs(), rsi, samples.getMotion());
+                rawSamples = new MotionSamples(samples.getTimestamp(), samples.getSamplingPeriod(),
+                        rsi, samples.getMotion());
                 break;
             case ROTATION:
-                rawSamples = new RotationSamples(samples.getTimestampUs(), rsi,
-                        samples.getRotation());
+                rawSamples = new RotationSamples(samples.getTimestamp(), samples.getSamplingPeriod(),
+                        rsi, samples.getRotation());
                 break;
             default:
                 return;

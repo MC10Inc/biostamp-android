@@ -9,8 +9,9 @@ public class AFE4900Samples extends RawSamples {
     private final int size;
     private final EnumMap<ColumnType, int[]> columns = new EnumMap<>(ColumnType.class);
 
-    AFE4900Samples(double firstTimestamp, RawSampleInfo rawSampleInfo, Brc3.AFE4900Samples samples) {
-        super(firstTimestamp, rawSampleInfo);
+    AFE4900Samples(long timestamp, int samplingPeriod, RawSampleInfo rawSampleInfo,
+                   Brc3.AFE4900Samples samples) {
+        super(timestamp, samplingPeriod, rawSampleInfo);
         size = getSize(samples);
         if (samples.getEcgCount() > 0) {
             columns.put(ColumnType.ECG, differentialToAbsolute(samples.getEcgList()));

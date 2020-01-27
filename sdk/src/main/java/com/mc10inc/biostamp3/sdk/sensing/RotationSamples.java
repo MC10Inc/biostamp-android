@@ -5,9 +5,9 @@ import com.mc10inc.biostamp3.sdk.Brc3;
 public class RotationSamples extends RawSamples {
     private Brc3.RotationSamples samples;
 
-    RotationSamples(double firstTimestamp, RawSampleInfo rawSampleInfo,
+    RotationSamples(long timestamp, int samplingPeriod, RawSampleInfo rawSampleInfo,
                     Brc3.RotationSamples samples) {
-        super(firstTimestamp, rawSampleInfo);
+        super(timestamp, samplingPeriod, rawSampleInfo);
         this.samples = samples;
     }
 

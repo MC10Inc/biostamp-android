@@ -5,8 +5,9 @@ import com.mc10inc.biostamp3.sdk.Brc3;
 public class AD5940Samples extends RawSamples {
     private Brc3.AD5940Samples samples;
 
-    AD5940Samples(double firstTimestamp, RawSampleInfo rawSampleInfo, Brc3.AD5940Samples samples) {
-        super(firstTimestamp, rawSampleInfo);
+    AD5940Samples(long timestamp, int samplingPeriod, RawSampleInfo rawSampleInfo,
+                  Brc3.AD5940Samples samples) {
+        super(timestamp, samplingPeriod, rawSampleInfo);
         this.samples = samples;
     }
 

@@ -26,11 +26,13 @@ public abstract class RawSamples {
         Z_PHASE
     }
 
-    private final double firstTimestamp;
+    private final double timestamp;
+    private final double samplingPeriod;
     protected final RawSampleInfo rawSampleInfo;
 
-    RawSamples(double firstTimestamp, RawSampleInfo rawSampleInfo) {
-        this.firstTimestamp = firstTimestamp;
+    RawSamples(long timestamp, int samplingPeriod, RawSampleInfo rawSampleInfo) {
+        this.timestamp = timestamp * rawSampleInfo.getTimestampScale();
+        this.samplingPeriod = samplingPeriod * rawSampleInfo.getSamplingPeriodScale();
         this.rawSampleInfo = rawSampleInfo;
     }
 
@@ -40,7 +42,7 @@ public abstract class RawSamples {
         if (index >= getSize()) {
             throw new IndexOutOfBoundsException();
         }
-        return firstTimestamp + index * rawSampleInfo.getSamplingPeriod();
+        return timestamp + index * samplingPeriod;
     }
 
     public abstract double getValue(ColumnType columnType, int index);

@@ -34,6 +34,8 @@ enum Command {
     LOAD_FIRMWARE_IMAGE = 50;
     SIMULATE_FAULT = 51;
     UPLOAD_WRITE_PAGES_FAST = 52;
+    RECORDING_GET_COUNT = 53;
+    RECORDING_CLEAR_OLDEST = 54;
     TEST_DATA = 101;
     BLINK_LEDS = 102;
     TIMESTAMP_TEST_DISABLE = 103;
@@ -54,8 +56,9 @@ enum ErrorCode {
     UPLOAD_FAILED = 9;
     MEMORY_FULL = 10;
     RECORDING_NOT_FOUND = 11;
-    FIRMWARE_IMAGE_INCOMPATIBILE = 12;
+    FIRMWARE_IMAGE_INCOMPATIBLE = 12;
     FIRMWARE_IMAGE_INVALID = 13;
+    RECORDING_IN_PROGRESS = 14;
 }
 
 message FlashEraseBlockCommandParam {
@@ -106,6 +109,10 @@ message SensingStartCommandParam {
     SensorConfig config = 1;
 }
 
+message SensingStartResponseParam {
+    uint32 recording_id = 1;
+}
+
 message StreamingStartCommandParam {
     StreamingType type = 1;
 }
@@ -140,10 +147,15 @@ message UploadWritePageCommandParam {
 
 message RecordingGetInfoCommandParam {
     uint32 index = 1;
+    uint32 recording_id = 2;
 }
 
 message RecordingGetInfoResponseParam {
     RecordingInfo info = 1;
+}
+
+message RecordingGetCountResponseParam {
+    uint32 count = 1;
 }
 
 message RecordingReadCommandParam {
@@ -224,6 +236,8 @@ message Response {
         RecordingGetFreeSpaceResponseParam recording_get_free_space = 29;
         VersionGetResponseParam version_get = 30;
         UploadStartResponseParam upload_start = 31;
+        SensingStartResponseParam sensing_start = 32;
+        RecordingGetCountResponseParam recording_get_count = 33;
     }
 }
 
@@ -272,7 +286,8 @@ message AD5940Samples {
 }
 
 message StreamingSamples {
-    uint64 timestamp_us = 1;
+    uint64 timestamp = 1;
+    uint32 sampling_period = 2;
     oneof samples {
         MotionSamples motion = 20;
         AFE4900Samples afe4900 = 21;
@@ -295,6 +310,8 @@ message StreamingInfo {
     float gyro_dps_scale = 2;
     float afe4900_ecg_v_scale = 3;
     float mag_ut_scale = 4;
+    float timestamp_scale = 5;
+    float sampling_period_scale = 6;
 }
 
 message DataMessage {

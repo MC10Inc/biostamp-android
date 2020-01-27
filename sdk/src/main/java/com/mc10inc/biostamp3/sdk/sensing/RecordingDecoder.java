@@ -32,27 +32,30 @@ public class RecordingDecoder {
 
     public void decode() {
         RawSampleInfo rawSampleInfo = new RawSampleInfo(recordingInfo.getMsg().getRawDataInfo());
-        double tsScale = recordingInfo.getMsg().getRawDataInfo().getTimestampScale();
         BioStampDb db = BioStampManager.getInstance().getDb();
         try (BioStampDb.RecordingPagesLoader pages = db.getRecordingPages(recordingInfo)) {
             Brc3.RecordingPage page;
             while ((page = pages.getNext()) != null) {
-                double ts = page.getTimestamp() * tsScale;
-
                 if (page.hasAd5940()) {
-                    RawSamples samples = new AD5940Samples(ts, rawSampleInfo, page.getAd5940());
+                    RawSamples samples = new AD5940Samples(
+                            page.getTimestamp(), page.getSamplingPeriod(),
+                            rawSampleInfo, page.getAd5940());
                     Listener listener = listeners.get(RawSamplesType.AD5940);
                     if (listener != null) {
                         listener.handleRawSamples(samples);
                     }
                 } else if (page.hasAfe4900()) {
-                    RawSamples samples = new AFE4900Samples(ts, rawSampleInfo, page.getAfe4900());
+                    RawSamples samples = new AFE4900Samples(
+                            page.getTimestamp(), page.getSamplingPeriod(),
+                            rawSampleInfo, page.getAfe4900());
                     Listener listener = listeners.get(RawSamplesType.AFE4900);
                     if (listener != null) {
                         listener.handleRawSamples(samples);
                     }
                 } else if (page.hasMotion()) {
-                    RawSamples samples = new MotionSamples(ts, rawSampleInfo, page.getMotion());
+                    RawSamples samples = new MotionSamples(
+                            page.getTimestamp(), page.getSamplingPeriod(),
+                            rawSampleInfo, page.getMotion());
                     Listener listener = listeners.get(RawSamplesType.MOTION);
                     if (listener != null) {
                         listener.handleRawSamples(samples);

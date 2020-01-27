@@ -9,8 +9,9 @@ public class MotionSamples extends RawSamples {
     private final int size;
     private final EnumMap<ColumnType, int[]> columns = new EnumMap<>(ColumnType.class);
 
-    MotionSamples(double firstTimestamp, RawSampleInfo rawSampleInfo, Brc3.MotionSamples samples) {
-        super(firstTimestamp, rawSampleInfo);
+    MotionSamples(long timestamp, int samplingPeriod, RawSampleInfo rawSampleInfo,
+                  Brc3.MotionSamples samples) {
+        super(timestamp, samplingPeriod, rawSampleInfo);
         size = getSize(samples);
         if (samples.getAccelXCount() > 0) {
             columns.put(ColumnType.ACCEL_X, differentialToAbsolute(samples.getAccelXList()));
