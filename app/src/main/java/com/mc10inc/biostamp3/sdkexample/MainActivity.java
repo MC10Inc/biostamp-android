@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager.widget.ViewPager;
 
 import com.mc10inc.biostamp3.sdk.BioStamp;
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         unbinder = ButterKnife.bind(this);
-        viewModel = ViewModelProviders.of(this).get(ExampleViewModel.class);
+        viewModel = new ViewModelProvider(this).get(ExampleViewModel.class);
 
         pager.setAdapter(new PagesAdapter(getSupportFragmentManager()));
 
