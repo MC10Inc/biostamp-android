@@ -30,6 +30,7 @@ import timber.log.Timber;
 
 public class RecordingsFragment extends BaseFragment {
     private static final int REQUEST_CODE_SELECT_EXPORT_FILE = 0;
+    private static final String SELECTED_RECORDING_KEY = "SELECTED_RECORDING";
 
     @BindView(R.id.recordingList)
     RecyclerView recordingList;
@@ -49,6 +50,10 @@ public class RecordingsFragment extends BaseFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_recordings, container, false);
         unbinder = ButterKnife.bind(this, view);
+
+        if (savedInstanceState != null) {
+            selectedRecordingToDecode = savedInstanceState.getParcelable(SELECTED_RECORDING_KEY);
+        }
 
         recordingList.setLayoutManager(new LinearLayoutManager(getContext()));
         recordingAdapter = new RecordingAdapter();
@@ -78,6 +83,12 @@ public class RecordingsFragment extends BaseFragment {
         super.onPause();
 
         BioStampManager.getInstance().getDb().removeRecordingUpdateListener(updateListener);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(SELECTED_RECORDING_KEY, selectedRecordingToDecode);
     }
 
     @OnClick(R.id.decodeButton) void decodeButton() {

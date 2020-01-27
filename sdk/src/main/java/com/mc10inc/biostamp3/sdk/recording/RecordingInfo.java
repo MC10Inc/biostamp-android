@@ -1,5 +1,9 @@
 package com.mc10inc.biostamp3.sdk.recording;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.mc10inc.biostamp3.sdk.Brc3;
 import com.mc10inc.biostamp3.sdk.db.RecordingKey;
 import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
@@ -10,7 +14,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class RecordingInfo implements RecordingKey {
+public class RecordingInfo implements RecordingKey, Parcelable {
     private Brc3.RecordingInfo msg;
     private String serial;
     private DownloadStatus downloadStatus;
@@ -19,6 +23,42 @@ public class RecordingInfo implements RecordingKey {
         this.msg = msg;
         this.serial = serial;
     }
+
+    protected RecordingInfo(Parcel in) {
+        byte[] msgBytes = new byte[in.readInt()];
+        in.readByteArray(msgBytes);
+        try {
+            msg = Brc3.RecordingInfo.parseFrom(msgBytes);
+        } catch (InvalidProtocolBufferException e) {
+            throw new RuntimeException(e);
+        }
+        serial = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        byte[] msgBytes = msg.toByteArray();
+        dest.writeInt(msgBytes.length);
+        dest.writeByteArray(msgBytes);
+        dest.writeString(serial);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<RecordingInfo> CREATOR = new Creator<RecordingInfo>() {
+        @Override
+        public RecordingInfo createFromParcel(Parcel in) {
+            return new RecordingInfo(in);
+        }
+
+        @Override
+        public RecordingInfo[] newArray(int size) {
+            return new RecordingInfo[size];
+        }
+    };
 
     public int getDurationSec() {
         return msg.getDurationSec();
