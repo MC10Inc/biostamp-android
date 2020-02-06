@@ -36,6 +36,7 @@ enum Command {
     UPLOAD_WRITE_PAGES_FAST = 52;
     RECORDING_GET_COUNT = 53;
     RECORDING_CLEAR_OLDEST = 54;
+    FAULT_GET_INFO = 55;
     TEST_DATA = 101;
     BLINK_LEDS = 102;
     TIMESTAMP_TEST_DISABLE = 103;
@@ -103,6 +104,7 @@ message SystemStatusResponseParam {
     uint32 battery_percent = 1;
     bool charge_power = 2;
     uint32 uptime_sec = 3;
+    uint32 reset_reason = 4;
 }
 
 message SensingStartCommandParam {
@@ -198,6 +200,10 @@ message SimulateFaultCommandParam {
     SimulateFaultType fault = 1;
 }
 
+message FaultGetInfoResponseParam {
+    FaultInfo fault_info = 1;
+}
+
 message Request {
     Command command = 1;
     oneof param {
@@ -238,6 +244,7 @@ message Response {
         UploadStartResponseParam upload_start = 31;
         SensingStartResponseParam sensing_start = 32;
         RecordingGetCountResponseParam recording_get_count = 33;
+        FaultGetInfoResponseParam fault_get_info = 34;
     }
 }
 
@@ -470,6 +477,7 @@ message RecordingPage {
         MotionSamples motion = 4;
         AFE4900Samples afe4900 = 5;
         AD5940Samples ad5940 = 6;
+        EnvironmentSamples environment = 7;
     }
 }
 
@@ -479,6 +487,84 @@ message TimestampTestMessage {
 
 enum SimulateFaultType {
     SIMULATEFAULTTYPE_UNDEFINED = 0;
-    HUNG_THREAD = 1;
+    SIM_HUNG_TASK = 1;
+    SIM_APP_ERROR = 2;
+    SIM_HARD_FAULT = 3;
+    SIM_SD_ASSERT = 4;
+    SIM_INVALID_MEM_ACC = 5;
+    SIM_HUNG_ISR = 6;
+}
+
+enum FaultType {
+    NO_FAULT = 0;
+    SD_ASSERT = 1;
+    APP_MEMACC = 2;
+    APP_ERROR = 3;
+    HARD_FAULT = 4;
+    WATCHDOG = 5;
+    WATCHDOG_TASK = 6;
+}
+
+message FaultAppError {
+    string file_name = 1;
+    uint32 line_number = 2;
+    uint32 error_code = 3;
+}
+
+message FaultHardFault {
+    uint32 r0 = 1;
+    uint32 r1 = 2;
+    uint32 r2 = 3;
+    uint32 r3 = 4;
+    uint32 r12 = 5;
+    uint32 lr = 6;
+    uint32 pc = 7;
+    uint32 psr = 8;
+    uint32 cfsr = 9;
+    uint32 hfsr = 10;
+    uint32 mmfar = 11;
+    uint32 bfar = 12;
+}
+
+message FaultSdAssert {
+    uint32 pc = 1;
+}
+
+message FaultMemAcc {
+    uint32 pc = 1;
+    uint32 address = 2;
+}
+
+message FaultWatchdog {
+    uint32 r0 = 1;
+    uint32 r1 = 2;
+    uint32 r2 = 3;
+    uint32 r3 = 4;
+    uint32 r12 = 5;
+    uint32 lr = 6;
+    uint32 pc = 7;
+    uint32 psr = 8;
+    uint32 icsr = 9;
+}
+
+message FaultWatchdogTask {
+    string task_name = 1;
+    uint32 lr = 2;
+    uint32 pc = 3;
+    uint32 blocking_queue = 4;
+    bool blocking_on_queue_send = 5;
+}
+
+message FaultInfo {
+    FaultType type = 1;
+    uint32 timestamp = 2;
+    oneof info {
+        FaultAppError app_error = 3;
+        FaultHardFault hard_fault = 4;
+        FaultSdAssert sd_assert = 5;
+        FaultMemAcc mem_acc = 6;
+        FaultWatchdog watchdog = 7;
+        FaultWatchdogTask watchdog_task = 8;
+    }
 }
 

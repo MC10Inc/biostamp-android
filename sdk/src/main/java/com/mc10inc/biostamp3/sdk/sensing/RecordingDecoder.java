@@ -12,6 +12,7 @@ public class RecordingDecoder {
     public enum RawSamplesType {
         AD5940,
         AFE4900,
+        ENVIRONMENT,
         MOTION
     }
 
@@ -49,6 +50,14 @@ public class RecordingDecoder {
                             page.getTimestamp(), page.getSamplingPeriod(),
                             rawSampleInfo, page.getAfe4900());
                     Listener listener = listeners.get(RawSamplesType.AFE4900);
+                    if (listener != null) {
+                        listener.handleRawSamples(samples);
+                    }
+                } else if (page.hasEnvironment()) {
+                    RawSamples samples = new EnvironmentSamples(
+                            page.getTimestamp(), page.getSamplingPeriod(),
+                            rawSampleInfo, page.getEnvironment());
+                    Listener listener = listeners.get(RawSamplesType.ENVIRONMENT);
                     if (listener != null) {
                         listener.handleRawSamples(samples);
                     }

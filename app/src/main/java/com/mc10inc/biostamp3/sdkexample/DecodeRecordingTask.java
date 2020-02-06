@@ -36,6 +36,9 @@ public class DecodeRecordingTask extends AsyncTask<Void, Void, Void> {
             if (recordingInfo.getSensorConfig().hasAfe4900()) {
                 decodeAfe4900(zip);
             }
+            if (recordingInfo.getSensorConfig().hasEnvironment()) {
+                decodeEnvironment(zip);
+            }
         } catch (IOException e) {
             Timber.e(e);
         }
@@ -66,6 +69,7 @@ public class DecodeRecordingTask extends AsyncTask<Void, Void, Void> {
             }
         });
         decoder.decode();
+        bos.flush();
         zip.closeEntry();
     }
 
@@ -108,6 +112,34 @@ public class DecodeRecordingTask extends AsyncTask<Void, Void, Void> {
             }
         });
         decoder.decode();
+        bos.flush();
+        zip.closeEntry();
+    }
+
+    private void decodeEnvironment(ZipOutputStream zip) throws IOException {
+        Timber.i("Writing environment.csv");
+        ZipEntry entry = new ZipEntry("environment.csv");
+        zip.putNextEntry(entry);
+        OutputStream bos = new BufferedOutputStream(zip);
+
+        RecordingDecoder decoder = new RecordingDecoder(recordingInfo);
+        bos.write("pascals,temperature_c\n".getBytes(StandardCharsets.US_ASCII));
+        decoder.setListener(RecordingDecoder.RawSamplesType.ENVIRONMENT, samples -> {
+            try {
+                for (int i = 0; i < samples.getSize(); i++) {
+                    NumberWriter.write(samples.getTimestamp(i), 3, bos);
+                    bos.write(',');
+                    NumberWriter.write(samples.getValue(RawSamples.ColumnType.PASCALS, i), 0, bos);
+                    bos.write(',');
+                    NumberWriter.write(samples.getValue(RawSamples.ColumnType.TEMPERATURE, i), 0, bos);
+                    bos.write('\n');
+                }
+            } catch (IOException e) {
+                Timber.e(e);
+            }
+        });
+        decoder.decode();
+        bos.flush();
         zip.closeEntry();
     }
 
@@ -163,6 +195,7 @@ public class DecodeRecordingTask extends AsyncTask<Void, Void, Void> {
             }
         });
         decoder.decode();
+        bos.flush();
         zip.closeEntry();
     }
 }

@@ -56,7 +56,10 @@ public class DownloadRecording extends Task<Void> {
                         .setFirstPage(pageNum)
                         .setRecordingId(recordingInfo.getRecordingId()));
                 try {
-                    latch.await(5, TimeUnit.SECONDS);
+                    boolean gotPages = latch.await(5, TimeUnit.SECONDS);
+                    if (!gotPages) {
+                        throw new BleException("Timeout waiting for recording page data");
+                    }
                 } catch (InterruptedException e) {
                     throw new BleException("Timeout waiting for recording page data");
                 }
