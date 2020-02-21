@@ -27,6 +27,9 @@ import butterknife.OnClick;
 import timber.log.Timber;
 
 public class SensingFragment extends BaseFragment {
+    @BindView(R.id.annotationText)
+    TextView annotationText;
+
     @BindView(R.id.enableRecordingCheckBox)
     CheckBox enableRecordingCheckBox;
 
@@ -110,5 +113,37 @@ public class SensingFragment extends BaseFragment {
     @OnCheckedChanged(R.id.enableRecordingCheckBox) void enableRecordingChanged(boolean enabled) {
         maxDurationText.setEnabled(enabled);
         metadataText.setEnabled(enabled);
+    }
+
+    @SuppressLint("DefaultLocale")
+    @OnClick(R.id.annotateButton) void annotateButton() {
+        BioStamp s = viewModel.getSensor();
+        if (s == null) {
+            return;
+        }
+
+        String annoText = annotationText.getText().toString();
+        if (annoText.length() < 1) {
+            errorPopup("Annotation text may not be empty");
+            return;
+        }
+
+        byte[] annoData = annoText.getBytes(StandardCharsets.UTF_8);
+        if (annoData.length > s.getRecordingMetadataMaxSize()) {
+            errorPopup(String.format(
+                    "Annotation is too large (%d bytes). Maximum size is %d bytes.",
+                    annoData.length,
+                    s.getAnnotationDataMaxSize()
+            ));
+            return;
+        }
+
+        s.annotate(annoData, (error, result) -> {
+            if (error == null) {
+                Timber.i("Created annotation at time %.3f", result);
+            } else {
+                Timber.e(error);
+            }
+        });
     }
 }

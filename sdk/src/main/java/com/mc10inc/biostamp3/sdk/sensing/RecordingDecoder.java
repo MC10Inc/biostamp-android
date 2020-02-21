@@ -16,15 +16,24 @@ public class RecordingDecoder {
         MOTION
     }
 
+    public interface AnnotationListener {
+        void handleAnnotation(RecordingAnnotation annotation);
+    }
+
     public interface Listener {
         void handleRawSamples(RawSamples samples);
     }
 
     private RecordingInfo recordingInfo;
+    private AnnotationListener annotationListener;
     private Map<RawSamplesType, Listener> listeners = new EnumMap<>(RawSamplesType.class);
 
     public RecordingDecoder(RecordingInfo recordingInfo) {
         this.recordingInfo = recordingInfo;
+    }
+
+    public void setAnnotationListener(AnnotationListener annotationListener) {
+        this.annotationListener = annotationListener;
     }
 
     public void setListener(RawSamplesType type, Listener listener) {
@@ -68,6 +77,12 @@ public class RecordingDecoder {
                     Listener listener = listeners.get(RawSamplesType.MOTION);
                     if (listener != null) {
                         listener.handleRawSamples(samples);
+                    }
+                } else if (page.hasAnnotation()) {
+                    if (annotationListener != null) {
+                        double ts = page.getTimestamp() * rawSampleInfo.getTimestampScale();
+                        byte[] data = page.getAnnotation().getAnnotationData().toByteArray();
+                        annotationListener.handleAnnotation(new RecordingAnnotation(ts, data));
                     }
                 }
             }

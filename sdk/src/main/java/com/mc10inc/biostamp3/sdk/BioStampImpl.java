@@ -180,6 +180,9 @@ public class BioStampImpl implements BioStamp {
     @Override
     public void startSensing(SensorConfig sensorConfig, int maxDuration, byte[] metadata,
                              Listener<Void> listener) {
+        if (metadata != null && metadata.length > getRecordingMetadataMaxSize()) {
+            throw new IllegalArgumentException("Metadata is too long");
+        }
         executeTask(new Task<Void>(this, listener) {
             @Override
             public void doTask() {
@@ -357,6 +360,31 @@ public class BioStampImpl implements BioStamp {
                 }
             }
         });
+    }
+
+    @Override
+    public void annotate(byte[] annotationData, Listener<Double> listener) {
+        if (annotationData.length > getAnnotationDataMaxSize()) {
+            throw new IllegalArgumentException("Annotation data is too long");
+        }
+        executeTask(new Task<Double>(this, listener) {
+            @Override
+            public void doTask() {
+                try {
+                    Brc3.AnnotateResponseParam resp = Request.annotate.execute(ble,
+                            Brc3.AnnotateCommandParam.newBuilder()
+                                    .setAnnotationData(ByteString.copyFrom(annotationData)));
+                    success(resp.getTimestamp());
+                } catch (BleException e) {
+                    error(e);
+                }
+            }
+        });
+    }
+
+    @Override
+    public int getAnnotationDataMaxSize() {
+        return 220;
     }
 
     @Override

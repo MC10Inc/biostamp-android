@@ -82,9 +82,33 @@
         android:id="@+id/maxDurationLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="Maximum duration (sec)"
         app:layout_constraintBottom_toBottomOf="@+id/maxDurationText"
         app:layout_constraintStart_toStartOf="@+id/metadataLabel"
         app:layout_constraintTop_toTopOf="@+id/maxDurationText" />
+
+    <EditText
+        android:id="@+id/annotationText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:ems="10"
+        android:gravity="start|top"
+        android:inputType="textMultiLine"
+        app:layout_constraintEnd_toStartOf="@+id/annotateButton"
+        app:layout_constraintStart_toStartOf="@+id/maxDurationLabel"
+        app:layout_constraintTop_toBottomOf="@id/sensorConfigSpinner" />
+
+    <Button
+        android:id="@+id/annotateButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="Annotate"
+        app:layout_constraintBottom_toBottomOf="@+id/annotationText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/annotationText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

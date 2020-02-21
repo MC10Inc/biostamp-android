@@ -4,12 +4,16 @@ import android.os.AsyncTask;
 
 import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
 import com.mc10inc.biostamp3.sdk.sensing.RawSamples;
+import com.mc10inc.biostamp3.sdk.sensing.RecordingAnnotation;
 import com.mc10inc.biostamp3.sdk.sensing.RecordingDecoder;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -39,6 +43,7 @@ public class DecodeRecordingTask extends AsyncTask<Void, Void, Void> {
             if (recordingInfo.getSensorConfig().hasEnvironment()) {
                 decodeEnvironment(zip);
             }
+            decodeAnnotations(zip);
         } catch (IOException e) {
             Timber.e(e);
         }
@@ -195,6 +200,33 @@ public class DecodeRecordingTask extends AsyncTask<Void, Void, Void> {
             }
         });
         decoder.decode();
+        bos.flush();
+        zip.closeEntry();
+    }
+
+    private void decodeAnnotations(ZipOutputStream zip) throws IOException {
+        List<RecordingAnnotation> annotations = new ArrayList<>();
+        RecordingDecoder decoder = new RecordingDecoder(recordingInfo);
+        decoder.setAnnotationListener(annotations::add);
+        decoder.decode();
+        if (annotations.isEmpty()) {
+            return;
+        }
+
+        Timber.i("Writing annotations.csv");
+        ZipEntry entry = new ZipEntry("annotations.csv");
+        zip.putNextEntry(entry);
+        OutputStream bos = new BufferedOutputStream(zip);
+        PrintWriter pw = new PrintWriter(bos);
+
+        pw.println("timestamp,annotation");
+        for (RecordingAnnotation annotation : annotations) {
+            pw.format("%.3f,%s\n", annotation.getTimestamp(),
+                    new String(annotation.getData(), StandardCharsets.UTF_8));
+        }
+
+        pw.flush();
+        pw.close();
         bos.flush();
         zip.closeEntry();
     }

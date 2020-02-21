@@ -125,4 +125,7 @@ public class Request<TC, TR> {
 
     public static final Request<Void, Brc3.VersionGetResponseParam> getVersion =
             new Request<>(Brc3.Command.VERSION_GET, null, Brc3.Response::getVersionGet);
+
+    public static final Request<Brc3.AnnotateCommandParam.Builder, Brc3.AnnotateResponseParam> annotate =
+            new Request<>(Brc3.Command.ANNOTATE, Brc3.Request.Builder::setAnnotate, Brc3.Response::getAnnotate);
 }
