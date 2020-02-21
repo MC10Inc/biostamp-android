@@ -35,6 +35,28 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/startSensingButton" />
 
+    <TextView
+        android:id="@+id/metadataLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Metadata"
+        app:layout_constraintBottom_toBottomOf="@+id/metadataText"
+        app:layout_constraintStart_toStartOf="@+id/enableRecordingCheckBox"
+        app:layout_constraintTop_toTopOf="@+id/metadataText" />
+
+    <EditText
+        android:id="@+id/metadataText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/metadataLabel"
+        app:layout_constraintTop_toBottomOf="@+id/enableRecordingCheckBox" />
+
     <Spinner
         android:id="@+id/sensorConfigSpinner"
         android:layout_width="wrap_content"
@@ -43,6 +65,26 @@
         android:layout_marginTop="8dp"
         android:spinnerMode="dialog"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/enableRecordingCheckBox" />
+        app:layout_constraintTop_toBottomOf="@+id/maxDurationText" />
+
+    <EditText
+        android:id="@+id/maxDurationText"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:inputType="number"
+        app:layout_constraintStart_toEndOf="@+id/maxDurationLabel"
+        app:layout_constraintTop_toBottomOf="@+id/metadataText" />
+
+    <TextView
+        android:id="@+id/maxDurationLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Maximum duration (sec)"
+        app:layout_constraintBottom_toBottomOf="@+id/maxDurationText"
+        app:layout_constraintStart_toStartOf="@+id/metadataLabel"
+        app:layout_constraintTop_toTopOf="@+id/maxDurationText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

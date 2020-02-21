@@ -178,7 +178,8 @@ public class BioStampImpl implements BioStamp {
     }
 
     @Override
-    public void startSensing(SensorConfig sensorConfig, Listener<Void> listener) {
+    public void startSensing(SensorConfig sensorConfig, int maxDuration, byte[] metadata,
+                             Listener<Void> listener) {
         executeTask(new Task<Void>(this, listener) {
             @Override
             public void doTask() {
@@ -186,8 +187,15 @@ public class BioStampImpl implements BioStamp {
                     double ts = System.currentTimeMillis() / 1000.0;
                     Request.setTime.execute(ble, Brc3.TimeSetCommandParam.newBuilder()
                             .setTimestamp(ts));
-                    Request.startSensing.execute(ble, Brc3.SensingStartCommandParam.newBuilder()
-                            .setConfig(sensorConfig.getMsg()));
+                    Brc3.SensingStartCommandParam.Builder ssb = Brc3.SensingStartCommandParam.newBuilder()
+                            .setConfig(sensorConfig.getMsg());
+                    if (maxDuration > 0) {
+                        ssb.setMaxDuration(maxDuration);
+                    }
+                    if (metadata != null) {
+                        ssb.setMetadata(ByteString.copyFrom(metadata));
+                    }
+                    Request.startSensing.execute(ble, ssb);
                     success(null);
                 } catch (BleException e) {
                     error(e);
@@ -349,6 +357,11 @@ public class BioStampImpl implements BioStamp {
                 }
             }
         });
+    }
+
+    @Override
+    public int getRecordingMetadataMaxSize() {
+        return 128;
     }
 
     private class SensorThread extends Thread {

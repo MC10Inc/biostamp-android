@@ -23,7 +23,8 @@ public interface BioStamp {
 
     <TC, TR> void execute(Request<TC, TR> request, TC param, Listener<TR> listener);
 
-    void startSensing(SensorConfig sensorConfig, Listener<Void> listener);
+    void startSensing(SensorConfig sensorConfig, int maxDuration, byte[] metadata,
+                      Listener<Void> listener);
 
     void stopSensing(Listener<Void> listener);
 
@@ -52,6 +53,8 @@ public interface BioStamp {
     void loadFirmwareImage(Listener<Void> listener);
 
     void reset(Listener<Void> listener);
+
+    int getRecordingMetadataMaxSize();
 
     enum State {
         DISCONNECTED,
