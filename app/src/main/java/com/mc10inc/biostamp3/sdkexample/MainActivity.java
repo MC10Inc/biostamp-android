@@ -20,6 +20,7 @@ import com.mc10inc.biostamp3.sdkexample.streaming.StreamingFragment;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -93,58 +94,58 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private static class PagesAdapter extends FragmentPagerAdapter {
+        private static class Page {
+            private interface FragmentConstructor {
+                Fragment construct();
+            }
+
+            FragmentConstructor constructor;
+            String title;
+
+            Page(FragmentConstructor constructor, String title) {
+                this.constructor = constructor;
+                this.title = title;
+            }
+        }
+
+        private final List<Page> pages;
+
         PagesAdapter(FragmentManager fm) {
-            super(fm);
+            super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+
+            pages = new ArrayList<>();
+            pages.add(new Page(ScanFragment::new, "Scan"));
+            pages.add(new Page(SensorsFragment::new, "Sensors"));
+            pages.add(new Page(ControlsFragment::new, "Controls"));
+            pages.add(new Page(SensingFragment::new, "Sensing"));
+            pages.add(new Page(StreamingFragment::new, "Streaming"));
+            pages.add(new Page(DownloadFragment::new, "Download"));
+            pages.add(new Page(RecordingsFragment::new, "Recordings"));
         }
 
         @NotNull
         @Override
         public Fragment getItem(int position) {
-            switch (position) {
-                case 0:
-                    return new ScanFragment();
-                case 1:
-                    return new SensorsFragment();
-                case 2:
-                    return new ControlsFragment();
-                case 3:
-                    return new SensingFragment();
-                case 4:
-                    return new StreamingFragment();
-                case 5:
-                    return new DownloadFragment();
-                case 6:
-                default:
-                    return new RecordingsFragment();
+            if (position < pages.size()) {
+                return pages.get(position).constructor.construct();
+            } else {
+                return pages.get(0).constructor.construct();
             }
         }
 
         @Nullable
         @Override
         public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return "Scan";
-                case 1:
-                    return "Sensors";
-                case 2:
-                    return "Controls";
-                case 3:
-                    return "Sensing";
-                case 4:
-                    return "Streaming";
-                case 5:
-                    return "Download";
-                case 6:
-                    return "Recordings";
-                default:
-                    return null;
+            if (position < pages.size()) {
+                return pages.get(position).title;
+            } else {
+                return null;
             }
         }
 
         @Override
         public int getCount() {
-            return 7;
+            return pages.size();
         }
     }
 }
