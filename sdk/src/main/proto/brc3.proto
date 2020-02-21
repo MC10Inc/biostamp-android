@@ -37,6 +37,8 @@ enum Command {
     RECORDING_GET_COUNT = 53;
     RECORDING_CLEAR_OLDEST = 54;
     FAULT_GET_INFO = 55;
+    DEBUG_RTOS_GET_INFO = 56;
+    ANNOTATE = 57;
     TEST_DATA = 101;
     BLINK_LEDS = 102;
     TIMESTAMP_TEST_DISABLE = 103;
@@ -60,6 +62,7 @@ enum ErrorCode {
     FIRMWARE_IMAGE_INCOMPATIBLE = 12;
     FIRMWARE_IMAGE_INVALID = 13;
     RECORDING_IN_PROGRESS = 14;
+    RECORDING_NOT_IN_PROGRESS = 15;
 }
 
 message FlashEraseBlockCommandParam {
@@ -109,9 +112,15 @@ message SystemStatusResponseParam {
 
 message SensingStartCommandParam {
     SensorConfig config = 1;
+    uint32 max_duration = 2;
+    bytes metadata = 3;
 }
 
 message SensingStartResponseParam {
+    uint32 recording_id = 1;
+}
+
+message SensingStopResponseParam {
     uint32 recording_id = 1;
 }
 
@@ -169,6 +178,7 @@ message SensingGetInfoResponseParam {
     bool enabled = 1;
     SensorConfig sensor_config = 2;
     uint32 timestamp_start = 3;
+    uint32 recording_id = 4;
 }
 
 message RecordingGetFreeSpaceResponseParam {
@@ -204,6 +214,20 @@ message FaultGetInfoResponseParam {
     FaultInfo fault_info = 1;
 }
 
+message DebugRtosGetInfoResponseParam {
+    repeated DebugRtosTask tasks = 1;
+    uint32 heap_free_space = 2;
+}
+
+message AnnotateCommandParam {
+    bytes annotation_data = 1;
+    double override_timestamp = 2;
+}
+
+message AnnotateResponseParam {
+    double timestamp = 1;
+}
+
 message Request {
     Command command = 1;
     oneof param {
@@ -223,6 +247,7 @@ message Request {
         TimesyncRxEnableCommandParam timesync_rx_enable = 114;
         AFE4900DynamicConfigCommandParam afe4900_dynamic_config = 115;
         SimulateFaultCommandParam simulate_fault = 116;
+        AnnotateCommandParam annotate = 117;
     }
 }
 
@@ -245,6 +270,9 @@ message Response {
         SensingStartResponseParam sensing_start = 32;
         RecordingGetCountResponseParam recording_get_count = 33;
         FaultGetInfoResponseParam fault_get_info = 34;
+        DebugRtosGetInfoResponseParam debug_rtos_get_info = 35;
+        SensingStopResponseParam sensing_stop = 36;
+        AnnotateResponseParam annotate = 37;
     }
 }
 
@@ -255,6 +283,10 @@ message TestDataOne {
 message TestDataTwo {
     uint32 foo = 200;
     bytes my_data_two = 201;
+}
+
+message Annotation {
+    bytes annotation_data = 1;
 }
 
 message MotionSamples {
@@ -459,6 +491,7 @@ message RecordingInfo {
     SensorConfig sensor_config = 5;
     RawDataInfo raw_data_info = 8;
     bool in_progress = 7;
+    bytes metadata = 9;
 }
 
 message RawDataInfo {
@@ -478,6 +511,7 @@ message RecordingPage {
         AFE4900Samples afe4900 = 5;
         AD5940Samples ad5940 = 6;
         EnvironmentSamples environment = 7;
+        Annotation annotation = 8;
     }
 }
 
@@ -493,6 +527,8 @@ enum SimulateFaultType {
     SIM_SD_ASSERT = 4;
     SIM_INVALID_MEM_ACC = 5;
     SIM_HUNG_ISR = 6;
+    SIM_MAIN_STACK_OVERFLOW = 7;
+    SIM_TASK_STACK_OVERFLOW = 8;
 }
 
 enum FaultType {
@@ -503,6 +539,7 @@ enum FaultType {
     HARD_FAULT = 4;
     WATCHDOG = 5;
     WATCHDOG_TASK = 6;
+    TASK_STACK_OVERFLOW = 7;
 }
 
 message FaultAppError {
@@ -555,6 +592,10 @@ message FaultWatchdogTask {
     bool blocking_on_queue_send = 5;
 }
 
+message FaultTaskStackOverflow {
+    string task_name = 1;
+}
+
 message FaultInfo {
     FaultType type = 1;
     uint32 timestamp = 2;
@@ -565,6 +606,12 @@ message FaultInfo {
         FaultMemAcc mem_acc = 6;
         FaultWatchdog watchdog = 7;
         FaultWatchdogTask watchdog_task = 8;
+        FaultTaskStackOverflow task_stack_overflow = 9;
     }
+}
+
+message DebugRtosTask {
+    string task_name = 1;
+    uint32 stack_high_water_mark = 2;
 }
 
