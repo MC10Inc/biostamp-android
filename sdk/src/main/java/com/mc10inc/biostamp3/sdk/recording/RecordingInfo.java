@@ -68,6 +68,10 @@ public class RecordingInfo implements RecordingKey, Parcelable {
         return msg.getInProgress();
     }
 
+    public byte[] getMetadata() {
+        return msg.getMetadata().toByteArray();
+    }
+
     public Brc3.RecordingInfo getMsg() {
         return msg;
     }

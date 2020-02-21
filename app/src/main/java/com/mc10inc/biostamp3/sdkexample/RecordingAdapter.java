@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.mc10inc.biostamp3.sdk.recording.DownloadStatus;
 import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -76,6 +77,10 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.Reco
                 rec.getDurationSec(),
                 rec.getNumPages(),
                 rec.getSensorConfig().toString()));
+        if (rec.getMetadata().length > 0) {
+            String metadataStr = new String(rec.getMetadata(), StandardCharsets.UTF_8);
+            s.append(String.format("<br />Metadata: %s", metadataStr));
+        }
         if (rec.isInProgress()) {
             s.append("<br />Recording in progress...");
         } else {
