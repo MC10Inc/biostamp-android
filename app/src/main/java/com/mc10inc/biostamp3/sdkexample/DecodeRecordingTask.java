@@ -226,7 +226,6 @@ public class DecodeRecordingTask extends AsyncTask<Void, Void, Void> {
         }
 
         pw.flush();
-        pw.close();
         bos.flush();
         zip.closeEntry();
     }
