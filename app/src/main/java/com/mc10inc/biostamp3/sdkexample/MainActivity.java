@@ -108,10 +108,12 @@ public class MainActivity extends AppCompatActivity {
                 case 2:
                     return new ControlsFragment();
                 case 3:
-                    return new StreamingFragment();
+                    return new SensingFragment();
                 case 4:
-                    return new DownloadFragment();
+                    return new StreamingFragment();
                 case 5:
+                    return new DownloadFragment();
+                case 6:
                 default:
                     return new RecordingsFragment();
             }
@@ -128,10 +130,12 @@ public class MainActivity extends AppCompatActivity {
                 case 2:
                     return "Controls";
                 case 3:
-                    return "Streaming";
+                    return "Sensing";
                 case 4:
-                    return "Download";
+                    return "Streaming";
                 case 5:
+                    return "Download";
+                case 6:
                     return "Recordings";
                 default:
                     return null;
@@ -140,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return 6;
+            return 7;
         }
     }
 }

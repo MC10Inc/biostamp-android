@@ -35,12 +35,6 @@ import timber.log.Timber;
 public class ControlsFragment extends BaseFragment {
     private static final int REQUEST_CODE_OPEN_FW = 0;
 
-    @BindView(R.id.enableRecordingCheckBox)
-    CheckBox enableRecordingCheckBox;
-
-    @BindView(R.id.sensorConfigSpinner)
-    Spinner sensorConfigSpinner;
-
     @BindView(R.id.statusText)
     TextView statusText;
 
@@ -58,12 +52,6 @@ public class ControlsFragment extends BaseFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_controls, container, false);
         unbinder = ButterKnife.bind(this, view);
-
-        SpinnerAdapter sensorConfigAdapter = new ArrayAdapter<>(getContext(),
-                R.layout.list_item_sensor_config,
-                PredefinedConfigs.getConfigs());
-        sensorConfigSpinner.setAdapter(sensorConfigAdapter);
-
         return view;
     }
 
@@ -73,33 +61,6 @@ public class ControlsFragment extends BaseFragment {
             return;
         }
         s.blinkLed((error, result) -> {
-            if (error != null) {
-                Timber.e(error);
-            }
-        });
-    }
-
-    @OnClick(R.id.startSensingButton) void startSensingButton() {
-        BioStamp s = viewModel.getSensor();
-        if (s == null) {
-            return;
-        }
-        SensorConfig sc = (SensorConfig)sensorConfigSpinner.getSelectedItem();
-        sc.setRecordingEnabled(enableRecordingCheckBox.isChecked());
-        s.startSensing(sc, (error, result) -> {
-            if (error != null) {
-                Timber.e(error);
-            }
-        });
-
-    }
-
-    @OnClick(R.id.stopSensingButton) void stopSensingButton() {
-        BioStamp s = viewModel.getSensor();
-        if (s == null) {
-            return;
-        }
-        s.stopSensing((error, result) -> {
             if (error != null) {
                 Timber.e(error);
             }
