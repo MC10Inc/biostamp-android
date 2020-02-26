@@ -48,12 +48,13 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    implementation project(':bitgatt')
     implementation 'com.jakewharton.timber:timber:4.7.1'
     implementation 'com.google.protobuf:protobuf-javalite:3.9.1'
     implementation "androidx.lifecycle:lifecycle-livedata:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
     implementation 'org.apache.commons:commons-collections4:4.4'
+
+    implementation 'com.mc10inc.biostamp:bitgatt:0.0.1-1a7b77f'
 }
 
 protobuf {

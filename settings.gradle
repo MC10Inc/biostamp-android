@@ -1,3 +1,2 @@
-include ':app', ':sdk', ':bitgatt'
-project(':bitgatt').projectDir = new File('sdk/bitgatt')
+include ':app', ':sdk'
 rootProject.name='BioStamp3SDK'
