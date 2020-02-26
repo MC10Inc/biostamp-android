@@ -1,3 +1,0 @@
-[submodule "sdk/bitgatt"]
-	path = sdk/bitgatt
-	url = https://github.com/Fitbit/bitgatt
