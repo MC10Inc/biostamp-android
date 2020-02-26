@@ -1,6 +1,3 @@
-apply plugin: 'com.android.library'
-apply plugin: 'com.google.protobuf'
-
 buildscript {
     repositories {
         google()
@@ -11,6 +8,16 @@ buildscript {
     }
 }
 
+plugins {
+    id 'org.ajoberstar.grgit' version '4.0.1'
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'com.google.protobuf'
+apply plugin: 'maven-publish'
+
+def libraryVersionName = "0.0.1-${grgit.head().getAbbreviatedId()}"
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
@@ -19,8 +26,8 @@ android {
     defaultConfig {
         minSdkVersion 24
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        versionCode grgit.log().size()
+        versionName libraryVersionName
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
@@ -67,6 +74,25 @@ protobuf {
                 java {
                     option "lite"
                 }
+            }
+        }
+    }
+}
+
+task sourceJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier "sources"
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            debug(MavenPublication) {
+                from components.debug
+                groupId = 'com.mc10inc.biostamp3'
+                version = libraryVersionName
+                artifactId = 'sdk'
+                artifact sourceJar
             }
         }
     }
