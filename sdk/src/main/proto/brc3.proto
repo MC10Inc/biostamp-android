@@ -85,6 +85,7 @@ message TestDataCommandParam {
 
 message PressureGetResponseParam {
     double pascals = 1;
+    double external_temperature_c = 2;
 }
 
 message TemperatureGetResponseParam {
@@ -317,6 +318,7 @@ message AFE4900Samples {
 message EnvironmentSamples {
     repeated float pascals = 2;
     repeated float temperature_c = 3;
+    repeated float external_temperature_c = 4;
 }
 
 message AD5940Samples {

@@ -21,6 +21,7 @@ public abstract class RawSamples {
         PPG,
         AMBIENT,
         PASCALS,
+        EXTERNAL_TEMPERATURE,
         TEMPERATURE,
         Z_MAG,
         Z_PHASE

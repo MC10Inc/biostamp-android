@@ -21,6 +21,8 @@ public class EnvironmentSamples extends RawSamples {
         switch (columnType) {
             case PASCALS:
                 return samples.getPascals(index);
+            case EXTERNAL_TEMPERATURE:
+                return samples.getExternalTemperatureC(index);
             case TEMPERATURE:
                 return samples.getTemperatureC(index);
             default:

@@ -128,7 +128,7 @@ public class DecodeRecordingTask extends AsyncTask<Void, Void, Void> {
         OutputStream bos = new BufferedOutputStream(zip);
 
         RecordingDecoder decoder = new RecordingDecoder(recordingInfo);
-        bos.write("pascals,temperature_c\n".getBytes(StandardCharsets.US_ASCII));
+        bos.write("pascals,temperature_c,external_temperature_c\n".getBytes(StandardCharsets.US_ASCII));
         decoder.setListener(RecordingDecoder.RawSamplesType.ENVIRONMENT, samples -> {
             try {
                 for (int i = 0; i < samples.getSize(); i++) {
@@ -137,6 +137,8 @@ public class DecodeRecordingTask extends AsyncTask<Void, Void, Void> {
                     NumberWriter.write(samples.getValue(RawSamples.ColumnType.PASCALS, i), 0, bos);
                     bos.write(',');
                     NumberWriter.write(samples.getValue(RawSamples.ColumnType.TEMPERATURE, i), 0, bos);
+                    bos.write(',');
+                    NumberWriter.write(samples.getValue(RawSamples.ColumnType.EXTERNAL_TEMPERATURE, i), 3, bos);
                     bos.write('\n');
                 }
             } catch (IOException e) {
