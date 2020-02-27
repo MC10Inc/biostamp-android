@@ -84,6 +84,16 @@ task sourceJar(type: Jar) {
     classifier "sources"
 }
 
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.sourceFiles
+    classpath += project.files(project.android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    from javadoc.destinationDir
+    classifier "javadoc"
+}
+
 afterEvaluate {
     publishing {
         publications {
@@ -93,6 +103,7 @@ afterEvaluate {
                 version = libraryVersionName
                 artifactId = 'sdk'
                 artifact sourceJar
+                artifact javadocJar
             }
         }
     }
