@@ -57,6 +57,10 @@ public class SensorsFragment extends BaseFragment {
     @OnClick(R.id.connectButton) void connectButton() {
         BioStamp sensor = sensorAdapter.getSelectedItem();
         if (sensor != null) {
+            if (sensor.getState() != BioStamp.State.DISCONNECTED) {
+                Timber.i("Cannot connect, state is %s", sensor.getState());
+                return;
+            }
             sensor.connect(new BioStamp.ConnectListener() {
                 @Override
                 public void connected() {
