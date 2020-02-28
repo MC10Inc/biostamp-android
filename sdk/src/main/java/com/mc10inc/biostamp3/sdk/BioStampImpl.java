@@ -3,6 +3,8 @@ package com.mc10inc.biostamp3.sdk;
 import android.os.Handler;
 import android.os.Looper;
 
+import androidx.lifecycle.Observer;
+
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.mc10inc.biostamp3.sdk.ble.SensorBle;
@@ -19,6 +21,7 @@ import com.mc10inc.biostamp3.sdk.task.Task;
 import com.mc10inc.biostamp3.sdk.task.UploadFirmware;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import timber.log.Timber;
@@ -28,12 +31,15 @@ public class BioStampImpl implements BioStamp {
         void handleRecordingPages(List<Brc3.RecordingPage> recordingPages);
     }
 
+    private static final int SCAN_FOR_SENSOR_IN_RANGE_TIMEOUT = 10000;
+
     private BioStampManager bioStampManager;
     private SensorBle ble;
     private ConnectListener connectListener;
     private volatile Task currentTask;
     private Handler handler = new Handler(Looper.getMainLooper());
     private volatile RecordingPagesListener recordingPagesListener;
+    private boolean scanningToConnect;
     private SensorThread sensorThread;
     private String serial;
     private volatile State state;
@@ -66,13 +72,51 @@ public class BioStampImpl implements BioStamp {
         if (state != State.DISCONNECTED) {
             throw new IllegalStateException("Not disconnected");
         }
+        setState(BioStamp.State.CONNECTING);
+        this.connectListener = connectListener;
         SensorBle newBle = bioStampManager.getSensorBle(serial);
         if (newBle == null) {
-            handler.post(connectListener::connectFailed);
-            return;
+            Timber.i("Scanning for sensor %s to connect", serial);
+            handler.postDelayed(scanTimeoutRunnable, SCAN_FOR_SENSOR_IN_RANGE_TIMEOUT);
+            bioStampManager.getSensorsInRangeLiveData().observeForever(scanObserver);
+            scanningToConnect = true;
+        } else {
+            ble = newBle;
+            connectWithSensorBle();
         }
-        ble = newBle;
-        this.connectListener = connectListener;
+    }
+
+    private final Observer<Map<String, ScannedSensorStatus>> scanObserver = new Observer<Map<String, ScannedSensorStatus>>() {
+        @Override
+        public void onChanged(Map<String, ScannedSensorStatus> sensorsInRange) {
+            if (!scanningToConnect) {
+                return;
+            }
+            if (sensorsInRange.containsKey(serial)) {
+                SensorBle newBle = bioStampManager.getSensorBle(serial);
+                if (newBle == null) {
+                    Timber.e("Scan reported sensor %s in range but could not get SensorBle", serial);
+                    return;
+                }
+                Timber.i("Found sensor %s during scan", serial);
+                ble = newBle;
+                handler.removeCallbacks(scanTimeoutRunnable);
+                scanningToConnect = false;
+                bioStampManager.getSensorsInRangeLiveData().removeObserver(scanObserver);
+                connectWithSensorBle();
+            }
+        }
+    };
+
+    private final Runnable scanTimeoutRunnable = () -> {
+        Timber.i("Timed out scanning for sensor %s", serial);
+        scanningToConnect = false;
+        bioStampManager.getSensorsInRangeLiveData().removeObserver(scanObserver);
+        setState(State.DISCONNECTED);
+        handler.post(connectListener::connectFailed);
+    };
+
+    private void connectWithSensorBle() {
         taskQueue = new LinkedBlockingQueue<>();
         sensorThread = new SensorThread();
         sensorThread.start();
@@ -395,8 +439,7 @@ public class BioStampImpl implements BioStamp {
     private class SensorThread extends Thread {
         @Override
         public void run() {
-            Timber.i("Connecting to sensor");
-            setState(BioStamp.State.CONNECTING);
+            Timber.i("Connecting to sensor %s", serial);
             try {
                 ble.connect(BioStampImpl.this::handleDisconnect, BioStampImpl.this::handleData);
                 Timber.i("Connected to sensor %s", ble.getSerial());
