@@ -64,6 +64,7 @@ public class BioStampManager {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Map<String, ScannedSensorStatus> sensorsInRange =
             new PassiveExpiringMap<>(SENSOR_IN_RANGE_TTL, new HashMap<>());
+    private final SensorsInRangeLiveData sensorsInRangeLiveData = new SensorsInRangeLiveData();
     private final ThroughputStats throughputStats = new ThroughputStats();
 
     private BioStampManager(Context context) {
@@ -98,18 +99,8 @@ public class BioStampManager {
                 0);
     }
 
-    public void startScanning() {
-        gatt.startHighPriorityScan(applicationContext);
-    }
-
-    public void stopScanning() {
-        gatt.cancelHighPriorityScan(applicationContext);
-    }
-
-    public Map<String, ScannedSensorStatus> getSensorsInRange() {
-        synchronized (sensorsInRange) {
-            return new HashMap<>(sensorsInRange);
-        }
+    public LiveData<Map<String, ScannedSensorStatus>> getSensorsInRangeLiveData() {
+        return sensorsInRangeLiveData;
     }
 
     public BioStamp getBioStamp(String serial) {
@@ -256,4 +247,71 @@ public class BioStampManager {
 
         }
     };
+
+    private class SensorsInRangeLiveData extends MutableLiveData<Map<String, ScannedSensorStatus>> {
+        private static final int SCAN_FAILED_RETRY_DELAY = 5000;
+        private static final int STOP_SCAN_DELAY = 30000;
+        private static final int UPDATE_RATE = 250;
+
+        private boolean scanInProgress;
+
+        SensorsInRangeLiveData() {
+            super(Collections.emptyMap());
+        }
+
+        private final Runnable updateRunnable = new Runnable() {
+            @Override
+            public void run() {
+                synchronized (sensorsInRange) {
+                    postValue(new HashMap<>(sensorsInRange));
+                }
+                handler.postDelayed(updateRunnable, UPDATE_RATE);
+            }
+        };
+
+        private final Runnable stopScanRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!scanInProgress) {
+                    return;
+                }
+                Timber.i("Stopping BLE scan for sensors after timeout");
+                gatt.cancelHighPriorityScan(applicationContext);
+                scanInProgress = false;
+            }
+        };
+
+        private void startScan() {
+            if (scanInProgress) {
+                return;
+            }
+            if (!hasActiveObservers()) {
+                return;
+            }
+            boolean started = gatt.startHighPriorityScan(applicationContext);
+            if (started) {
+                Timber.i("Started BLE scan for sensors");
+                scanInProgress = true;
+            } else {
+                Timber.e("Start BLE scan failed; will retry");
+                handler.postDelayed(this::startScan, SCAN_FAILED_RETRY_DELAY);
+            }
+        }
+
+        @Override
+        protected void onActive() {
+            super.onActive();
+            handler.removeCallbacks(updateRunnable);
+            handler.removeCallbacks(stopScanRunnable);
+            handler.post(updateRunnable);
+            startScan();
+        }
+
+        @Override
+        protected void onInactive() {
+            super.onInactive();
+            handler.removeCallbacks(updateRunnable);
+            handler.postDelayed(stopScanRunnable, STOP_SCAN_DELAY);
+        }
+    }
 }
