@@ -161,7 +161,10 @@ public class BioStampManager {
                     biostamps.put(s, new BioStampImpl(this, s));
                 }
                 for (String s : toRemove) {
-                    // TODO Disconnect if connected
+                    BioStampImpl toDisconnect = biostamps.get(s);
+                    if (toDisconnect != null) {
+                        toDisconnect.disconnect();
+                    }
                     biostamps.remove(s);
                 }
             }
