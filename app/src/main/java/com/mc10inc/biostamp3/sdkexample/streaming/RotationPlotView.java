@@ -62,7 +62,7 @@ public class RotationPlotView extends FrameLayout implements StreamingPlot {
     }
 
     @Override
-    public void handleRawSamples(RawSamples samples) {
+    public boolean handleRawSamples(RawSamples samples) {
         int i = samples.getSize() - 1;
         Quaternion quat = new Quaternion(
                 samples.getValue(RawSamples.ColumnType.QUAT_A, i),
@@ -70,5 +70,7 @@ public class RotationPlotView extends FrameLayout implements StreamingPlot {
                 samples.getValue(RawSamples.ColumnType.QUAT_C, i),
                 samples.getValue(RawSamples.ColumnType.QUAT_D, i));
         renderer.update(quat);
+
+        return true;
     }
 }

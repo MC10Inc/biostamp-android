@@ -76,7 +76,12 @@ public class Streaming {
 
         Set<StreamingListener> listenersToCall = Objects.requireNonNull(listeners.get(type));
         for (StreamingListener l : listenersToCall) {
-            handler.post(() -> l.handleRawSamples(rawSamples));
+            handler.post(() -> {
+                boolean continueListening = l.handleRawSamples(rawSamples);
+                if (!continueListening) {
+                    listenersToCall.remove(l);
+                }
+            });
         }
     }
 

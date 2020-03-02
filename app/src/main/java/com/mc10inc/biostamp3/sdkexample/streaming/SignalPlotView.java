@@ -166,12 +166,14 @@ public class SignalPlotView extends FrameLayout implements StreamingPlot {
     }
 
     @Override
-    public void handleRawSamples(RawSamples samples) {
+    public boolean handleRawSamples(RawSamples samples) {
         for (RawSamplesDataSeries dataSeries : dataSeriesList) {
             dataSeries.update(samples);
         }
 
         plot.redraw();
+
+        return true;
     }
 
     @Override

@@ -57,7 +57,7 @@ public class EnvironmentPlotView extends LinearLayout implements StreamingPlot {
 
     @SuppressLint("DefaultLocale")
     @Override
-    public void handleRawSamples(RawSamples samples) {
+    public boolean handleRawSamples(RawSamples samples) {
         temperatureText.setText(String.format("Temperature: %.1f°C",
                 samples.getValue(RawSamples.ColumnType.TEMPERATURE, samples.getSize() - 1)));
         externalTemperatureText.setText(String.format("External Temperature: %.1f°C",
@@ -65,5 +65,7 @@ public class EnvironmentPlotView extends LinearLayout implements StreamingPlot {
                         samples.getSize() - 1)));
         pressureText.setText(String.format("Pressure: %.0f pascals",
                 samples.getValue(RawSamples.ColumnType.PASCALS, samples.getSize() - 1)));
+
+        return true;
     }
 }
