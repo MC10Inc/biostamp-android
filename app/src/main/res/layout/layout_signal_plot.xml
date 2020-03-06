@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     android:orientation="vertical">
 
     <include
@@ -11,4 +12,13 @@
         layout="@layout/streaming_xyplot"
         android:layout_width="match_parent"
         android:layout_height="240dp" />
-</FrameLayout>
+
+    <TextView
+        android:id="@+id/textUnderPlot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        android:visibility="gone"
+        tools:text="Line of text underneath the plot"
+        tools:visibility="visible" />
+</LinearLayout>

@@ -1,5 +1,6 @@
 package com.mc10inc.biostamp3.sdkexample.streaming;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
@@ -8,6 +9,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.androidplot.util.PixelUtils;
 import com.androidplot.xy.BoundaryMode;
@@ -33,7 +35,12 @@ public class SignalPlotView extends FrameLayout implements StreamingPlot {
     @BindView(R.id.plot)
     XYPlot plot;
 
+    @BindView(R.id.textUnderPlot)
+    TextView textUnderPlot;
+
     private List<RawSamplesDataSeries> dataSeriesList = new ArrayList<>();
+
+    private boolean showEdaValue;
 
     public SignalPlotView(Context context) {
         super(context);
@@ -142,6 +149,9 @@ public class SignalPlotView extends FrameLayout implements StreamingPlot {
     }
 
     private void initEda(SensorConfig sensorConfig) {
+        textUnderPlot.setVisibility(VISIBLE);
+        showEdaValue = true;
+
         genericPlotSetup(plot);
         plot.setTitle("AD5940 EDA");
 
@@ -192,11 +202,26 @@ public class SignalPlotView extends FrameLayout implements StreamingPlot {
 
         plot.redraw();
 
+        if (showEdaValue) {
+            handleEda(samples);
+        }
+
         return true;
     }
 
     @Override
     public View getView() {
         return this;
+    }
+
+    @SuppressLint("DefaultLocale")
+    private void handleEda(RawSamples samples) {
+        final double edaFreqHz = 100;
+        double zMag = samples.getValue(RawSamples.ColumnType.Z_MAG, samples.getSize() - 1);
+        double zPhase = samples.getValue(RawSamples.ColumnType.Z_PHASE, samples.getSize() - 1);
+        double zReal = zMag * Math.cos(zPhase);
+        double zImag = zMag * Math.sin(zPhase);
+        double capUf = 1 / (2 * Math.PI * edaFreqHz * zImag) * 1000000;
+        textUnderPlot.setText(String.format("R=%.0fΩ C=%.6fµF", zReal, capUf));
     }
 }
