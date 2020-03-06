@@ -17,7 +17,6 @@ import com.androidplot.xy.XYGraphWidget;
 import com.androidplot.xy.XYPlot;
 import com.mc10inc.biostamp3.sdk.sensing.RawSamples;
 import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
-import com.mc10inc.biostamp3.sdk.sensing.StreamingListener;
 import com.mc10inc.biostamp3.sdkexample.R;
 
 import java.text.NumberFormat;
@@ -68,6 +67,9 @@ public class SignalPlotView extends FrameLayout implements StreamingPlot {
                 break;
             case BIOPOTENTIAL:
                 initBiopotential(sensorConfig);
+                break;
+            case EDA:
+                initEda(sensorConfig);
                 break;
         }
     }
@@ -133,6 +135,23 @@ public class SignalPlotView extends FrameLayout implements StreamingPlot {
         int samplingPeriodUs = 1000000 / 250; // TODO Add to sensor config
         RawSamplesDataSeries series = new RawSamplesDataSeries("Voltage", samplingPeriodUs,
                 getDurationSec() * 1000000, RawSamples.ColumnType.ECG, VOLTS_TO_MV);
+        dataSeriesList.add(series);
+
+        plot.addSeries(series, getLineAndPointFormatter(Color.rgb(0, 0, 200)));
+        plot.redraw();
+    }
+
+    private void initEda(SensorConfig sensorConfig) {
+        genericPlotSetup(plot);
+        plot.setTitle("AD5940 EDA");
+
+        plot.setRangeLabel("Magnitude kΩ");
+        plot.setRangeBoundaries(0, 0, BoundaryMode.AUTO);
+        plot.setRangeStep(StepMode.SUBDIVIDE, 5);
+
+        int samplingPeriodUs = 1000000 / 4; // TODO Add to sensor config
+        RawSamplesDataSeries series = new RawSamplesDataSeries("kΩ", samplingPeriodUs,
+                getDurationSec() * 1000000, RawSamples.ColumnType.Z_MAG, 0.001);
         dataSeriesList.add(series);
 
         plot.addSeries(series, getLineAndPointFormatter(Color.rgb(0, 0, 200)));

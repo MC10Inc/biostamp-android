@@ -81,6 +81,9 @@ public class StreamingFragment extends BaseFragment implements PlotContainer.Lis
         if (sensorConfig.hasAfe4900Ecg()) {
             plotTypes.add(PlotType.BIOPOTENTIAL);
         }
+        if (sensorConfig.hasAd5940()) {
+            plotTypes.add(PlotType.EDA);
+        }
 
         CharSequence[] items = plotTypes.stream()
                 .map(Enum::toString)
@@ -113,6 +116,9 @@ public class StreamingFragment extends BaseFragment implements PlotContainer.Lis
                 break;
             case BIOPOTENTIAL:
                 addPlotAfe4900Ecg(s, sensorConfig);
+                break;
+            case EDA:
+                addPlotAd5940Eda(s, sensorConfig);
                 break;
         }
     }
@@ -177,6 +183,17 @@ public class StreamingFragment extends BaseFragment implements PlotContainer.Lis
             s.addStreamingListener(StreamingType.AFE4900, plot);
         }
         enableStreaming(s, StreamingType.AFE4900);
+    }
+
+    private void addPlotAd5940Eda(BioStamp s, SensorConfig sensorConfig) {
+        PlotKey key = new PlotKey(s.getSerial(), PlotType.EDA);
+        if (!plotContainers.containsKey(key)) {
+            SignalPlotView plot = new SignalPlotView(getContext());
+            plot.init(key, sensorConfig);
+            addPlotContainer(key, plot);
+            s.addStreamingListener(StreamingType.AD5940, plot);
+        }
+        enableStreaming(s, StreamingType.AD5940);
     }
 
     private void enableStreaming(BioStamp s, StreamingType streamingType) {
