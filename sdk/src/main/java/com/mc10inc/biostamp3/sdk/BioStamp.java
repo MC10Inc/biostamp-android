@@ -54,6 +54,8 @@ public interface BioStamp {
 
     void reset(Listener<Void> listener);
 
+    void powerOff(Listener<Void> listener);
+
     void annotate(byte[] annotationData, Listener<Double> listener);
 
     int getAnnotationDataMaxSize();

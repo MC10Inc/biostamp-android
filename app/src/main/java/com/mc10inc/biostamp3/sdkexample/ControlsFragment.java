@@ -106,6 +106,18 @@ public class ControlsFragment extends BaseFragment {
         });
     }
 
+    @OnClick(R.id.powerOffButton) void powerOffButton() {
+        BioStamp s = viewModel.getSensor();
+        if (s == null) {
+            return;
+        }
+        s.powerOff((error, result) -> {
+            if (error != null) {
+                Timber.e(error);
+            }
+        });
+    }
+
     @OnClick(R.id.loadImageButton) void loadImageButton() {
         BioStamp s = viewModel.getSensor();
         if (s == null) {

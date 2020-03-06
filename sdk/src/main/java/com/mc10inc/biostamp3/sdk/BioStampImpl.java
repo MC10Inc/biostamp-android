@@ -407,6 +407,21 @@ public class BioStampImpl implements BioStamp {
     }
 
     @Override
+    public void powerOff(Listener<Void> listener) {
+        executeTask(new Task<Void>(this, listener) {
+            @Override
+            public void doTask() {
+                try {
+                    Request.powerOff.execute(ble);
+                    success(null);
+                } catch (BleException e) {
+                    error(e);
+                }
+            }
+        });
+    }
+
+    @Override
     public void annotate(byte[] annotationData, Listener<Double> listener) {
         if (annotationData.length > getAnnotationDataMaxSize()) {
             throw new IllegalArgumentException("Annotation data is too long");
