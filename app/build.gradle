@@ -24,6 +24,16 @@ android {
     }
 }
 
+repositories {
+    maven() {
+        url = uri("https://maven.pkg.github.com/mc10inc/bitgatt")
+        credentials {
+            username = project.findProperty("gpr.user")
+            password = project.findProperty("gpr.key")
+        }
+    }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.1.0'

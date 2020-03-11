@@ -22,7 +22,6 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
 
-
     defaultConfig {
         minSdkVersion 24
         targetSdkVersion 29
@@ -46,6 +45,16 @@ android {
     }
 }
 
+repositories {
+    maven() {
+        url = uri("https://maven.pkg.github.com/mc10inc/bitgatt")
+        credentials {
+            username = project.findProperty("gpr.user")
+            password = project.findProperty("gpr.key")
+        }
+    }
+}
+
 dependencies {
     def lifecycle_version = "2.2.0"
 
@@ -61,7 +70,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
     implementation 'org.apache.commons:commons-collections4:4.4'
 
-    implementation 'com.mc10inc.biostamp:bitgatt:0.0.1-1a7b77f'
+    implementation 'com.mc10inc.biostamp:bitgatt:0.0.1-3241a53'
 }
 
 protobuf {
