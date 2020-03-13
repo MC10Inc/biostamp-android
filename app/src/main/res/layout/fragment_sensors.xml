@@ -25,15 +25,6 @@
         app:layout_constraintStart_toEndOf="@id/connectButton"
         app:layout_constraintTop_toTopOf="@+id/connectButton" />
 
-    <Button
-        android:id="@+id/deprovisionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="Deprovision"
-        app:layout_constraintStart_toEndOf="@+id/disconnectButton"
-        app:layout_constraintTop_toTopOf="@+id/connectButton" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/sensorList"
         android:layout_width="0dp"

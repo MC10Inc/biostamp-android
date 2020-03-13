@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.mc10inc.biostamp3.sdk.BioStamp;
 import com.mc10inc.biostamp3.sdk.BioStampManager;
 import com.mc10inc.biostamp3.sdk.ScannedSensorStatus;
 
@@ -65,10 +66,10 @@ public class ScanFragment extends BaseFragment {
         bs.getSensorsInRangeLiveData().removeObservers(this);
     }
 
-    @OnClick(R.id.provisionButton) void provisionButton() {
+    @OnClick(R.id.selectButton) void selectButton() {
         String serial = sensorAdapter.getSelectedItem();
         if (serial != null) {
-            bs.provisionSensor(serial);
+            BioStamp bioStamp = bs.getBioStamp(serial);
         }
     }
 
@@ -78,7 +79,7 @@ public class ScanFragment extends BaseFragment {
         sensorAdapter.setSensorSerials(serials);
     }
 
-    private class ScanSensorAdapter extends RecyclerView.Adapter<ScanSensorViewHolder> {
+    private static class ScanSensorAdapter extends RecyclerView.Adapter<ScanSensorViewHolder> {
         private int selection = RecyclerView.NO_POSITION;
         private List<String> sensorSerials = Collections.emptyList();
 
@@ -113,7 +114,7 @@ public class ScanFragment extends BaseFragment {
             }
         }
 
-        public String getSelectedItem() {
+        String getSelectedItem() {
             if (selection == RecyclerView.NO_POSITION) {
                 return null;
             } else {

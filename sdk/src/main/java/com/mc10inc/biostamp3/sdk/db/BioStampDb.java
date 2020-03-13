@@ -29,10 +29,6 @@ public class BioStampDb {
     private static final int DB_VERSION = 1;
     private static final String DB_NAME = "BioStamp.db";
 
-    private static final String CREATE_TABLE_PROVISIONED_SENSORS =
-            "CREATE TABLE IF NOT EXISTS provisioned_sensors ("
-                    + "serial TEXT PRIMARY KEY)";
-
     private static final String CREATE_TABLE_RECORDINGS =
             "CREATE TABLE IF NOT EXISTS recordings ("
                     + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -50,14 +46,13 @@ public class BioStampDb {
                     + "PRIMARY KEY(recording, page_number)) "
                     + "WITHOUT ROWID";
 
-    private class DbHelper extends SQLiteOpenHelper {
+    private static class DbHelper extends SQLiteOpenHelper {
         DbHelper(Context context) {
             super(context, DB_NAME, null, DB_VERSION);
         }
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(CREATE_TABLE_PROVISIONED_SENSORS);
             db.execSQL(CREATE_TABLE_RECORDINGS);
             db.execSQL(CREATE_TABLE_PAGES);
         }
@@ -74,7 +69,7 @@ public class BioStampDb {
         }
     }
 
-    private class DbRecInfo {
+    private static class DbRecInfo {
         final long id;
         final int numPages;
 
@@ -98,41 +93,6 @@ public class BioStampDb {
 
     public void removeRecordingUpdateListener(RecordingUpdateListener listener) {
         recordingUpdateListeners.remove(listener);
-    }
-
-    public List<ProvisionedSensor> getProvisionedSensors() {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        List<ProvisionedSensor> sensors = new ArrayList<>();
-        try (Cursor cursor = db.query("provisioned_sensors",
-                new String[]{
-                        "serial"},
-                null,
-                null,
-                null,
-                null,
-                "serial ASC")) {
-            while (cursor.moveToNext()) {
-                String serial = cursor.getString(0);
-                ProvisionedSensor sensor = new ProvisionedSensor(serial);
-                sensors.add(sensor);
-            }
-        }
-        return sensors;
-    }
-
-    public void insertProvisionedSensor(ProvisionedSensor sensor) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        cv.put("serial", sensor.getSerial());
-        db.insertWithOnConflict("provisioned_sensors", null, cv,
-                SQLiteDatabase.CONFLICT_IGNORE);
-    }
-
-    public void deleteProvisionedSensor(ProvisionedSensor sensor) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.delete("provisioned_sensors",
-                "serial = ?",
-                new String[]{sensor.getSerial()});
     }
 
     public void insertRecording(RecordingInfo recording) {
@@ -258,7 +218,7 @@ public class BioStampDb {
         }
     }
 
-    public class RecordingPagesLoader implements AutoCloseable {
+    public static class RecordingPagesLoader implements AutoCloseable {
         private Cursor cursor;
 
         RecordingPagesLoader(Cursor cursor) {

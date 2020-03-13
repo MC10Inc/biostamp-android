@@ -18,19 +18,15 @@ import com.mc10inc.biostamp3.sdk.ble.SensorBle;
 import com.mc10inc.biostamp3.sdk.ble.SensorBleBitgatt;
 import com.mc10inc.biostamp3.sdk.ble.StatusBroadcast;
 import com.mc10inc.biostamp3.sdk.db.BioStampDb;
-import com.mc10inc.biostamp3.sdk.db.ProvisionedSensor;
 
-import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.collections4.map.PassiveExpiringMap;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 import timber.log.Timber;
 
@@ -81,7 +77,6 @@ public class BioStampManager {
     };
 
     private void start() {
-        updateProvisionedSensors();
         gatt.startWithScanFilters(applicationContext, StatusBroadcast.getScanFilters(), callback);
         handler.post(updateThroughput);
     }
@@ -105,6 +100,10 @@ public class BioStampManager {
 
     public BioStamp getBioStamp(String serial) {
         synchronized (biostamps) {
+            if (!biostamps.containsKey(serial)) {
+                biostamps.put(serial, new BioStampImpl(this, serial));
+                updateBioStampLiveData();
+            }
             return biostamps.get(serial);
         }
     }
@@ -132,44 +131,6 @@ public class BioStampManager {
         }
 
         return new SensorBleBitgatt(conns.get(0));
-    }
-
-    public void provisionSensor(String sensor) {
-        dbExecutor.execute(() -> {
-            ProvisionedSensor ps = new ProvisionedSensor(sensor);
-            db.insertProvisionedSensor(ps);
-            updateProvisionedSensors();
-        });
-    }
-
-    public void deprovisionSensor(String sensor) {
-        dbExecutor.execute(() -> {
-            ProvisionedSensor ps = new ProvisionedSensor(sensor);
-            db.deleteProvisionedSensor(ps);
-            updateProvisionedSensors();
-        });
-    }
-
-    private void updateProvisionedSensors() {
-        dbExecutor.execute(() -> {
-            List<ProvisionedSensor> sensors = db.getProvisionedSensors();
-            Set<String> ps = sensors.stream().map(ProvisionedSensor::getSerial).collect(Collectors.toSet());
-            synchronized (biostamps) {
-                Set<String> toAdd = SetUtils.difference(ps, biostamps.keySet()).toSet();
-                Set<String> toRemove = SetUtils.difference(biostamps.keySet(), ps);
-                for (String s : toAdd) {
-                    biostamps.put(s, new BioStampImpl(this, s));
-                }
-                for (String s : toRemove) {
-                    BioStampImpl toDisconnect = biostamps.get(s);
-                    if (toDisconnect != null) {
-                        toDisconnect.disconnect();
-                    }
-                    biostamps.remove(s);
-                }
-            }
-            updateBioStampLiveData();
-        });
     }
 
     private void updateBioStampLiveData() {

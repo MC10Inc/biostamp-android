@@ -87,14 +87,7 @@ public class SensorsFragment extends BaseFragment {
         }
     }
 
-    @OnClick(R.id.deprovisionButton) void deprovisionButton() {
-        BioStamp sensor = sensorAdapter.getSelectedItem();
-        if (sensor != null) {
-            bs.deprovisionSensor(sensor.getSerial());
-        }
-    }
-
-    private class SensorAdapter extends RecyclerView.Adapter<SensorViewHolder> {
+    private static class SensorAdapter extends RecyclerView.Adapter<SensorViewHolder> {
         private int selection = RecyclerView.NO_POSITION;
         private List<BioStamp> sensors = Collections.emptyList();
 
@@ -142,7 +135,7 @@ public class SensorsFragment extends BaseFragment {
             notifyDataSetChanged();
         }
 
-        public BioStamp getSelectedItem() {
+        BioStamp getSelectedItem() {
             if (selection == RecyclerView.NO_POSITION) {
                 return null;
             } else {

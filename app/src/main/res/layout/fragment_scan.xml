@@ -7,15 +7,6 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/provisionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="Provision"
-        app:layout_constraintStart_toEndOf="@+id/stopButton"
-        app:layout_constraintTop_toTopOf="@+id/startButton" />
-
-    <Button
         android:id="@+id/startButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -32,6 +23,15 @@
         android:layout_marginStart="8dp"
         android:text="Stop"
         app:layout_constraintStart_toEndOf="@+id/startButton"
+        app:layout_constraintTop_toTopOf="@+id/startButton" />
+
+    <Button
+        android:id="@+id/selectButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Select"
+        app:layout_constraintStart_toEndOf="@+id/stopButton"
         app:layout_constraintTop_toTopOf="@+id/startButton" />
 
     <androidx.recyclerview.widget.RecyclerView
