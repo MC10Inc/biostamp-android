@@ -23,6 +23,7 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import timber.log.Timber;
 
 public class ScanFragment extends BaseFragment {
     @BindView(R.id.sensorList)
@@ -66,10 +67,30 @@ public class ScanFragment extends BaseFragment {
         bs.getSensorsInRangeLiveData().removeObservers(this);
     }
 
-    @OnClick(R.id.selectButton) void selectButton() {
+    @OnClick(R.id.connectButton) void connectButton() {
         String serial = sensorAdapter.getSelectedItem();
         if (serial != null) {
-            BioStamp bioStamp = bs.getBioStamp(serial);
+            BioStamp sensor = bs.getBioStamp(serial);
+            if (sensor.getState() != BioStamp.State.DISCONNECTED) {
+                Timber.i("Cannot connect, state is %s", sensor.getState());
+                return;
+            }
+            sensor.connect(new BioStamp.ConnectListener() {
+                @Override
+                public void connected() {
+                    Timber.i("Connected to %s", sensor.getSerial());
+                }
+
+                @Override
+                public void connectFailed() {
+                    Timber.i("Failed to connect");
+                }
+
+                @Override
+                public void disconnected() {
+                    Timber.i("Disconnected");
+                }
+            });
         }
     }
 

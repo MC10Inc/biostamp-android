@@ -26,11 +26,11 @@
         app:layout_constraintTop_toTopOf="@+id/startButton" />
 
     <Button
-        android:id="@+id/selectButton"
+        android:id="@+id/connectButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="Select"
+        android:text="Connect"
         app:layout_constraintStart_toEndOf="@+id/stopButton"
         app:layout_constraintTop_toTopOf="@+id/startButton" />
 
