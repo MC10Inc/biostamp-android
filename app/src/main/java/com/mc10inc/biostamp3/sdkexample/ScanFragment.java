@@ -100,21 +100,41 @@ public class ScanFragment extends BaseFragment {
         sensorAdapter.setSensorSerials(serials);
     }
 
-    private static class ScanSensorAdapter extends RecyclerView.Adapter<ScanSensorViewHolder> {
+    private static class ScanSensorAdapter extends RecyclerView.Adapter<SensorViewHolder> {
         private int selection = RecyclerView.NO_POSITION;
         private List<String> sensorSerials = Collections.emptyList();
+        private Map<String, BioStamp> biostamps = Collections.emptyMap();
 
         @NonNull
         @Override
-        public ScanSensorViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        public SensorViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View v = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.list_item_sensor, parent, false);
-            return new ScanSensorViewHolder(v, this::setSelected);
+            return new SensorViewHolder(v, this::setSelected);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull ScanSensorViewHolder holder, int position) {
-            holder.serialTextView.setText(sensorSerials.get(position));
+        public void onBindViewHolder(@NonNull SensorViewHolder holder, int position) {
+            String serial = sensorSerials.get(position);
+            holder.serialTextView.setText(serial);
+            if (biostamps != null && biostamps.containsKey(serial)) {
+                BioStamp sensor = biostamps.get(serial);
+                String status = "";
+                if (sensor != null) {
+                    switch (sensor.getState()) {
+                        case CONNECTED:
+                            status = "Connected";
+                            break;
+                        case DISCONNECTED:
+                            status = "";
+                            break;
+                        case CONNECTING:
+                            status = "Connecting…";
+                            break;
+                    }
+                }
+                holder.statusTextView.setText(status);
+            }
             holder.view.setSelected(position == selection);
         }
 
@@ -129,10 +149,9 @@ public class ScanFragment extends BaseFragment {
         }
 
         private void setSensorSerials(List<String> sensorSerials) {
-            if (!this.sensorSerials.equals(sensorSerials)) {
-                this.sensorSerials = sensorSerials;
-                notifyDataSetChanged();
-            }
+            this.sensorSerials = sensorSerials;
+            this.biostamps = BioStampManager.getInstance().getBioStampsLiveData().getValue();
+            notifyDataSetChanged();
         }
 
         String getSelectedItem() {
@@ -144,7 +163,7 @@ public class ScanFragment extends BaseFragment {
         }
     }
 
-    static class ScanSensorViewHolder extends RecyclerView.ViewHolder {
+    static class SensorViewHolder extends RecyclerView.ViewHolder {
         interface SelectListener {
             void selected(int position);
         }
@@ -154,7 +173,10 @@ public class ScanFragment extends BaseFragment {
         @BindView(R.id.serialTextView)
         TextView serialTextView;
 
-        ScanSensorViewHolder(View view, SelectListener listener) {
+        @BindView(R.id.statusTextView)
+        TextView statusTextView;
+
+        SensorViewHolder(View view, SensorViewHolder.SelectListener listener) {
             super(view);
             this.view = view;
             ButterKnife.bind(this, view);
