@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +53,7 @@ public class ControlsFragment extends BaseFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_controls, container, false);
         unbinder = ButterKnife.bind(this, view);
+        statusText.setMovementMethod(new ScrollingMovementMethod());
         return view;
     }
 
@@ -76,16 +78,24 @@ public class ControlsFragment extends BaseFragment {
         s.getSensorStatus((error, result) -> {
             if (error == null) {
                 StringBuilder sb = new StringBuilder();
-                sb.append(String.format("Batt %d%% %s Uptime %ds\nFW %s\nBL: %s\n",
+                sb.append(String.format("Sensor %s\nBatt %d%% %s Uptime %ds Reset Reason %d\nFW %s BL: %s\n",
+                        s.getSerial(),
                         result.getBatteryPercent(),
                         result.isCharging() ? "charging" : "",
                         result.getUptime(),
+                        result.getResetReason(),
                         result.getFirmwareVersion(),
                         result.getBootloaderVersion()));
                 if (result.getSensingInfo().isEnabled()) {
                     sb.append(result.getSensingInfo().toString());
                 } else {
                     sb.append("Sensing is idle\n");
+                }
+                String fault = result.getFault();
+                if (fault != null) {
+                    sb.append("\n--------- FAULT ---------\n");
+                    sb.append(fault);
+                    sb.append("\n");
                 }
                 statusText.setText(sb.toString());
             } else {
@@ -197,5 +207,15 @@ public class ControlsFragment extends BaseFragment {
         }
 
         viewModel.setFirmwareImage(baos.toByteArray());
+    }
+
+    @OnClick(R.id.shareStatusButton) void shareStatusButton() {
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, statusText.getText());
+        sendIntent.setType("text/plain");
+
+        Intent shareIntent = Intent.createChooser(sendIntent, null);
+        startActivity(shareIntent);
     }
 }
