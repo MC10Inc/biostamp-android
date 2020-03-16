@@ -42,6 +42,16 @@ public class StreamingFragment extends BaseFragment implements PlotContainer.Lis
         return view;
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        for (Map.Entry<PlotKey, PlotContainer> entry : plotContainers.entrySet()) {
+            BioStamp s = BioStampManager.getInstance().getBioStamp(entry.getKey().getSerial());
+            s.removeStreamingListener(entry.getValue().getPlot());
+        }
+        plotContainers.clear();
+    }
+
     @OnClick(R.id.addPlotButton) void addPlotButton() {
         BioStamp s = viewModel.getSensor();
         if (s == null) {
