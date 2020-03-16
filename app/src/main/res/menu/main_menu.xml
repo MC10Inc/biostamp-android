@@ -4,4 +4,7 @@
     <item
         android:id="@+id/about_menu_item"
         android:title="About" />
+    <item
+        android:id="@+id/test_crash_report_menu_item"
+        android:title="Test Crash Report" />
 </menu>

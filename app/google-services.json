@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "952833780760",
+    "firebase_url": "https://brc3-85c6d.firebaseio.com",
+    "project_id": "brc3-85c6d",
+    "storage_bucket": "brc3-85c6d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:952833780760:android:ba813c2073dd8a8224276d",
+        "android_client_info": {
+          "package_name": "com.mc10inc.biostamp3.sdkexample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "952833780760-76t8mrc8bcv7clgtjtatc809dsc3j5tf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfL9zfKyH_CwEvyVoN8r2OF_YRq7eGiuM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "952833780760-76t8mrc8bcv7clgtjtatc809dsc3j5tf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

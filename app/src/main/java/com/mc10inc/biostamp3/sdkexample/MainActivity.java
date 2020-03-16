@@ -1,6 +1,7 @@
 package com.mc10inc.biostamp3.sdkexample;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -102,6 +103,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.about_menu_item:
                 showAboutPopup();
                 return true;
+            case R.id.test_crash_report_menu_item:
+                showTestCrashReportPopup();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -110,6 +114,17 @@ public class MainActivity extends AppCompatActivity {
     private void showAboutPopup() {
         new AlertDialog.Builder(this)
                 .setMessage(String.format("Version %s", BuildConfig.GIT_HASH))
+                .create()
+                .show();
+    }
+
+    private void showTestCrashReportPopup() {
+        new AlertDialog.Builder(this)
+                .setMessage("Are you sure?")
+                .setCancelable(true)
+                .setPositiveButton("Yes", (dialogInterface, i) -> {
+                    throw new RuntimeException("Test Crash");
+                })
                 .create()
                 .show();
     }
