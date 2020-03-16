@@ -101,7 +101,7 @@ public class ScanFragment extends BaseFragment {
     }
 
     private static class ScanSensorAdapter extends RecyclerView.Adapter<SensorViewHolder> {
-        private int selection = RecyclerView.NO_POSITION;
+        private String selectedSerial = null;
         private List<String> sensorSerials = Collections.emptyList();
         private Map<String, BioStamp> biostamps = Collections.emptyMap();
 
@@ -135,7 +135,7 @@ public class ScanFragment extends BaseFragment {
                 }
                 holder.statusTextView.setText(status);
             }
-            holder.view.setSelected(position == selection);
+            holder.view.setSelected(serial.equals(selectedSerial));
         }
 
         @Override
@@ -144,22 +144,25 @@ public class ScanFragment extends BaseFragment {
         }
 
         private void setSelected(int position) {
-            selection = position;
+            if (position >= 0 && position < sensorSerials.size()) {
+                selectedSerial = sensorSerials.get(position);
+            } else {
+                selectedSerial = null;
+            }
             notifyDataSetChanged();
         }
 
         private void setSensorSerials(List<String> sensorSerials) {
             this.sensorSerials = sensorSerials;
             this.biostamps = BioStampManager.getInstance().getBioStampsLiveData().getValue();
+            if (selectedSerial != null && !sensorSerials.contains(selectedSerial)) {
+                selectedSerial = null;
+            }
             notifyDataSetChanged();
         }
 
         String getSelectedItem() {
-            if (selection == RecyclerView.NO_POSITION) {
-                return null;
-            } else {
-                return sensorSerials.get(selection);
-            }
+            return selectedSerial;
         }
     }
 
