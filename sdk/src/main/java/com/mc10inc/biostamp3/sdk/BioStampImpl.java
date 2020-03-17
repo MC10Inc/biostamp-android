@@ -16,6 +16,7 @@ import com.mc10inc.biostamp3.sdk.sensing.Streaming;
 import com.mc10inc.biostamp3.sdk.sensing.StreamingListener;
 import com.mc10inc.biostamp3.sdk.sensing.StreamingType;
 import com.mc10inc.biostamp3.sdk.task.DownloadRecording;
+import com.mc10inc.biostamp3.sdk.task.GetFaultLogs;
 import com.mc10inc.biostamp3.sdk.task.GetRecordingList;
 import com.mc10inc.biostamp3.sdk.task.Task;
 import com.mc10inc.biostamp3.sdk.task.UploadFirmware;
@@ -450,6 +451,26 @@ public class BioStampImpl implements BioStamp {
     @Override
     public int getRecordingMetadataMaxSize() {
         return 128;
+    }
+
+    @Override
+    public void clearFaultLogs(Listener<Void> listener) {
+        executeTask(new Task<Void>(this, listener) {
+            @Override
+            public void doTask() {
+                try {
+                    Request.clearFaultLog.execute(ble);
+                    success(null);
+                } catch (BleException e) {
+                    error(e);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void getFaultLogs(Listener<List<String>> listener) {
+        executeTask(new GetFaultLogs(this, listener));
     }
 
     private class SensorThread extends Thread {

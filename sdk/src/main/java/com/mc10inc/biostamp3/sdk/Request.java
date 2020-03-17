@@ -134,4 +134,10 @@ public class Request<TC, TR> {
 
     public static final Request<Void, Brc3.FaultGetInfoResponseParam> getFaultInfo =
             new Request<>(Brc3.Command.FAULT_GET_INFO, null, Brc3.Response::getFaultGetInfo);
+
+    public static final Request<Void, Void> clearFaultLog =
+            new Request<>(Brc3.Command.FAULT_LOG_CLEAR, null, null);
+
+    public static final Request<Brc3.FaultLogReadCommandParam.Builder, Brc3.FaultLogReadResponseParam> readFaultLog =
+            new Request<>(Brc3.Command.FAULT_LOG_READ, Brc3.Request.Builder::setFaultLogRead, Brc3.Response::getFaultLogRead);
 }

@@ -39,6 +39,8 @@ enum Command {
     FAULT_GET_INFO = 55;
     DEBUG_RTOS_GET_INFO = 56;
     ANNOTATE = 57;
+    FAULT_LOG_READ = 58;
+    FAULT_LOG_CLEAR = 59;
     TEST_DATA = 101;
     BLINK_LEDS = 102;
     TIMESTAMP_TEST_DISABLE = 103;
@@ -229,6 +231,14 @@ message AnnotateResponseParam {
     double timestamp = 1;
 }
 
+message FaultLogReadCommandParam {
+    uint32 index = 1;
+}
+
+message FaultLogReadResponseParam {
+    FaultInfo fault_info = 1;
+}
+
 message Request {
     Command command = 1;
     oneof param {
@@ -249,6 +259,7 @@ message Request {
         AFE4900DynamicConfigCommandParam afe4900_dynamic_config = 115;
         SimulateFaultCommandParam simulate_fault = 116;
         AnnotateCommandParam annotate = 117;
+        FaultLogReadCommandParam fault_log_read = 118;
     }
 }
 
@@ -274,6 +285,7 @@ message Response {
         DebugRtosGetInfoResponseParam debug_rtos_get_info = 35;
         SensingStopResponseParam sensing_stop = 36;
         AnnotateResponseParam annotate = 37;
+        FaultLogReadResponseParam fault_log_read = 38;
     }
 }
 
@@ -542,6 +554,7 @@ enum FaultType {
     WATCHDOG = 5;
     WATCHDOG_TASK = 6;
     TASK_STACK_OVERFLOW = 7;
+    BATTERY_DEAD = 8;
 }
 
 message FaultAppError {

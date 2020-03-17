@@ -218,4 +218,38 @@ public class ControlsFragment extends BaseFragment {
         Intent shareIntent = Intent.createChooser(sendIntent, null);
         startActivity(shareIntent);
     }
+
+    @OnClick(R.id.getFaultLogButton) void getFaultLogButton() {
+        BioStamp s = viewModel.getSensor();
+        if (s == null) {
+            return;
+        }
+        s.getFaultLogs((error, result) -> {
+            if (error == null) {
+                StringBuilder sb = new StringBuilder();
+                for (String fault : result) {
+                    sb.append(fault);
+                    sb.append("\n--------------------------------------\n");
+                }
+                if (result.isEmpty()) {
+                    sb.append("No faults logged");
+                }
+                statusText.setText(sb.toString());
+            } else {
+                Timber.e(error);
+            }
+        });
+    }
+
+    @OnClick(R.id.clearFaultLogButton) void clearFaultLogButton() {
+        BioStamp s = viewModel.getSensor();
+        if (s == null) {
+            return;
+        }
+        s.clearFaultLogs((error, result) -> {
+            if (error != null) {
+                Timber.e(error);
+            }
+        });
+    }
 }

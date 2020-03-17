@@ -62,6 +62,10 @@ public interface BioStamp {
 
     int getRecordingMetadataMaxSize();
 
+    void clearFaultLogs(Listener<Void> listener);
+
+    void getFaultLogs(Listener<List<String>> listener);
+
     enum State {
         DISCONNECTED,
         CONNECTING,

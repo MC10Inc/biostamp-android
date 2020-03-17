@@ -85,6 +85,25 @@
         app:layout_constraintStart_toEndOf="@id/loadImageButton"
         app:layout_constraintTop_toTopOf="@id/uploadFirmwareButton" />
 
+    <Button
+        android:id="@+id/getFaultLogButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Get Fault Log"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/selectFirmwareButton" />
+
+    <Button
+        android:id="@+id/clearFaultLogButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Clear Fault Log"
+        app:layout_constraintStart_toEndOf="@+id/getFaultLogButton"
+        app:layout_constraintTop_toTopOf="@+id/getFaultLogButton" />
+
     <TextView
         android:id="@+id/statusText"
         android:layout_width="0dp"
@@ -93,7 +112,7 @@
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/uploadFirmwareButton"
+        app:layout_constraintTop_toBottomOf="@+id/getFaultLogButton"
         tools:text="sensor status text" />
 
     <ImageButton
