@@ -105,6 +105,16 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 
 afterEvaluate {
     publishing {
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/mc10inc/biostamp-android")
+                credentials {
+                    username = project.findProperty("gpr.user")
+                    password = project.findProperty("gpr.key")
+                }
+            }
+        }
         publications {
             debug(MavenPublication) {
                 from components.debug
