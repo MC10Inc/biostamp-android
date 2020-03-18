@@ -49,7 +49,7 @@ public class SensorStatus {
     }
 
     public String getFault() {
-        if (fault.getFaultInfo() == null) {
+        if (fault.getFaultInfo().getType() == Brc3.FaultType.NO_FAULT) {
             return null;
         } else {
             return fault.getFaultInfo().toString();
