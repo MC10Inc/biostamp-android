@@ -8,7 +8,21 @@ import com.mc10inc.biostamp3.sdk.sensing.StreamingType;
 
 import java.util.List;
 
+/**
+ * BioStamp object representing a single BioStamp sensor
+ *
+ * The BioStamp object for a specific sensor, as identified by the sensor serial number, is obtained
+ * through the BioStampManger getBioStamp method.
+ */
 public interface BioStamp {
+    /**
+     * Request a connection to the sensor
+     *
+     * There must not be a connection already established or in progress. It is a fatal error to
+     * call this method if getState does not return DISCONNECTED.
+     *
+     * @param connectListener listener to receive connect and disconnect callbacks
+     */
     void connect(ConnectListener connectListener);
 
     void disconnect();
@@ -72,6 +86,9 @@ public interface BioStamp {
         CONNECTED
     }
 
+    /**
+     * Listener to handle connection events
+     */
     interface ConnectListener {
         void connected();
         void connectFailed();

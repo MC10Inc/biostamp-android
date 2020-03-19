@@ -93,14 +93,22 @@ task sourceJar(type: Jar) {
     classifier "sources"
 }
 
-task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.sourceFiles
-    classpath += project.files(project.android.getBootClasspath().join(File.pathSeparator))
+tasks.withType(Javadoc) {
+    options.addStringOption('Xdoclint:none', '-quiet')
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    from javadoc.destinationDir
-    classifier "javadoc"
+android.libraryVariants.all { variant ->
+    if (variant.name == 'debug') {
+        task javadoc(type: Javadoc) {
+            source = android.sourceSets.main.java.sourceFiles
+            classpath = files(((Object) android.bootClasspath.join(File.pathSeparator)))
+            classpath += variant.javaCompileProvider.get().classpath
+        }
+        task javadocJar(type: Jar, dependsOn: javadoc) {
+            from javadoc.destinationDir
+            classifier "javadoc"
+        }
+    }
 }
 
 afterEvaluate {
