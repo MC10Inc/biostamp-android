@@ -12,6 +12,9 @@ import java.util.TimeZone;
 
 import timber.log.Timber;
 
+/**
+ * Info about the current sensing operation.
+ */
 public class SensingInfo {
     private Brc3.SensingGetInfoResponseParam msg;
     private SensorConfig sensorConfig;
@@ -23,14 +26,29 @@ public class SensingInfo {
         }
     }
 
+    /**
+     * Is sensing enabled?
+     *
+     * @return true if sensing is enabled
+     */
     public boolean isEnabled() {
         return msg.getEnabled();
     }
 
+    /**
+     * Get current sensor configuration
+     *
+     * @return sensor configuration or null if sensing is not enabled
+     */
     public SensorConfig getSensorConfig() {
         return sensorConfig;
     }
 
+    /**
+     * Get start time
+     *
+     * @return the time when sensing was enabled as a Unix timestamp in seconds
+     */
     public int getStartTimestamp() {
         return msg.getTimestampStart();
     }

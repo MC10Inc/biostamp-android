@@ -48,6 +48,8 @@ public class RequestException extends BleException {
                 return new SensorUploadFailedException(response);
             case RECORDING_NOT_FOUND:
                 return new SensorRecordingNotFoundException(response);
+            case MEMORY_FULL:
+                return new SensorMemoryFullException(response);
             default:
                 return new RequestException(response);
         }

@@ -31,7 +31,7 @@ import java.util.concurrent.Executors;
 import timber.log.Timber;
 
 /**
- * Main entry point to BioStamp SDK
+ * Main entry point to BioStamp SDK.
  * <p/>
  * This singleton class provides access to all BioStamp SDK functions. It handles scanning for
  * sensors in range and managing the connections to those sensors.
@@ -40,7 +40,7 @@ public class BioStampManager {
     private static BioStampManager INSTANCE;
 
     /**
-     * Initialize the BioStamp SDK
+     * Initialize the BioStamp SDK.
      * <p/>
      * This method must be called exactly once when the application starts up. It is a fatal error
      * if it is called again after the SDK is already initialized. This method must be called before
@@ -59,7 +59,7 @@ public class BioStampManager {
     }
 
     /**
-     * Get the BioStampManager singleton
+     * Get the BioStampManager singleton.
      * <p/>
      * initialize must be called before calling this method.
      *
@@ -106,7 +106,7 @@ public class BioStampManager {
     }
 
     /**
-     * Check if the application has the permissions needed to communicate with the sensors
+     * Check if the application has the permissions needed to communicate with the sensors.
      * <p/>
      * The ACCESS_COARSE_LOCATION permission is required for BLE scanning. If this method returns
      * false, the requestPermissions method must be called to request the permissions.
@@ -120,7 +120,7 @@ public class BioStampManager {
     }
 
     /**
-     * Request the permissions needed to communicate with the sensors
+     * Request the permissions needed to communicate with the sensors.
      * <p/>
      * This method must be called if hasPermissions returns false. Android will show the user a
      * dialog asking them to grant the required permission. The message is:
@@ -137,7 +137,7 @@ public class BioStampManager {
     }
 
     /**
-     * Get a LiveData object that shows all sensors in range
+     * Get a LiveData object that shows all sensors in range.
      * <p/>
      * Any time this LiveData is being observed, the SDK will enable BLE scanning to find sensors
      * in range. The LiveData is updated periodically, and the contents of the result may not change
@@ -163,7 +163,7 @@ public class BioStampManager {
 
 
     /**
-     * Get a BioStamp object representing a sensor
+     * Get a BioStamp object representing a sensor.
      * <p/>
      * All communication with a specific sensor is performed through the BioStamp object which
      * represents that sensor. The returned object represents that sensor for as long as the
@@ -186,7 +186,7 @@ public class BioStampManager {
     }
 
     /**
-     * Get a LiveData representing all sensors used by the SDK
+     * Get a LiveData representing all sensors used by the SDK.
      * <p/>
      * The value of the LiveData is a map whose key is the sensor serial number and whose value is
      * the BioStamp object, as returned by getBioStamp.
@@ -204,7 +204,7 @@ public class BioStampManager {
     }
 
     /**
-     * Access the BioStamp recording database object
+     * Access the BioStamp recording database object.
      * <p/>
      * This object provides access to the database in the application's local storage which contains
      * recordings downloaded from sensors.

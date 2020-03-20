@@ -27,6 +27,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import timber.log.Timber;
 
+/**
+ * See {@link BioStamp} for documentation.
+ */
 public class BioStampImpl implements BioStamp {
     public interface RecordingPagesListener {
         void handleRecordingPages(List<Brc3.RecordingPage> recordingPages);
@@ -207,7 +210,6 @@ public class BioStampImpl implements BioStamp {
         });
     }
 
-    @Override
     public <TC, TR> void execute(Request<TC, TR> request, TC param, Listener<TR> listener) {
         executeTask(new Task<TR>(this, listener) {
             @Override
