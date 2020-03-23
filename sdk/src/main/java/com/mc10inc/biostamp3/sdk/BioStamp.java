@@ -306,10 +306,41 @@ public interface BioStamp {
      */
     void powerOff(Listener<Void> listener);
 
+    /**
+     * Insert an annotation into the recording.
+     * <p/>
+     * An annotation is a block of arbitrary binary data whose format is defined by the application,
+     * which is inserted into the current recording along with sensor samples. The maximum size of
+     * the annotation data is given by {@link #getAnnotationDataMaxSize()}. When the recording is
+     * downloaded from the sensor, the annotations are included in the recording.
+     * <p/>
+     * The annotation is timestamped with the sensor's time when it receives this command over BLE.
+     * The exact timestamp of the new annotation is returned to the listener in seconds as a
+     * floating point number.
+     *
+     * @param annotationData Contents of the annotation
+     * @param listener       Listener to receive annotation timestamp in seconds
+     */
     void annotate(byte[] annotationData, Listener<Double> listener);
 
+    /**
+     * Get the maximum size of an annotation.
+     * <p/>
+     * It is a fatal error to pass an annotation that is larger than this size to {@link
+     * #annotate(byte[], Listener)}.
+     *
+     * @return Maximum size of an annotation in bytes
+     */
     int getAnnotationDataMaxSize();
 
+    /**
+     * Get the maximum size of recording metadata.
+     * <p/>
+     * It is a fatal error to pass recording metadata that is larger than this size to {@link
+     * #startSensing(SensorConfig, int, byte[], Listener)}.
+     *
+     * @return Maximum size of recording metadata in bytes.
+     */
     int getRecordingMetadataMaxSize();
 
     void clearFaultLogs(Listener<Void> listener);
@@ -370,7 +401,18 @@ public interface BioStamp {
         void done(Throwable error, T result);
     }
 
+    /**
+     * Listener to handle progress of a long-running sensor task.
+     */
     interface ProgressListener {
+        /**
+         * Method to be called periodically as a long-running sensor task executes.
+         * <p/>
+         * This is always called from the main thread, so it is safe to access the Android UI from
+         * within this method.
+         *
+         * @param progress Task progress from 0 to 1.
+         */
         void updateProgress(double progress);
     }
 }

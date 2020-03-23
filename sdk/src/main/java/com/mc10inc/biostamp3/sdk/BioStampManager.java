@@ -161,7 +161,6 @@ public class BioStampManager {
         return sensorsInRangeLiveData;
     }
 
-
     /**
      * Get a BioStamp object representing a sensor.
      * <p/>
