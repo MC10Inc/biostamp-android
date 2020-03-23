@@ -5,7 +5,7 @@ import com.mc10inc.biostamp3.sdk.BioStampImpl;
 import com.mc10inc.biostamp3.sdk.BioStampManager;
 import com.mc10inc.biostamp3.sdk.Brc3;
 import com.mc10inc.biostamp3.sdk.Request;
-import com.mc10inc.biostamp3.sdk.db.BioStampDb;
+import com.mc10inc.biostamp3.sdk.BioStampDb;
 import com.mc10inc.biostamp3.sdk.exception.BleException;
 import com.mc10inc.biostamp3.sdk.exception.SensorRecordingNotFoundException;
 import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;

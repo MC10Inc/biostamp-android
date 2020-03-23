@@ -17,7 +17,6 @@ import com.fitbit.bluetooth.fbgatt.GattConnection;
 import com.mc10inc.biostamp3.sdk.ble.SensorBle;
 import com.mc10inc.biostamp3.sdk.ble.SensorBleBitgatt;
 import com.mc10inc.biostamp3.sdk.ble.StatusBroadcast;
-import com.mc10inc.biostamp3.sdk.db.BioStampDb;
 
 import org.apache.commons.collections4.map.PassiveExpiringMap;
 
@@ -79,7 +78,7 @@ public class BioStampManager {
     private final Context applicationContext;
     private final Map<String, BioStampImpl> biostamps = new HashMap<>();
     private final MutableLiveData<Map<String, BioStamp>> biostampsLiveData = new MutableLiveData<>();
-    private final BioStampDb db;
+    private final BioStampDbImpl db;
     private final Executor dbExecutor = Executors.newSingleThreadExecutor();
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Map<String, ScannedSensorStatus> sensorsInRange =
@@ -89,7 +88,7 @@ public class BioStampManager {
 
     private BioStampManager(Context context) {
         this.applicationContext = context;
-        db = new BioStampDb(context);
+        db = new BioStampDbImpl(context);
     }
 
     private final Runnable updateThroughput = new Runnable() {
@@ -211,6 +210,10 @@ public class BioStampManager {
      * @return the recording database singleton
      */
     public BioStampDb getDb() {
+        return db;
+    }
+
+    public BioStampDbImpl getDbImpl() {
         return db;
     }
 

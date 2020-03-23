@@ -14,8 +14,8 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.mc10inc.biostamp3.sdk.BioStampDb;
 import com.mc10inc.biostamp3.sdk.BioStampManager;
-import com.mc10inc.biostamp3.sdk.db.BioStampDb;
 import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
 
 import java.io.IOException;

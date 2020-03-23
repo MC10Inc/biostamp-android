@@ -4,8 +4,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.mc10inc.biostamp3.sdk.BioStampDb;
 import com.mc10inc.biostamp3.sdk.Brc3;
-import com.mc10inc.biostamp3.sdk.db.RecordingKey;
 import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
 
 import java.text.DateFormat;
@@ -14,7 +14,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class RecordingInfo implements RecordingKey, Parcelable {
+public class RecordingInfo implements BioStampDb.RecordingKey, Parcelable {
     private Brc3.RecordingInfo msg;
     private String serial;
     private DownloadStatus downloadStatus;

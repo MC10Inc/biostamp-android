@@ -229,9 +229,9 @@ public interface BioStamp {
      * Download a recording from the sensor's flash memory.
      * <p/>
      * Specify one of the recordings that was returned from {@link #getRecordingList(Listener)}. The
-     * recording will be downloaded into the SDK's recording database {@link
-     * com.mc10inc.biostamp3.sdk.db.BioStampDb} within the application's local storage and the
-     * contents can be accessed through the database once the download is complete.
+     * recording will be downloaded into the SDK's recording database {@link BioStampDb} within the
+     * application's local storage and the contents can be accessed through the database once the
+     * download is complete.
      * <p/>
      * To stop the download before it completes, call {@link #cancelTask()}. If a download is
      * interrupted for any reason (loss of connection, etc) the partial download will remain in the

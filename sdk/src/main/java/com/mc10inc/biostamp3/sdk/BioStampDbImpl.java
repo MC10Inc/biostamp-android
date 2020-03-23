@@ -1,4 +1,4 @@
-package com.mc10inc.biostamp3.sdk.db;
+package com.mc10inc.biostamp3.sdk;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.mc10inc.biostamp3.sdk.Brc3;
 import com.mc10inc.biostamp3.sdk.recording.DownloadStatus;
 import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
 
@@ -21,10 +20,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import timber.log.Timber;
 
-public class BioStampDb {
-    public interface RecordingUpdateListener {
-        void recordingsDbUpdated();
-    }
+public class BioStampDbImpl implements BioStampDb {
 
     private static final int DB_VERSION = 1;
     private static final String DB_NAME = "BioStamp.db";
@@ -83,14 +79,16 @@ public class BioStampDb {
     private Handler handler = new Handler(Looper.getMainLooper());
     private Set<RecordingUpdateListener> recordingUpdateListeners = new CopyOnWriteArraySet<>();
 
-    public BioStampDb(Context context) {
+    public BioStampDbImpl(Context context) {
         dbHelper = new DbHelper(context);
     }
 
+    @Override
     public void addRecordingUpdateListener(RecordingUpdateListener listener) {
         recordingUpdateListeners.add(listener);
     }
 
+    @Override
     public void removeRecordingUpdateListener(RecordingUpdateListener listener) {
         recordingUpdateListeners.remove(listener);
     }
@@ -107,12 +105,14 @@ public class BioStampDb {
         notifyRecordingUpdate();
     }
 
+    @Override
     public void deleteAllRecordings() {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.delete("recordings", null, null);
         notifyRecordingUpdate();
     }
 
+    @Override
     public void deleteRecording(RecordingKey recordingKey) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.delete("recordings",
@@ -123,6 +123,7 @@ public class BioStampDb {
         notifyRecordingUpdate();
     }
 
+    @Override
     public List<RecordingInfo> getRecordings() {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         List<RecordingInfo> recs = new ArrayList<>();
@@ -198,6 +199,7 @@ public class BioStampDb {
         notifyRecordingUpdate();
     }
 
+    @Override
     public DownloadStatus getRecordingDownloadStatus(RecordingKey key) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         DbRecInfo dbRecInfo = getDbRecInfo(key);
@@ -274,4 +276,5 @@ public class BioStampDb {
             handler.post(listener::recordingsDbUpdated);
         }
     }
+
 }

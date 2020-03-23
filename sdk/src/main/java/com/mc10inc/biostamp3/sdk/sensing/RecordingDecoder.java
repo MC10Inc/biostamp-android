@@ -1,8 +1,8 @@
 package com.mc10inc.biostamp3.sdk.sensing;
 
+import com.mc10inc.biostamp3.sdk.BioStampDbImpl;
 import com.mc10inc.biostamp3.sdk.BioStampManager;
 import com.mc10inc.biostamp3.sdk.Brc3;
-import com.mc10inc.biostamp3.sdk.db.BioStampDb;
 import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
 
 import java.util.EnumMap;
@@ -42,8 +42,8 @@ public class RecordingDecoder {
 
     public void decode() {
         RawSampleInfo rawSampleInfo = new RawSampleInfo(recordingInfo.getMsg().getRawDataInfo());
-        BioStampDb db = BioStampManager.getInstance().getDb();
-        try (BioStampDb.RecordingPagesLoader pages = db.getRecordingPages(recordingInfo)) {
+        BioStampDbImpl db = BioStampManager.getInstance().getDbImpl();
+        try (BioStampDbImpl.RecordingPagesLoader pages = db.getRecordingPages(recordingInfo)) {
             Brc3.RecordingPage page;
             while ((page = pages.getNext()) != null) {
                 if (page.hasAd5940()) {

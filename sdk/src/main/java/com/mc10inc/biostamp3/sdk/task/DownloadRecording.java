@@ -1,11 +1,11 @@
 package com.mc10inc.biostamp3.sdk.task;
 
 import com.mc10inc.biostamp3.sdk.BioStamp;
+import com.mc10inc.biostamp3.sdk.BioStampDbImpl;
 import com.mc10inc.biostamp3.sdk.BioStampImpl;
 import com.mc10inc.biostamp3.sdk.BioStampManager;
 import com.mc10inc.biostamp3.sdk.Brc3;
 import com.mc10inc.biostamp3.sdk.Request;
-import com.mc10inc.biostamp3.sdk.db.BioStampDb;
 import com.mc10inc.biostamp3.sdk.exception.BleException;
 import com.mc10inc.biostamp3.sdk.recording.DownloadStatus;
 import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
@@ -31,7 +31,7 @@ public class DownloadRecording extends Task<Void> {
     public void doTask() {
         try {
             progress(0);
-            BioStampDb db = BioStampManager.getInstance().getDb();
+            BioStampDbImpl db = BioStampManager.getInstance().getDbImpl();
             DownloadStatus downloadStatus = db.getRecordingDownloadStatus(recordingInfo);
             if (downloadStatus != null && downloadStatus.isComplete()) {
                 Timber.i("Download is already complete");
