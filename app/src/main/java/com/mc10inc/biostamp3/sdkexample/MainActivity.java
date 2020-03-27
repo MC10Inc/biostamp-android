@@ -2,6 +2,8 @@ package com.mc10inc.biostamp3.sdkexample;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -26,6 +29,7 @@ import com.mc10inc.biostamp3.sdkexample.streaming.StreamingFragment;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,6 +38,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnItemSelected;
 import butterknife.Unbinder;
+import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
     @BindView(R.id.pager)
@@ -106,6 +111,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.test_crash_report_menu_item:
                 showTestCrashReportPopup();
                 return true;
+            case R.id.export_database_menu_item:
+                exportDatabase();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -127,6 +135,17 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .create()
                 .show();
+    }
+
+    private void exportDatabase() {
+        File dbFile = new File(BioStampManager.getInstance().getDbImpl().getDatabasePath());
+        Uri uri = FileProvider.getUriForFile(this,
+                "com.mc10inc.biostamp3.sdkexample.dbfileprovider", dbFile);
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("application/octet-stream");
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(Intent.createChooser(intent, "Select destination for database export"));
     }
 
     @OnItemSelected(R.id.selectedSensorSpinner) void onSensorSelected(int position) {

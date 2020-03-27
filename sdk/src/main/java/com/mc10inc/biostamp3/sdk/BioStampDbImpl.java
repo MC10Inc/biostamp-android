@@ -277,4 +277,8 @@ public class BioStampDbImpl implements BioStampDb {
         }
     }
 
+    public String getDatabasePath() {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        return db.getPath();
+    }
 }
