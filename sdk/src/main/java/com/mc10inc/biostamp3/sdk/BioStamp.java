@@ -359,14 +359,16 @@ public interface BioStamp {
          * Connection attempt is in progress.
          * <p/>
          * Either {@link ConnectListener#connected()} or {@link ConnectListener#disconnected()} will
-         * be called depending on whether the attempt succeeds or fails.
+         * be called depending on whether the attempt succeeds or fails. It is a fatal error to call
+         * {@link #connect(ConnectListener)} while the connection is in this state.
          */
         CONNECTING,
         /**
          * Connected.
          * <p/>
          * When this connection disconnects, either because disconnection is requested or the
-         * connection is lost, {@link ConnectListener#disconnected()} will be called.
+         * connection is lost, {@link ConnectListener#disconnected()} will be called. It is a fatal
+         * error to call {@link #connect(ConnectListener)} while the connection is in this state.
          */
         CONNECTED
     }
@@ -393,6 +395,10 @@ public interface BioStamp {
          * If any error occurs executing the task (for example lost connection or an error returned
          * by the sensor firmware) then a Throwable describing the error is provided in error. If
          * error is null, this indicates that the task completed successfully.
+         * <p/>
+         * It is guaranteed that this method will be called exactly once within a finite time after
+         * a method accepting a Listener is called, regardless of whether the requested operation
+         * succeeds, fails, times out, or the connection is lost.
          *
          * @param error  null if task was successful, or a Throwable describing the error if it
          *               failed
