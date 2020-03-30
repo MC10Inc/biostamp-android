@@ -7,6 +7,7 @@ The SDK is used to build Android applications which communicate with BioStamp®
 
   * [Requirements](#requirements)
   * [Getting started](#getting-started)
+  * [Connecting to sensors](#connecting-to-sensors)
 
 ## Requirements
 
@@ -137,6 +138,11 @@ and add it to your application's `AndroidManifest.xml` file:
         ...    
 ```
 
+All SDK functions are accessed through the `BioStampManager` class. It is a
+singleton, and once it is initialized it can be accessed from anywhere in the
+application by calling `BioStampManager.getInstance()`. It is a fatal error to
+call `getInstance()` before calling `initialize()`.
+
 ### Documentation
 
 In addition to this document the SDK supplies Javadoc documentation for classes
@@ -154,7 +160,79 @@ and select View -> External Documentation from the Android Studio menu. Note
 that this menu item does not appear unless code with external Javadoc is
 selected.
 
+## Connecting to sensors
+
+Bluetooth Low Energy defines roles for BLE devices. The BioStamp sensor is in
+the Peripheral role and the Android device is in the Central role. As a
+Peripheral, any time the sensor is powered on it is either advertising
+(broadcasting its presence and accepting connection requests) or it is in a
+connection with a Central. As a Central, the Android device scans for
+advertising sensors and initiates connections to sensors.
+
+As soon as a connection is established with the sensor it stops advertising
+until that connection is disconnected.
+
+### Permissions
+
+To use Bluetooth Low Energy, the application must have the [Android permission][5]
+`ACCESS_COARSE_LOCATION` granted by the end user. The application's UI is
+responsible for initiating that request. The SDK provides optional utility
+methods for requesting the permission.
+
+The `BioStampManager.hasPermissions()` method checks if the permissions are
+granted, and `BioStampManager.requestPermissions(activity)` requests the
+permissions. For example, from within an Activity:
+
+```java
+    BioStampManager bs = BioStampManager.getInstance();
+    if (!bs.hasPermissions()) {
+        bs.requestPermissions(this);
+    }
+```
+
+If `hasPermissions()` returns `false` then scanning for sensors or connecting
+to a sensor will fail.
+
+### Scanning for sensors
+
+The SDK can scan to find all sensors that are powered on and in range of the
+Android device. In a typical application this would be used to let the user
+select which sensor(s) they want to use.
+
+If you have only one sensor and you know its serial number, it is not necessary
+to implement scanning for a minimal test app. You can instead directly connect
+to the sensor using a hardcoded serial number.
+
+The scanning function is accessed through a [LiveData object][6]. Scanning is
+enabled any time that object is being observed. The value of the LiveData is a
+`Map` whose keys are sensor serial numbers and whose values are
+`ScannedSensorStatus` objects containing info about the sensor.
+
+Do not observe the scanning LiveData until the necessary permissions have been
+granted and `BioStampManager.hasPermissions()` returns true.
+
+Sensors are added to the set of sensors in range any time an advertisement from
+the sensor is received. Sensors are removed after they have not been seen for
+10 seconds. Sensors do not advertise while connected, so a sensor will
+disappear from the set of sensors in range soon after a connection is opened to
+it.
+
+This minimal example prints out the serial numbers of all sensors in range:
+
+```java
+    BioStampManager bs = BioStampManager.getInstance();
+    bs.getSensorsInRangeLiveData().observe(this, sensors -> {
+        Log.i("app", String.format("%d sensors in range:", sensors.size()));
+        for (String serialNumber : sensors.keySet()) {
+            Log.i("app", serialNumber);
+        }
+    });
+```
+
 [1]: https://developer.android.com/studio/write/java8-support
 [2]: https://help.github.com/en/packages
 [3]: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line
 [4]: https://developer.android.com/reference/android/app/Application
+[5]: https://developer.android.com/training/permissions/requesting
+[6]: https://developer.android.com/topic/libraries/architecture/livedata
+
