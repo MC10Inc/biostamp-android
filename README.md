@@ -396,4 +396,5 @@ complete.
 [4]: https://developer.android.com/reference/android/app/Application
 [5]: https://developer.android.com/training/permissions/requesting
 [6]: https://developer.android.com/topic/libraries/architecture/livedata
+[7]: https://en.wikipedia.org/wiki/Bluetooth_Low_Energy
 

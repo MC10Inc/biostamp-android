@@ -24,6 +24,8 @@ import java.util.List;
  * effect for as long as sensing is enabled and for the entire recording; the only way to change any
  * setting defined here is to stop sensing and then restart sensing with a new configuration,
  * creating a new recording.
+ * <p/>
+ * Use the {@link SensorConfig.Builder} to create a sensor configuration programmatically.
  */
 public class SensorConfig {
     private static final List<Integer> accelGRanges =
@@ -314,13 +316,35 @@ public class SensorConfig {
         return new DecimalFormat("0.###").format(1000000.0 / periodUs) + "Hz";
     }
 
+    /**
+     * Create a sensor configuration programmatically.
+     * <p/>
+     * To create a sensor configuration, first construct a SensorConfig.Builder. Call the enable
+     * method for each sensor that you want to enable. Finally, call {@link #build()} to obtain the
+     * sensor configuration object. There can be only one configuration per sensor type; for example
+     * it is an error to call {@link #enableMotionAccel(int, int)} followed by {@link
+     * #enableMotionAccelGyro(int, int, int)} because they both enable the same sensor but in
+     * different modes. An IllegalArgumentException is thrown if any sensor setting is invalid or
+     * unsupported.
+     * <p/>
+     * All sampling periods are specified in units of microseconds. For example a sampling period
+     * of 50000µs corresponds to (1000000 / 50000) = 20Hz.
+     */
     public static class Builder {
         private Brc3.SensorConfig.Builder msg;
 
+        /**
+         * Create a Builder to build a sensor configuration.
+         */
         public Builder() {
             msg = Brc3.SensorConfig.newBuilder();
         }
 
+        /**
+         * Build the sensor configuration.
+         *
+         * @return sensor configuration
+         */
         public SensorConfig build() {
             if (!msg.hasMotion() && !msg.hasAd5940() && !msg.hasEnvironment() && !msg.hasAfe4900()) {
                 throw new IllegalArgumentException("No sensors are enabled!");
@@ -328,11 +352,22 @@ public class SensorConfig {
             return new SensorConfig(msg.build());
         }
 
+        /**
+         * Enable recording to flash memory.
+         *
+         * @return builder
+         */
         public Builder enableRecording() {
             msg.setRecordingEnabled(true);
             return this;
         }
 
+        /**
+         * Enable the environment (temperature and atmospheric pressure) sensor.
+         *
+         * @param samplingPeriodUs sampling period
+         * @return builder
+         */
         public Builder enableEnvironment(int samplingPeriodUs) {
             if (msg.hasEnvironment()) {
                 throw new IllegalArgumentException("Environment sensor is already enabled!");
@@ -343,6 +378,15 @@ public class SensorConfig {
             return this;
         }
 
+        /**
+         * Enable the ICM-20948 motion sensor in accelerometer mode.
+         *
+         * @param samplingPeriodUs sampling period
+         * @param accelGRange      Accelerometer G range. Must be 2, 4, 8, or 16. For example if 16
+         *                         is specified, the full scale range of the sensor is -16G to
+         *                         +16G.
+         * @return builder
+         */
         public Builder enableMotionAccel(int samplingPeriodUs, int accelGRange) {
             if (msg.hasMotion()) {
                 throw new IllegalArgumentException("Motion sensor is already enabled!");
@@ -355,6 +399,18 @@ public class SensorConfig {
             return this;
         }
 
+        /**
+         * Enable the ICM-20948 motion sensor in accelerometer and gyroscope mode.
+         *
+         * @param samplingPeriodUs sampling period
+         * @param accelGRange      Accelerometer G range. Must be 2, 4, 8, or 16. For example if 16
+         *                         is specified, the full scale range of the sensor is -16G to
+         *                         +16G.
+         * @param gyroDpsRange     Gyroscope DPS (degrees per second) range. Must be 250, 500, 1000,
+         *                         or 2000. For example if 2000 is specified, the full scale range
+         *                         of the sensor is -2000DPS to +2000DPS.
+         * @return builder
+         */
         public Builder enableMotionAccelGyro(int samplingPeriodUs, int accelGRange,
                                              int gyroDpsRange) {
             if (msg.hasMotion()) {
@@ -387,24 +443,70 @@ public class SensorConfig {
             return this;
         }
 
+        /**
+         * Enable the ICM-20948 motion sensor in accel+gyro rotation mode.
+         * <p/>
+         * The accelerometer and gyroscope are used to determine the sensor's orientation.
+         *
+         * @param samplingPeriodUs sampling period
+         * @param accelGRange      Accelerometer G range. Must be 2, 4, 8, or 16. For example if 16
+         *                         is specified, the full scale range of the sensor is -16G to
+         *                         +16G.
+         * @param gyroDpsRange     Gyroscope DPS (degrees per second) range. Must be 250, 500, 1000,
+         *                         or 2000. For example if 2000 is specified, the full scale range
+         *                         of the sensor is -2000DPS to +2000DPS.
+         * @return builder
+         */
         public Builder enableMotionRotationFromAccelGyro(int samplingPeriodUs, int accelGRange,
                                                          int gyroDpsRange) {
             return enableMotionRotation(samplingPeriodUs, accelGRange, gyroDpsRange,
                     Brc3.MotionRotationType.ROT_ACCEL_GYRO);
         }
 
+        /**
+         * Enable the ICM-20948 motion sensor in accel+gyro+compass rotation mode.
+         * <p/>
+         * The accelerometer, gyroscope, and compass are used to determine the sensor's
+         * orientation.
+         *
+         * @param samplingPeriodUs sampling period
+         * @param accelGRange      Accelerometer G range. Must be 2, 4, 8, or 16. For example if 16
+         *                         is specified, the full scale range of the sensor is -16G to
+         *                         +16G.
+         * @param gyroDpsRange     Gyroscope DPS (degrees per second) range. Must be 250, 500, 1000,
+         *                         or 2000. For example if 2000 is specified, the full scale range
+         *                         of the sensor is -2000DPS to +2000DPS.
+         * @return builder
+         */
         public Builder enableMotionRotationFromAccelGyroCompass(int samplingPeriodUs, int accelGRange,
                                                                 int gyroDpsRange) {
             return enableMotionRotation(samplingPeriodUs, accelGRange, gyroDpsRange,
                     Brc3.MotionRotationType.ROT_ACCEL_GYRO_MAG);
         }
 
+        /**
+         * Enable the ICM-20948 motion sensor in accel+compass rotation mode.
+         * <p/>
+         * The accelerometer and compass are used to determine the sensor's orientation.
+         *
+         * @param samplingPeriodUs sampling period
+         * @param accelGRange      Accelerometer G range. Must be 2, 4, 8, or 16. For example if 16
+         *                         is specified, the full scale range of the sensor is -16G to
+         *                         +16G.
+         * @return builder
+         */
         public Builder enableMotionRotationFromAccelCompass(int samplingPeriodUs, int accelGRange) {
             // Gyro is not used in this mode, specify any valid DPS range for it
             return enableMotionRotation(samplingPeriodUs, accelGRange, 2000,
                     Brc3.MotionRotationType.ROT_ACCEL_MAG);
         }
 
+        /**
+         * Enable the ICM-20948 motion sensor in compass mode.
+         *
+         * @param samplingPeriodUs sampling period
+         * @return builder
+         */
         public Builder enableMotionCompass(int samplingPeriodUs) {
             if (msg.hasMotion()) {
                 throw new IllegalArgumentException("Motion sensor is already enabled!");
@@ -415,6 +517,11 @@ public class SensorConfig {
             return this;
         }
 
+        /**
+         * Enable the AD5940 bio-impedance sensor in electrodermal activity mode.
+         *
+         * @return builder
+         */
         public Builder enableAd5940ElectrodermalActivity() {
             if (msg.hasAd5940()) {
                 throw new IllegalArgumentException("AD5940 sensor is already enabled!");
@@ -424,6 +531,12 @@ public class SensorConfig {
             return this;
         }
 
+        /**
+         * Enable the AFE4900 sensor in ECG (biopotential) mode.
+         *
+         * @param ecgGain ECG gain. Must be 2, 3, 4, 5, 6, 9, or 12.
+         * @return builder
+         */
         public Builder enableAfe4900Ecg(int ecgGain) {
             if (msg.hasAfe4900()) {
                 throw new IllegalArgumentException("AFE4900 sensor is already enabled!");
