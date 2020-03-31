@@ -8,6 +8,7 @@ Build Android applications that communicate with BioStamp3™ sensors via
   * [Requirements](#requirements)
   * [Getting started](#getting-started)
   * [Connecting to sensors](#connecting-to-sensors)
+  * [Controlling sensors](#controlling-sensors)
 
 ## Requirements
 
@@ -109,13 +110,13 @@ If your existing application already subclasses [Application][4], then add
 the following line to the `onCreate` method:
 
 ```java
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        ...    
-        BioStampManager.initialize(this);
-        ...
-    }
+@Override
+public void onCreate() {
+    super.onCreate();
+    ...    
+    BioStampManager.initialize(this);
+    ...
+}
 ```
 
 If you are creating a new application or your existing application does not subclass
@@ -138,9 +139,9 @@ public class MyCustomApplication extends Application {
 and add it to your application's `AndroidManifest.xml` file:
 
 ```xml
-    <application
-        android:name=".MyCustomApplication"
-        ...    
+<application
+    android:name=".MyCustomApplication"
+    ...    
 ```
 
 All SDK functions are accessed through the `BioStampManager` class. It is a
@@ -189,10 +190,10 @@ granted, and `BioStampManager.requestPermissions(activity)` requests the
 permissions. For example, from within an Activity:
 
 ```java
-    BioStampManager bs = BioStampManager.getInstance();
-    if (!bs.hasPermissions()) {
-        bs.requestPermissions(this);
-    }
+BioStampManager bs = BioStampManager.getInstance();
+if (!bs.hasPermissions()) {
+    bs.requestPermissions(this);
+}
 ```
 
 If `hasPermissions()` returns `false` then scanning for sensors or connecting
@@ -225,13 +226,13 @@ it.
 This minimal example prints out the serial numbers of all sensors in range:
 
 ```java
-    BioStampManager bs = BioStampManager.getInstance();
-    bs.getSensorsInRangeLiveData().observe(this, sensors -> {
-        Log.i("app", String.format("%d sensors in range:", sensors.size()));
-        for (String serialNumber : sensors.keySet()) {
-            Log.i("app", serialNumber);
-        }
-    });
+BioStampManager bs = BioStampManager.getInstance();
+bs.getSensorsInRangeLiveData().observe(this, sensors -> {
+    Log.i("app", String.format("%d sensors in range:", sensors.size()));
+    for (String serialNumber : sensors.keySet()) {
+        Log.i("app", serialNumber);
+    }
+});
 ```
 
 ### Connecting to a sensor
@@ -245,8 +246,149 @@ The object is obtained from the SDK by providing a sensor serial number, which
 would normally be obtained by scanning but can also be hardcoded.
 
 ```java
-    BioStamp sensor = BioStampManager.getInstance().getBioStamp(serialNumber);
+BioStamp sensor = BioStampManager.getInstance().getBioStamp(serialNumber);
 ```
+
+The connection state of the `BioStamp` is defined by `BioStamp.State` and is
+either `DISCONNECTED`, `CONNECTING`, or `CONNECTED`. The sensor is initially
+`DISCONNECTED`. When a connection attempt is initiated it enters the
+`CONNECTING` state, and then enters either `CONNECTED` if the connection is
+successful or `DISCONNECTED` if the connection fails. The connection state must
+be `DISCONNECTED` in order to initiate a connection; it is a fatal error to
+call `connect()` if the state is `CONNECTING` or `CONNECTED`.
+
+```java
+if (sensor.getState() != BioStamp.State.DISCONNECTED) {
+    Log.i("app", "Cannot initiate a connection now");
+}
+```
+
+To connect to the sensor, call the `connect()` method supplying a
+`ConnectionListener` which handles the result of the connection attempt. The
+connection attempt always completes within a finite time, either succeeding or
+failing.  If the connection attempt succeeds, then `connected()` is called and
+at some point in the future when the connection is eventually disconnected,
+`disconnected()` will be called. But if the connection attempt fails, then
+`connectFailed()` is called and `disconnected()` will never be called.
+
+```java
+sensor.connect(new BioStamp.ConnectListener() {
+    @Override
+    public void connected() {
+        Log.i("app", "Connected successfully");
+    }
+
+    @Override
+    public void connectFailed() {
+        Log.i("app", "Failed to connect");
+    }
+
+    @Override
+    public void disconnected() {
+        Log.i("app", "Disconnected after connecting successfully");
+    }
+});
+```
+
+To disconnect from the sensor, call the `disconnect()` method. If the sensor is
+not connected, then nothing happens. If the sensor is connected, then it will
+be disconnected and the `disconnect()` method of the `ConnectListener` that was
+passed to `connect()` will be called.
+
+```java
+sensor.disconnect();
+```
+
+### Observing connection state
+
+The `BioStampManager` provides a way to keep track of the connection state of
+all sensors in one place: `BioStampManager.getBioStampsLiveData()` returns a
+[LiveData][6] whose value is a `Map` containing an entry for each `BioStamp`
+that has been accessed since the application was launched. The key is the
+serial number and the value is the `BioStamp` object. The observer is notified
+of a change any time any of the sensors' connection state changes.
+
+For example, this code prints a message every time a sensor connects or
+disconnects.
+
+```java
+BioStampManager bs = BioStampManager.getInstance();
+bs.getBioStampsLiveData().observe(this, sensors -> {
+    int count = 0;
+    for (BioStamp sensor : sensors.values()) {
+        if (sensor.getState() == BioStamp.State.CONNECTED) {
+            count++;
+        }
+    }
+    Log.i("app", String.format("There are %d sensors connected", count));
+});
+```
+
+## Controlling sensors
+
+Once a connection to a sensor is established, it is controlled through the
+`BioStamp` object which provides methods for executing various sensor tasks.
+All of these methods are asynchronous and have a similar interface: the method
+accepts a `BioStamp.Listener` as one of its parameters. The method returns
+immediately and the task starts executing in the background. When the task
+completes, the listener is called with the result of the task. The listener is
+always called on the main thread so it is safe to directly access the Android
+UI.
+
+The `BioStamp` executes one task at a time; if task methods are called while
+another task is already executing, they are enqueued. It is guaranteed that if
+a task method is called, then its listener will be called exactly once within a
+finite time, regardless of whether the task succeeds, fails, or times out. If
+the connection to the sensor is lost, then all pending tasks' listeners are
+called with an error.
+
+The `BioStamp.Listener` is a method with the signature:
+
+```java
+void done(Throwable error, T result);
+```
+
+`error` is defined for all tasks and indicates whether the task succeeded or
+failed. If the task succeeded then `error` is `null`. If the task failed, then
+`error` indicates what went wrong. For tasks which return a result, it is
+passed in `result`, which is only valid if `error` is `null`. For tasks which
+do not return a result, `result` is ignored.
+
+For example, this is a simple task that does not return any result other
+than success or failure.
+
+```java
+sensor.blinkLed((error, result) -> {
+    if (error == null) {
+        Log.i("app", "Blinked the LED successfully");
+    } else {
+        Log.i("app", "Failed to blink the LED: " + error.toString());
+    }
+});
+```
+
+This is an example of a task which does return a result:
+
+```java
+sensor.getSensorStatus((error, result) -> {
+    if (error == null) {
+        Log.i("app", String.format("The firmware version is %s", result.getFirmwareVersion()));
+    } else {
+        Log.i("app", "Failed to get sensor status: " + error.toString());
+    }
+});
+```
+
+Some long-running tasks additionally accept an optional
+`BioStamp.ProgressListener`. This is a method whose signature is:
+
+```java
+void updateProgress(double progress);
+```
+
+As the task executes the method is called periodically on the main thread with
+a value that starts at 0 and increments until it reaches 1 when the task is
+complete.
 
 [1]: https://developer.android.com/studio/write/java8-support
 [2]: https://help.github.com/en/packages
