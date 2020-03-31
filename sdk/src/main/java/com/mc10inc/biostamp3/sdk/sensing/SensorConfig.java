@@ -399,9 +399,9 @@ public class SensorConfig {
                     Brc3.MotionRotationType.ROT_ACCEL_GYRO_MAG);
         }
 
-        public Builder enableMotionRotationFromAccelCompass(int samplingPeriodUs, int accelGRange,
-                                                                int gyroDpsRange) {
-            return enableMotionRotation(samplingPeriodUs, accelGRange, gyroDpsRange,
+        public Builder enableMotionRotationFromAccelCompass(int samplingPeriodUs, int accelGRange) {
+            // Gyro is not used in this mode, specify any valid DPS range for it
+            return enableMotionRotation(samplingPeriodUs, accelGRange, 2000,
                     Brc3.MotionRotationType.ROT_ACCEL_MAG);
         }
 

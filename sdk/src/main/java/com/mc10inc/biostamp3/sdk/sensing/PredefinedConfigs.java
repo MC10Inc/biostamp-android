@@ -14,7 +14,7 @@ public class PredefinedConfigs {
         configs = new ArrayList<>();
 
         configs.add(new SensorConfig.Builder()
-                .enableMotionAccel(100000, 16)
+                .enableMotionAccel(10000, 16)
                 .build());
 
         configs.add(new SensorConfig.Builder()
@@ -26,7 +26,7 @@ public class PredefinedConfigs {
                 .build());
 
         configs.add(new SensorConfig.Builder()
-                .enableMotionAccel(100000, 16)
+                .enableMotionAccel(10000, 16)
                 .enableEnvironment(1000000)
                 .build());
 
