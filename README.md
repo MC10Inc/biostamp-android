@@ -1,7 +1,7 @@
-# BioStamp® 3.0 Android SDK
+# BioStamp3™ Android SDK
 
-The SDK is used to build Android applications which communicate with BioStamp®
-3.0 sensors.
+Build Android applications that communicate with BioStamp3™ sensors via
+[Bluetooth Low Energy (BLE)][7].
 
 ## Table of Contents
 
@@ -11,26 +11,25 @@ The SDK is used to build Android applications which communicate with BioStamp®
 
 ## Requirements
 
-The minimum required Android SDK version for applications built with this SDK
-is API level 24 (Android 7.0 Nougat). The application will not run on older
-devices.
+This SDK requires Android 7.0 Nougat (API level 24) or higher. It will not
+work on older devices.
 
-The application must enable [Java 8 language features][1].
+Your application must enable [Java 8 language features][1].
 
-The device that the application runs on must support at minimum Bluetooth 4.0
-with Bluetooth Low Energy (BLE). Bluetooth 4.0 or 4.1 is sufficient for command
-and control of the sensor but data throughput is slow. Bluetooth 4.2 provides
-acceptable data throughput, and Bluetooth 5.0 or newer provides a further
-improvement.
+Your application must run on a device that supports Bluetooth 4.0 with
+Bluetooth Low Energy (BLE). Bluetooth 4.0 or 4.1 is sufficient for command
+and control of the sensor but data throughput is slow. Bluetooth 4.2
+provides acceptable data throughput, and Bluetooth 5.0 or newer provides a
+further improvement.
 
 ## Getting started
 
 ### GitHub Packages
 
-The SDK is supplied as an Android library which is hosted on [GitHub
-Packages][2].  To access the library, first [create a personal access token][3]
-with the `read:packages` scope for your GitHub account. To make the access
-token available to any Android Studio project, create a file in your home
+This SDK is supplied as an Android library hosted by [GitHub Packages][2].
+To access the library, first [create a personal access token][3] with the
+`read:packages` scope for your GitHub account. To make the access token
+available to any Android Studio project, create a file in your home
 directory named `.gradle/gradle.properties`:
 
 ```
@@ -40,11 +39,12 @@ gpr.key=your_access_token
 
 ### Project Setup
 
-To use the SDK, start by opening your existing Android application or creating
+To use this SDK, start by opening your existing Android application or creating
 a new application in Android Studio. Open your application's `build.gradle`
 script and make the following changes:
 
 Confirm that the minimum SDK version is at least 24:
+
 ```gradle
 android {
     ...
@@ -56,6 +56,7 @@ android {
 ```
 
 Enable Java 8 language features:
+
 ```gradle
 android {
     ...
@@ -68,7 +69,8 @@ android {
 
 Add the GitHub Packages repositories. Your GitHub username and access token can
 optionally be hardcoded here instead of referencing the values in
-`gradle.properties`.
+`gradle.properties`:
+
 ```gradle
 repositories {
     maven() {
@@ -89,6 +91,7 @@ repositories {
 ```
 
 Add the SDK library to the application's dependencies:
+
 ```gradle
 dependencies {
     ...
@@ -98,10 +101,9 @@ dependencies {
 
 ### Initializing the SDK
 
-The BioStamp SDK must be initialized before any other SDK functions may be
-called. This must be done once every time the application is launched. It is
-recommended to initialize the SDK from within the `onCreate` method of the
-[Application][4] class.
+The `BioStampManager` class must be initialized before any other SDK functions
+are called. This must be done once every time the application is launched. Ideally,
+you should do this from within the `onCreate` method of the [Application][4] class.
 
 If your existing application already subclasses [Application][4], then add
 the following line to the `onCreate` method:
@@ -116,7 +118,9 @@ the following line to the `onCreate` method:
     }
 ```
 
-If you are creating a new application or your existing application does not subclass Application, then create a class like this:
+If you are creating a new application or your existing application does not subclass
+`Application`, then create a class like this:
+
 ```java
 import android.app.Application;
 
@@ -132,6 +136,7 @@ public class MyCustomApplication extends Application {
 ```
 
 and add it to your application's `AndroidManifest.xml` file:
+
 ```xml
     <application
         android:name=".MyCustomApplication"
@@ -145,9 +150,9 @@ call `getInstance()` before calling `initialize()`.
 
 ### Documentation
 
-In addition to this document the SDK supplies Javadoc documentation for classes
-and methods that are part of the SDK's public API. The Javadoc is automatically
-downloaded along with the library and is accessible from within Android Studio.
+In addition to this document the SDK include Javadoc for classes and methods
+that are part of the SDK's public API. The Javadoc is automatically downloaded
+along with the library and is accessible from within Android Studio.
 
 To view Javadoc from within Android Studio, click on an SDK class or method
 (for example `BioStampManager`) in a source file and press Ctrl-Q. A popup
@@ -227,6 +232,20 @@ This minimal example prints out the serial numbers of all sensors in range:
             Log.i("app", serialNumber);
         }
     });
+```
+
+### Connecting to a sensor
+
+All interaction between the application and a specific BioStamp is through a
+`BioStamp` object dedicated to that sensor. The same object is used for that
+sensor for as long as the application is running; it is not necessary to obtain
+a new object when reconnecting after disconnecting.
+
+The object is obtained from the SDK by providing a sensor serial number, which
+would normally be obtained by scanning but can also be hardcoded.
+
+```java
+    BioStamp sensor = BioStampManager.getInstance().getBioStamp(serialNumber);
 ```
 
 [1]: https://developer.android.com/studio/write/java8-support
