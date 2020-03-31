@@ -8,6 +8,9 @@ import com.mc10inc.biostamp3.sdk.Brc3;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Sensor configuration.
@@ -23,6 +26,11 @@ import java.text.DecimalFormat;
  * creating a new recording.
  */
 public class SensorConfig {
+    private static final List<Integer> accelGRanges =
+            Collections.unmodifiableList(Arrays.asList(2, 4, 8, 16));
+    private static final List<Integer> gyroDpsRanges =
+            Collections.unmodifiableList(Arrays.asList(250, 500, 1000, 2000));
+
     private Brc3.SensorConfig.Builder msg;
 
     public SensorConfig(Brc3.SensorConfig msg) {
@@ -304,5 +312,159 @@ public class SensorConfig {
 
     private String rate(int periodUs) {
         return new DecimalFormat("0.###").format(1000000.0 / periodUs) + "Hz";
+    }
+
+    public static class Builder {
+        private Brc3.SensorConfig.Builder msg;
+
+        public Builder() {
+            msg = Brc3.SensorConfig.newBuilder();
+        }
+
+        public SensorConfig build() {
+            if (!msg.hasMotion() && !msg.hasAd5940() && !msg.hasEnvironment() && !msg.hasAfe4900()) {
+                throw new IllegalArgumentException("No sensors are enabled!");
+            }
+            return new SensorConfig(msg.build());
+        }
+
+        public Builder enableRecording() {
+            msg.setRecordingEnabled(true);
+            return this;
+        }
+
+        public Builder enableEnvironment(int samplingPeriodUs) {
+            if (msg.hasEnvironment()) {
+                throw new IllegalArgumentException("Environment sensor is already enabled!");
+            }
+            msg.setEnvironment(Brc3.EnvironmentConfig.newBuilder()
+                    .setMode(Brc3.EnvironmentMode.ALL)
+                    .setSamplingPeriodUs(samplingPeriodUs));
+            return this;
+        }
+
+        public Builder enableMotionAccel(int samplingPeriodUs, int accelGRange) {
+            if (msg.hasMotion()) {
+                throw new IllegalArgumentException("Motion sensor is already enabled!");
+            }
+            validateAccelGRange(accelGRange);
+            msg.setMotion(Brc3.MotionConfig.newBuilder()
+                    .setSamplingPeriodUs(samplingPeriodUs)
+                    .setAccelGRange(accelGRange)
+                    .setMode(Brc3.MotionMode.ACCEL));
+            return this;
+        }
+
+        public Builder enableMotionAccelGyro(int samplingPeriodUs, int accelGRange,
+                                             int gyroDpsRange) {
+            if (msg.hasMotion()) {
+                throw new IllegalArgumentException("Motion sensor is already enabled!");
+            }
+            validateAccelGRange(accelGRange);
+            validateGyroDpsRange(gyroDpsRange);
+            msg.setMotion(Brc3.MotionConfig.newBuilder()
+                    .setSamplingPeriodUs(samplingPeriodUs)
+                    .setAccelGRange(accelGRange)
+                    .setGyroDpsRange(gyroDpsRange)
+                    .setMode(Brc3.MotionMode.ACCEL_GYRO));
+            return this;
+        }
+
+        private Builder enableMotionRotation(int samplingPeriodUs, int accelGRange,
+                                             int gyroDpsRange,
+                                             Brc3.MotionRotationType rotationType) {
+            if (msg.hasMotion()) {
+                throw new IllegalArgumentException("Motion sensor is already enabled!");
+            }
+            validateAccelGRange(accelGRange);
+            validateGyroDpsRange(gyroDpsRange);
+            msg.setMotion(Brc3.MotionConfig.newBuilder()
+                    .setSamplingPeriodUs(samplingPeriodUs)
+                    .setAccelGRange(accelGRange)
+                    .setGyroDpsRange(gyroDpsRange)
+                    .setRotationType(rotationType)
+                    .setMode(Brc3.MotionMode.ROTATION));
+            return this;
+        }
+
+        public Builder enableMotionRotationFromAccelGyro(int samplingPeriodUs, int accelGRange,
+                                                         int gyroDpsRange) {
+            return enableMotionRotation(samplingPeriodUs, accelGRange, gyroDpsRange,
+                    Brc3.MotionRotationType.ROT_ACCEL_GYRO);
+        }
+
+        public Builder enableMotionRotationFromAccelGyroCompass(int samplingPeriodUs, int accelGRange,
+                                                                int gyroDpsRange) {
+            return enableMotionRotation(samplingPeriodUs, accelGRange, gyroDpsRange,
+                    Brc3.MotionRotationType.ROT_ACCEL_GYRO_MAG);
+        }
+
+        public Builder enableMotionRotationFromAccelCompass(int samplingPeriodUs, int accelGRange,
+                                                                int gyroDpsRange) {
+            return enableMotionRotation(samplingPeriodUs, accelGRange, gyroDpsRange,
+                    Brc3.MotionRotationType.ROT_ACCEL_MAG);
+        }
+
+        public Builder enableMotionCompass(int samplingPeriodUs) {
+            if (msg.hasMotion()) {
+                throw new IllegalArgumentException("Motion sensor is already enabled!");
+            }
+            msg.setMotion(Brc3.MotionConfig.newBuilder()
+                    .setSamplingPeriodUs(samplingPeriodUs)
+                    .setMode(Brc3.MotionMode.COMPASS));
+            return this;
+        }
+
+        public Builder enableAd5940ElectrodermalActivity() {
+            if (msg.hasAd5940()) {
+                throw new IllegalArgumentException("AD5940 sensor is already enabled!");
+            }
+            msg.setAd5940(Brc3.AD5940Config.newBuilder()
+                    .setMode(Brc3.AD5940Mode.EDA));
+            return this;
+        }
+
+        public Builder enableAfe4900Ecg(int ecgGain) {
+            if (msg.hasAfe4900()) {
+                throw new IllegalArgumentException("AFE4900 sensor is already enabled!");
+            }
+            msg.setAfe4900(Brc3.AFE4900Config.newBuilder()
+                    .setMode(Brc3.AFE4900Mode.ECG)
+                    .setEcgGain(convertAfe4900EcgGain(ecgGain)));
+            return this;
+        }
+
+        private Brc3.AFE4900ECGGain convertAfe4900EcgGain(int ecgGain) {
+            switch (ecgGain) {
+                case 2:
+                    return Brc3.AFE4900ECGGain.GAIN_2;
+                case 3:
+                    return Brc3.AFE4900ECGGain.GAIN_3;
+                case 4:
+                    return Brc3.AFE4900ECGGain.GAIN_4;
+                case 5:
+                    return Brc3.AFE4900ECGGain.GAIN_5;
+                case 6:
+                    return Brc3.AFE4900ECGGain.GAIN_6;
+                case 9:
+                    return Brc3.AFE4900ECGGain.GAIN_9;
+                case 12:
+                    return Brc3.AFE4900ECGGain.GAIN_12;
+                default:
+                    throw new IllegalArgumentException("Invalid AFE4900 ECG gain");
+            }
+        }
+
+        private void validateAccelGRange(int accelGRange) {
+            if (!accelGRanges.contains(accelGRange)) {
+                throw new IllegalArgumentException("Invalid accelerometer G range");
+            }
+        }
+
+        private void validateGyroDpsRange(int gyroDpsRange) {
+            if (!gyroDpsRanges.contains(gyroDpsRange)) {
+                throw new IllegalArgumentException("Invalid gyroscope DPS range");
+            }
+        }
     }
 }
