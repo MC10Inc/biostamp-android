@@ -97,7 +97,7 @@ public class ControlsFragment extends BaseFragment {
                     sb.append(fault);
                     sb.append("\n");
                 }
-                statusText.setText(sb.toString());
+                setStatusText(sb.toString());
             } else {
                 Timber.e(error);
             }
@@ -234,7 +234,7 @@ public class ControlsFragment extends BaseFragment {
                 if (result.isEmpty()) {
                     sb.append("No faults logged");
                 }
-                statusText.setText(sb.toString());
+                setStatusText(sb.toString());
             } else {
                 Timber.e(error);
             }
@@ -251,5 +251,10 @@ public class ControlsFragment extends BaseFragment {
                 Timber.e(error);
             }
         });
+    }
+
+    private void setStatusText(String text) {
+        statusText.setText(text);
+        statusText.scrollTo(0, 0);
     }
 }
