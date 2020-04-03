@@ -364,6 +364,11 @@ public class SensorConfig {
 
         /**
          * Enable the environment (temperature and atmospheric pressure) sensor.
+         * <p/>
+         * Generates samples containing values:
+         * <p/>
+         * {@link RawSamples.ColumnType#TEMPERATURE}
+         * {@link RawSamples.ColumnType#PASCALS}
          *
          * @param samplingPeriodUs sampling period
          * @return builder
@@ -380,6 +385,12 @@ public class SensorConfig {
 
         /**
          * Enable the ICM-20948 motion sensor in accelerometer mode.
+         * <p/>
+         * Generates samples containing values:
+         * <p/>
+         * {@link RawSamples.ColumnType#ACCEL_X}
+         * {@link RawSamples.ColumnType#ACCEL_Y}
+         * {@link RawSamples.ColumnType#ACCEL_Z}
          *
          * @param samplingPeriodUs sampling period
          * @param accelGRange      Accelerometer G range. Must be 2, 4, 8, or 16. For example if 16
@@ -401,6 +412,15 @@ public class SensorConfig {
 
         /**
          * Enable the ICM-20948 motion sensor in accelerometer and gyroscope mode.
+         * <p/>
+         * Generates samples containing values:
+         * <p/>
+         * {@link RawSamples.ColumnType#ACCEL_X}
+         * {@link RawSamples.ColumnType#ACCEL_Y}
+         * {@link RawSamples.ColumnType#ACCEL_Z}
+         * {@link RawSamples.ColumnType#GYRO_X}
+         * {@link RawSamples.ColumnType#GYRO_Y}
+         * {@link RawSamples.ColumnType#GYRO_Z}
          *
          * @param samplingPeriodUs sampling period
          * @param accelGRange      Accelerometer G range. Must be 2, 4, 8, or 16. For example if 16
@@ -447,6 +467,13 @@ public class SensorConfig {
          * Enable the ICM-20948 motion sensor in accel+gyro rotation mode.
          * <p/>
          * The accelerometer and gyroscope are used to determine the sensor's orientation.
+         * <p/>
+         * Generates samples containing values:
+         * <p/>
+         * {@link RawSamples.ColumnType#QUAT_A}
+         * {@link RawSamples.ColumnType#QUAT_B}
+         * {@link RawSamples.ColumnType#QUAT_C}
+         * {@link RawSamples.ColumnType#QUAT_D}
          *
          * @param samplingPeriodUs sampling period
          * @param accelGRange      Accelerometer G range. Must be 2, 4, 8, or 16. For example if 16
@@ -468,6 +495,13 @@ public class SensorConfig {
          * <p/>
          * The accelerometer, gyroscope, and compass are used to determine the sensor's
          * orientation.
+         * <p/>
+         * Generates samples containing values:
+         * <p/>
+         * {@link RawSamples.ColumnType#QUAT_A}
+         * {@link RawSamples.ColumnType#QUAT_B}
+         * {@link RawSamples.ColumnType#QUAT_C}
+         * {@link RawSamples.ColumnType#QUAT_D}
          *
          * @param samplingPeriodUs sampling period
          * @param accelGRange      Accelerometer G range. Must be 2, 4, 8, or 16. For example if 16
@@ -488,6 +522,13 @@ public class SensorConfig {
          * Enable the ICM-20948 motion sensor in accel+compass rotation mode.
          * <p/>
          * The accelerometer and compass are used to determine the sensor's orientation.
+         * <p/>
+         * Generates samples containing values:
+         * <p/>
+         * {@link RawSamples.ColumnType#QUAT_A}
+         * {@link RawSamples.ColumnType#QUAT_B}
+         * {@link RawSamples.ColumnType#QUAT_C}
+         * {@link RawSamples.ColumnType#QUAT_D}
          *
          * @param samplingPeriodUs sampling period
          * @param accelGRange      Accelerometer G range. Must be 2, 4, 8, or 16. For example if 16
@@ -503,6 +544,12 @@ public class SensorConfig {
 
         /**
          * Enable the ICM-20948 motion sensor in compass mode.
+         * <p/>
+         * Generates samples containing values:
+         * <p/>
+         * {@link RawSamples.ColumnType#MAG_X}
+         * {@link RawSamples.ColumnType#MAG_Y}
+         * {@link RawSamples.ColumnType#MAG_Z}
          *
          * @param samplingPeriodUs sampling period
          * @return builder
@@ -519,6 +566,11 @@ public class SensorConfig {
 
         /**
          * Enable the AD5940 bio-impedance sensor in electrodermal activity mode.
+         * <p/>
+         * Generates samples containing values:
+         * <p/>
+         * {@link RawSamples.ColumnType#Z_MAG}
+         * {@link RawSamples.ColumnType#Z_PHASE}
          *
          * @return builder
          */
@@ -533,6 +585,10 @@ public class SensorConfig {
 
         /**
          * Enable the AFE4900 sensor in ECG (biopotential) mode.
+         * <p/>
+         * Generates samples containing values:
+         * <p/>
+         * {@link RawSamples.ColumnType#ECG}
          *
          * @param ecgGain ECG gain. Must be 2, 3, 4, 5, 6, 9, or 12.
          * @return builder
