@@ -226,6 +226,18 @@ public interface BioStamp {
     void clearAllRecordings(Listener<Void> listener);
 
     /**
+     * Clear the oldest recording in the sensor's flash memory.
+     * <p/>
+     * The recording that is cleared is the first element in the list of recordings returned by
+     * {@link #getRecordingList(Listener)}. The oldest recording must not be in progress in order to
+     * clear all recordings. If it is in progress, call {@link #stopSensing(Listener)} to stop it
+     * before clearing it.
+     *
+     * @param listener
+     */
+    void clearOldestRecording(Listener<Void> listener);
+
+    /**
      * Download a recording from the sensor's flash memory.
      * <p/>
      * Specify one of the recordings that was returned from {@link #getRecordingList(Listener)}. The

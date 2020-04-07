@@ -93,6 +93,18 @@ public class DownloadFragment extends BaseFragment {
                 .show();
     }
 
+    @OnClick(R.id.clearOldestButton) void clearOldestButton() {
+        if (getActivity() == null || getActivity().isFinishing()) {
+            return;
+        }
+        new AlertDialog.Builder(getActivity())
+                .setMessage("Are you sure you want to clear the oldest recording?")
+                .setPositiveButton("Yes", (dialogInterface, i) -> clearOldestRecording())
+                .setNegativeButton("No", (dialogInterface, i) -> dialogInterface.dismiss())
+                .create()
+                .show();
+    }
+
     private void clearAllRecordings() {
         BioStamp s = viewModel.getSensor();
         if (s == null) {
@@ -106,6 +118,23 @@ public class DownloadFragment extends BaseFragment {
             }
         });
     }
+
+    private void clearOldestRecording() {
+        BioStamp s = viewModel.getSensor();
+        if (s == null) {
+            return;
+        }
+        s.clearOldestRecording((error, result) -> {
+            if (error == null) {
+                // Update the list now
+                viewModel.setRecordingList(Collections.emptyList());
+                listButton();
+            } else {
+                Timber.e(error);
+            }
+        });
+    }
+
     private void updateRecordingList(List<RecordingInfo> recordings) {
         if (recordings == null) {
             recordingAdapter.setRecordings(Collections.emptyList());

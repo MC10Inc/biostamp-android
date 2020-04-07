@@ -370,6 +370,21 @@ public class BioStampImpl implements BioStamp {
     }
 
     @Override
+    public void clearOldestRecording(Listener<Void> listener) {
+        executeTask(new Task<Void>(this, listener) {
+            @Override
+            public void doTask() {
+                try {
+                    Request.clearOldestRecording.execute(ble);
+                    success(null);
+                } catch (BleException e) {
+                    error(e);
+                }
+            }
+        });
+    }
+
+    @Override
     public void downloadRecording(RecordingInfo recording, Listener<Void> listener,
                                   ProgressListener progressListener) {
         executeTask(new DownloadRecording(this, listener, progressListener, recording));

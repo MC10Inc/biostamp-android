@@ -99,6 +99,9 @@ public class Request<TC, TR> {
     public static final Request<Void, Void> clearAllRecordings =
             new Request<>(Brc3.Command.CLEAR_ALL_RECORDINGS, null, null);
 
+    public static final Request<Void, Void> clearOldestRecording =
+            new Request<>(Brc3.Command.RECORDING_CLEAR_OLDEST, null, null);
+
     public static final Request<Brc3.RecordingReadCommandParam.Builder, Void> readRecording =
             new Request<>(Brc3.Command.RECORDING_READ, Brc3.Request.Builder::setRecordingRead, null);
 
