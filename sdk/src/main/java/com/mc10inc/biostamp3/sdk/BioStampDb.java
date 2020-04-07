@@ -1,5 +1,7 @@
 package com.mc10inc.biostamp3.sdk;
 
+import androidx.lifecycle.LiveData;
+
 import com.mc10inc.biostamp3.sdk.recording.DownloadStatus;
 import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
 
@@ -12,20 +14,6 @@ import java.util.List;
  * downloaded from sensors.
  */
 public interface BioStampDb {
-    /**
-     * Add a listener to be notified when the contents of the database change.
-     *
-     * @param listener Listener to receive updates
-     */
-    void addRecordingUpdateListener(RecordingUpdateListener listener);
-
-    /**
-     * Remove a listener to stop being notified when the contents of the database change.
-     *
-     * @param listener Listener to stop receiving updates
-     */
-    void removeRecordingUpdateListener(RecordingUpdateListener listener);
-
     /**
      * Delete all recordings in the database.
      */
@@ -48,6 +36,17 @@ public interface BioStampDb {
      * @return List of all recordings in the database
      */
     List<RecordingInfo> getRecordings();
+
+    /**
+     * Get a list of all recordings in the database as LiveData.
+     * <p/>
+     * The value of the LiveData is the same as the value returned by {@link #getRecordings()}.
+     * Observers are notified any time the contents of the database change. This may be used to
+     * update a UI interface that shows the contents of the database.
+     *
+     * @return LiveData of list of all recordings in the database
+     */
+    LiveData<List<RecordingInfo>> getRecordingsLiveData();
 
     /**
      * Get the download status of a recording.

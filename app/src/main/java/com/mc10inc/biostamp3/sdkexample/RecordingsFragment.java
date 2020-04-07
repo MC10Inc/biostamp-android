@@ -38,13 +38,6 @@ public class RecordingsFragment extends BaseFragment {
     private RecordingAdapter recordingAdapter;
     private RecordingInfo selectedRecordingToDecode;
 
-    private final BioStampDb.RecordingUpdateListener updateListener = () -> {
-        if (getActivity() == null || getActivity().isFinishing()) {
-            return;
-        }
-        getActivity().runOnUiThread(this::refresh);
-    };
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -59,30 +52,14 @@ public class RecordingsFragment extends BaseFragment {
         recordingAdapter = new RecordingAdapter();
         recordingList.setAdapter(recordingAdapter);
 
-        viewModel.getLocalRecordingList().observe(getViewLifecycleOwner(), recordingInfos -> {
+        BioStampManager.getInstance().getDb().getRecordingsLiveData().observe(getViewLifecycleOwner(), recordingInfos -> {
             List<RecordingAdapter.RecordingItem> items = recordingInfos.stream()
                     .map(RecordingAdapter.RecordingItem::new)
                     .collect(Collectors.toList());
             recordingAdapter.setRecordings(items);
         });
 
-        refresh();
-
         return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        BioStampManager.getInstance().getDb().addRecordingUpdateListener(updateListener);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        BioStampManager.getInstance().getDb().removeRecordingUpdateListener(updateListener);
     }
 
     @Override
@@ -145,10 +122,6 @@ public class RecordingsFragment extends BaseFragment {
                 .setNegativeButton("No", (dialogInterface, i) -> dialogInterface.dismiss())
                 .create()
                 .show();
-    }
-
-    private void refresh() {
-        new GetRecordingsTask(viewModel).execute();
     }
 
     @Override

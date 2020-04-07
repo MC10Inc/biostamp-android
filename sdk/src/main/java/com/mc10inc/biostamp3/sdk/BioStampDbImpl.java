@@ -9,11 +9,15 @@ import android.database.sqlite.SQLiteStatement;
 import android.os.Handler;
 import android.os.Looper;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.mc10inc.biostamp3.sdk.recording.DownloadStatus;
 import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -77,20 +81,10 @@ public class BioStampDbImpl implements BioStampDb {
 
     private DbHelper dbHelper;
     private Handler handler = new Handler(Looper.getMainLooper());
-    private Set<RecordingUpdateListener> recordingUpdateListeners = new CopyOnWriteArraySet<>();
+    private RecordingsLiveData recordingsLiveData = new RecordingsLiveData();
 
     public BioStampDbImpl(Context context) {
         dbHelper = new DbHelper(context);
-    }
-
-    @Override
-    public void addRecordingUpdateListener(RecordingUpdateListener listener) {
-        recordingUpdateListeners.add(listener);
-    }
-
-    @Override
-    public void removeRecordingUpdateListener(RecordingUpdateListener listener) {
-        recordingUpdateListeners.remove(listener);
     }
 
     public void insertRecording(RecordingInfo recording) {
@@ -102,14 +96,14 @@ public class BioStampDbImpl implements BioStampDb {
         cv.put("info_msg", recording.getMsg().toByteArray());
         long id = db.insertWithOnConflict("recordings", null, cv,
                 SQLiteDatabase.CONFLICT_FAIL);
-        notifyRecordingUpdate();
+        recordingsLiveData.notifyUpdate();
     }
 
     @Override
     public void deleteAllRecordings() {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.delete("recordings", null, null);
-        notifyRecordingUpdate();
+        recordingsLiveData.notifyUpdate();
     }
 
     @Override
@@ -120,7 +114,7 @@ public class BioStampDbImpl implements BioStampDb {
                 new String[]{
                         recordingKey.getSerial(),
                         String.valueOf(recordingKey.getRecordingId())});
-        notifyRecordingUpdate();
+        recordingsLiveData.notifyUpdate();
     }
 
     @Override
@@ -153,6 +147,11 @@ public class BioStampDbImpl implements BioStampDb {
             recInfo.setDownloadStatus(ds);
         }
         return recs;
+    }
+
+    @Override
+    public LiveData<List<RecordingInfo>> getRecordingsLiveData() {
+        return recordingsLiveData;
     }
 
     private DbRecInfo getDbRecInfo(RecordingKey recordingKey) {
@@ -196,7 +195,7 @@ public class BioStampDbImpl implements BioStampDb {
         } finally {
             db.endTransaction();
         }
-        notifyRecordingUpdate();
+        recordingsLiveData.notifyUpdate();
     }
 
     @Override
@@ -271,14 +270,30 @@ public class BioStampDbImpl implements BioStampDb {
         return new RecordingPagesLoader(cursor);
     }
 
-    private void notifyRecordingUpdate() {
-        for (RecordingUpdateListener listener : recordingUpdateListeners) {
-            handler.post(listener::recordingsDbUpdated);
-        }
-    }
-
     public String getDatabasePath() {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         return db.getPath();
+    }
+
+    private class RecordingsLiveData extends MutableLiveData<List<RecordingInfo>> {
+        RecordingsLiveData() {
+            super(Collections.emptyList());
+        }
+
+        @Override
+        protected void onActive() {
+            super.onActive();
+            update();
+        }
+
+        void notifyUpdate() {
+            if (hasActiveObservers()) {
+                update();
+            }
+        }
+
+        private void update() {
+            BioStampManager.getInstance().dbExecute(() -> postValue(getRecordings()));
+        }
     }
 }
