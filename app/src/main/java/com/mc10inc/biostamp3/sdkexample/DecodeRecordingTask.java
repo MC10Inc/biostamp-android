@@ -1,7 +1,5 @@
 package com.mc10inc.biostamp3.sdkexample;
 
-import android.os.AsyncTask;
-
 import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
 import com.mc10inc.biostamp3.sdk.sensing.RawSamples;
 import com.mc10inc.biostamp3.sdk.sensing.RecordingAnnotation;
@@ -19,7 +17,7 @@ import java.util.zip.ZipOutputStream;
 
 import timber.log.Timber;
 
-public class DecodeRecordingTask extends AsyncTask<Void, Void, Void> {
+public class DecodeRecordingTask implements Runnable {
     private RecordingInfo recordingInfo;
     private OutputStream outputStream;
 
@@ -29,7 +27,7 @@ public class DecodeRecordingTask extends AsyncTask<Void, Void, Void> {
     }
 
     @Override
-    protected Void doInBackground(Void... voids) {
+    public void run() {
         try (ZipOutputStream zip = new ZipOutputStream(new BufferedOutputStream((outputStream)))) {
             if (recordingInfo.getSensorConfig().hasMotion()) {
                 decodeMotion(zip);
@@ -47,7 +45,6 @@ public class DecodeRecordingTask extends AsyncTask<Void, Void, Void> {
         } catch (IOException e) {
             Timber.e(e);
         }
-        return null;
     }
 
     private void decodeAd5940(ZipOutputStream zip) throws IOException {
