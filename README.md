@@ -674,6 +674,40 @@ sensor.startSensing(config, 0, metadata, (error, result) -> {
 });
 ```
 
+### Annotations
+
+An annotation is a small message of application-defined data which is inserted
+into a recording alongside sensor samples while the recording is in progress.
+Annotations are timestamped with the time the sensor receives them and are
+included in the downloaded recording.
+
+Similarly to [recording metadata](#metadata), the SDK accepts an annotation as
+a `byte[]` array. The maximum size is given by the `getAnnotationDataMaxSize()`
+method of `BioStamp`. Currently the size is limited by firmware to 220 bytes,
+but this may change in the future.
+
+In the following example the application defines the format of the metadata as
+a human readable string.
+
+To insert an annotation in a recording in progress:
+
+```java
+String annoStr = "Subject starts running now";
+byte[] annotation = annoStr.getBytes(StandardCharsets.UTF_8);
+if (annotation.length > sensor.getAnnotationDataMaxSize()) {
+    // Annotation is too large - exception would be thrown!
+}
+sensor.annotate(annotation, (error, timestamp) -> {
+    if (error == null) {
+        Log.i("app", String.format("Annotation added at timestamp %f", timestamp));
+    }
+});
+```
+
+The sensor returns the exact timestamp that it gave the annotation as a
+floating point number in seconds. When the recording is downloaded and decoded,
+the annotation timestamp in the recording will exactly match this value.
+
 ### Downloading
 
 The first step in downloading a recording is to get a list of recordings in the
@@ -746,6 +780,168 @@ is in progress. We can stop the download before it is complete.
 
 ```java
 sensor.cancelTask();
+```
+
+Once the recording is downloaded, if it is the oldest recording in the sensor's
+memory (the first element of the list returned by `getRecordingList`), then it
+can be deleted to free up space.
+
+```java
+sensor.clearOldestRecording((error, result) -> {
+    if (error == null) {
+        Log.i("app", "Deleted oldest recording");
+    }
+});
+```
+
+Instead of deleting recordings one by one, they can all be deleted at once.
+
+```java
+sensor.clearAllRecordings((error, result) -> {
+    if (error == null) {
+        Log.i("app", "Deleted all recordings");
+    }
+});
+```
+
+### Recording Database
+
+The `BioStampDb` singleton object provides access to the recording database. To
+access the database:
+
+```java
+BioStampDb db = BioStampManager.getInstance().getDb();
+```
+
+The `BioStampDb` methods may sometimes take a long time to execute. Therefore
+it is recommended (although not mandatory) to call them from a background
+thread instead of the main thread to avoid blocking the app's UI.
+
+To get a list of all recordings in the database, call `getRecordings()`. The
+result is a list of `RecordingInfo`, exactly like the response to
+`getRecordingList` from the sensor.
+
+```java
+List<RecordingInfo> recordings = db.getRecordings();
+Log.i("app", String.format("There are %d recordings in the database",
+        recordings.size()));
+```
+
+Some applications may have a UI which needs to be updated based on the contents
+of the database. To support this, the list of recordings is also provided as a
+[LiveData][6] which notifies observers any time the contents of the database
+change.
+
+```java
+db.getRecordingsLiveData().observe(this, recordings -> {
+    Log.i("app", String.format("There are %d recordings in the database",
+            recordings.size()));
+});
+```
+
+We can query the `RecordingInfo` for each recording. In this example we assume
+that the application is using metadata and has defined its format as a string,
+as in the [Metadata](#metadata) example above.
+
+```java
+RecordingInfo recInfo = recordings.get(0);
+Log.i("app", String.format("This recording is from sensor %s",
+        recInfo.getSerial()));
+Log.i("app", String.format("It started at date and time %s",
+        recInfo.getDurationSec()));
+Log.i("app", String.format("The sensor configuration is: %s",
+        recInfo.getSensorConfig().toString()));
+if (recInfo.getMetadata() == null) {
+    Log.i("app", "There is no metadata");
+} else {
+    String metadataStr = new String(recInfo.getMetadata(), StandardCharsets.UTF_8);
+    Log.i("app", String.format("The metadata is: %s", metadataStr));
+}
+if (recInfo.getDownloadStatus().isComplete()) {
+    Log.i("app", String.format("The download is complete and it can be decoded now"));
+}
+```
+
+Once we are done with a recording in the database we can delete that specific
+recording to free up space. The `RecordingInfo` object identifies which
+recording to delete.
+
+```java
+db.deleteRecording(recInfo);
+```
+
+Or all recordings in the database can be deleted at once.
+
+```java
+db.deleteAllRecordings();
+```
+
+### Decoding a Recording
+
+The `RecordingDecoder` object is used to decode a recording from the database.
+It is constructed with a `RecordingInfo` object that identifies which recording
+to decode. The application registers a listener for each type of sensor sample
+it wants to decode, and optionally a listener for annotations. Once the
+listeners are registered, the `decode()` method is called and the
+`RecordingDecoder` iterates through the entire recording, passing the data to
+the listeners as `RawSamples` objects. These are exactly the same as the
+objects received from the sensor during real time streaming, as described in
+[Raw Samples](#raw-samples).
+
+For a large recording, the `decode()` method can take a long time to execute so
+it is important to call it from a background thread, not the main thread, to
+avoid blocking the UI. Once the `decode()` method returns, the entire recording
+has been decoded.
+
+In this example we print out all of the annotations and ignore the sensor
+samples. We assume that the application has defined the format of the
+annotation as a human readable string.
+
+```java
+RecordingDecoder decoder = new RecordingDecoder(recInfo);
+
+decoder.setAnnotationListener(annotation -> {
+    String annoStr = new String(annotation.getData(), StandardCharsets.UTF_8);
+    Log.i("app", String.format("Annotation at %f: %s\n",
+            annotation.getTimestamp(), annoStr));
+});
+
+decoder.decode();
+```
+
+This example is for an accelerometer recording. We read all of the
+accelerometer samples into memory and calculate the mean acceleration on the Z
+axis in G's. We create a list with one element for each sample. Each element is
+a list whose elements are the timestamp, X axis, Y axis, and Z axis.
+
+```java
+RecordingDecoder decoder = new RecordingDecoder(recInfo);
+
+List<List<Double>> accelSamples = new ArrayList<>();
+decoder.setListener(RecordingDecoder.RawSamplesType.MOTION, samples -> {
+    for (int i = 0; i < samples.getSize(); i++) {
+        List<Double> s = new ArrayList<>();
+        s.add(samples.getTimestamp(i));
+        s.add(samples.getValue(RawSamples.ColumnType.ACCEL_X, i));
+        s.add(samples.getValue(RawSamples.ColumnType.ACCEL_Y, i));
+        s.add(samples.getValue(RawSamples.ColumnType.ACCEL_Z, i));
+        accelSamples.add(s);
+    }
+});
+
+decoder.decode();
+
+Log.i("app", String.format("The timestamp of the first sample is %f",
+        accelSamples.get(0).get(0)));
+Log.i("app", String.format("The timestamp of the last sample is %f",
+        accelSamples.get(accelSamples.size() - 1).get(0)));
+
+double zSum = 0;
+for (List<Double> sample : accelSamples) {
+    zSum += sample.get(3);
+}
+Log.i("app", String.format("The mean value of the Z axis is %f G",
+        zSum / accelSamples.size()));
 ```
 
 [1]: https://developer.android.com/studio/write/java8-support
