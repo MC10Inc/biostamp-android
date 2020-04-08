@@ -11,6 +11,7 @@ Build Android applications that communicate with BioStamp3™ sensors via
   * [Controlling sensors](#controlling-sensors)
   * [Sensing](#sensing)
   * [Recordings](#recordings)
+  * [Firmware](#firmware)
 
 ## Requirements
 
@@ -942,6 +943,81 @@ for (List<Double> sample : accelSamples) {
 }
 Log.i("app", String.format("The mean value of the Z axis is %f G",
         zSum / accelSamples.size()));
+```
+
+## Firmware
+
+The BioStamp's firmware can be updated over the air from a firmware image file
+provided by MC10.
+
+The BioStamp contains both application firmware and a bootloader which performs
+the firmware update. A typical firmware update would only update the
+application firmware and leave the bootloader unchanged. In the event that the
+bootloader ever does need to be updated, it is possible for a firmware image to
+contain an updated bootloader in addition to an updated application.
+
+The firmware version is formatted as a string. To check the current firmware
+version:
+
+```java
+sensor.getSensorStatus((error, result) -> {
+    Log.i("app", "The application firmware version is " + result.getFirmwareVersion());
+    Log.i("app", "The bootloader version is " + result.getBootloaderVersion());
+});
+```
+
+To perform a firmware update:
+    
+1. Upload the firmware image over BLE to the sensor. The firmware image is
+   stored in the sensor's flash memory. This has no effect on the running
+   firmware and there is no possibility of leaving the sensor in a non-functional
+   state if an error occurs here.
+
+2. Command the sensor to load the firmware image. The sensor reads back the
+   image that was uploaded in the previous step and checks that it is valid,
+   not corrupt, and compatible with the BioStamp. It then sets a flag indicating
+   that the bootloader should load the image next time the sensor starts up.
+
+3. Reset the sensor. At this point the BLE connection is lost. The bootloader
+   copies the firmware image from the flash memory to the processor and starts
+   up the new firmware.
+
+4. Reconnect to the sensor and confirm that the firmware version has changed.
+
+This code performs an update, given a firmware image file as an array of bytes.
+
+```java
+public void updateFirmware(BioStamp sensor, byte[] image) {
+    sensor.uploadFirmware(image, (error, result) -> {
+        if (error == null) {
+            loadFirmwareImage(sensor);
+        } else {
+            Log.i("app", "Failed to upload firmware");
+        }
+    }, progress -> {
+        Log.i("app", String.format("Firmware upload is %d%% complete", (int)(progress * 100)));
+    });
+}
+
+public void loadFirmwareImage(BioStamp sensor) {
+    sensor.loadFirmwareImage(((error, result) -> {
+        if (error == null) {
+            resetSensor(sensor);
+        } else {
+            Log.i("app", "Sensor failed to load firmware image");
+        }
+    }));
+}
+
+public void resetSensor(BioStamp sensor) {
+    sensor.reset(((error, result) -> {
+        if (error == null) {
+            Log.i("app", "Sensor reset; now reconnect to check firmware was updated");
+        } else {
+            Log.i("app", "Failed to reset sensor");
+        }
+    }));
+}
 ```
 
 [1]: https://developer.android.com/studio/write/java8-support
