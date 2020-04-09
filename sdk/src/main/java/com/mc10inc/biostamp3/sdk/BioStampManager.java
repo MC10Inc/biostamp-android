@@ -14,6 +14,8 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.fitbit.bluetooth.fbgatt.FitbitGatt;
 import com.fitbit.bluetooth.fbgatt.GattConnection;
+import com.fitbit.bluetooth.fbgatt.GattServerConnection;
+import com.fitbit.bluetooth.fbgatt.exception.BitGattStartException;
 import com.mc10inc.biostamp3.sdk.ble.SensorBle;
 import com.mc10inc.biostamp3.sdk.ble.SensorBleBitgatt;
 import com.mc10inc.biostamp3.sdk.ble.StatusBroadcast;
@@ -100,7 +102,15 @@ public class BioStampManager {
     };
 
     private void start() {
-        gatt.startWithScanFilters(applicationContext, StatusBroadcast.getScanFilters(), callback);
+        gatt.registerGattEventListener(callback);
+        gatt.startGattClient(applicationContext);
+        gatt.initializeScanner(applicationContext);
+        // Starting and stopping a periodical scan is currently the only way to pass in a ScanFilter
+        // object. We need to do this because a method is not provided to add a scan filter for
+        // manufacturer-specific data, even though methods are provided for many other items in the
+        // advertisement.
+        gatt.startPeriodicalScannerWithFilters(applicationContext, StatusBroadcast.getScanFilters());
+        gatt.cancelPeriodicalScan(applicationContext);
         handler.post(updateThroughput);
     }
 
@@ -263,16 +273,6 @@ public class BioStampManager {
         }
 
         @Override
-        public void onFitbitGattReady() {
-
-        }
-
-        @Override
-        public void onFitbitGattStartFailed() {
-
-        }
-
-        @Override
         public void onScanStarted() {
 
         }
@@ -280,6 +280,11 @@ public class BioStampManager {
         @Override
         public void onScanStopped() {
 
+        }
+
+        @Override
+        public void onScannerInitError(BitGattStartException error) {
+            Timber.e(error);
         }
 
         @Override
@@ -310,6 +315,26 @@ public class BioStampManager {
         @Override
         public void onBluetoothTurningOff() {
 
+        }
+
+        @Override
+        public void onGattServerStarted(GattServerConnection serverConnection) {
+
+        }
+
+        @Override
+        public void onGattServerStartError(BitGattStartException error) {
+
+        }
+
+        @Override
+        public void onGattClientStarted() {
+
+        }
+
+        @Override
+        public void onGattClientStartError(BitGattStartException error) {
+            Timber.e(error);
         }
     };
 
