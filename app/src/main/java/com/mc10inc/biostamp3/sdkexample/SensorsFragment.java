@@ -116,6 +116,7 @@ public class SensorsFragment extends BaseFragment {
                     break;
             }
             holder.statusTextView.setText(status);
+            holder.sensorStatusTextView.setText("");
             holder.view.setSelected(position == selection);
         }
 
@@ -156,6 +157,9 @@ public class SensorsFragment extends BaseFragment {
 
         @BindView(R.id.statusTextView)
         TextView statusTextView;
+
+        @BindView(R.id.sensorStatusTextView)
+        TextView sensorStatusTextView;
 
         SensorViewHolder(View view, SensorViewHolder.SelectListener listener) {
             super(view);

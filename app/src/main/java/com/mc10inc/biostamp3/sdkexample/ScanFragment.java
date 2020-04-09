@@ -17,6 +17,7 @@ import com.mc10inc.biostamp3.sdk.ScannedSensorStatus;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -95,14 +96,14 @@ public class ScanFragment extends BaseFragment {
     }
 
     private void updateSensorList(Map<String, ScannedSensorStatus> sensorsInRange) {
-        List<String> serials = new ArrayList<>(sensorsInRange.keySet());
-        Collections.sort(serials);
-        sensorAdapter.setSensorSerials(serials);
+        List<ScannedSensorStatus> sensors = new ArrayList<>(sensorsInRange.values());
+        Collections.sort(sensors, (a, b) -> a.getSerial().compareTo(b.getSerial()));
+        sensorAdapter.setSensors(sensors);
     }
 
     private static class ScanSensorAdapter extends RecyclerView.Adapter<SensorViewHolder> {
         private String selectedSerial = null;
-        private List<String> sensorSerials = Collections.emptyList();
+        private List<ScannedSensorStatus> sensors = Collections.emptyList();
         private Map<String, BioStamp> biostamps = Collections.emptyMap();
 
         @NonNull
@@ -115,13 +116,13 @@ public class ScanFragment extends BaseFragment {
 
         @Override
         public void onBindViewHolder(@NonNull SensorViewHolder holder, int position) {
-            String serial = sensorSerials.get(position);
-            holder.serialTextView.setText(serial);
-            if (biostamps != null && biostamps.containsKey(serial)) {
-                BioStamp sensor = biostamps.get(serial);
+            ScannedSensorStatus sensor = sensors.get(position);
+            holder.serialTextView.setText(sensor.getSerial());
+            if (biostamps != null && biostamps.containsKey(sensor.getSerial())) {
+                BioStamp bioStamp = biostamps.get(sensor.getSerial());
                 String status = "";
-                if (sensor != null) {
-                    switch (sensor.getState()) {
+                if (bioStamp != null) {
+                    switch (bioStamp.getState()) {
                         case CONNECTED:
                             status = "Connected";
                             break;
@@ -134,29 +135,45 @@ public class ScanFragment extends BaseFragment {
                     }
                 }
                 holder.statusTextView.setText(status);
+            } else {
+                holder.statusTextView.setText("");
             }
-            holder.view.setSelected(serial.equals(selectedSerial));
+            if (sensor.getStatusBroadcast() != null) {
+                holder.sensorStatusTextView.setText(sensor.getStatusBroadcast().toString());
+            } else {
+                holder.sensorStatusTextView.setText("");
+            }
+            holder.view.setSelected(sensor.getSerial().equals(selectedSerial));
         }
 
         @Override
         public int getItemCount() {
-            return sensorSerials.size();
+            return sensors.size();
         }
 
         private void setSelected(int position) {
-            if (position >= 0 && position < sensorSerials.size()) {
-                selectedSerial = sensorSerials.get(position);
+            if (position >= 0 && position < sensors.size()) {
+                selectedSerial = sensors.get(position).getSerial();
             } else {
                 selectedSerial = null;
             }
             notifyDataSetChanged();
         }
 
-        private void setSensorSerials(List<String> sensorSerials) {
-            this.sensorSerials = sensorSerials;
+        private void setSensors(List<ScannedSensorStatus> sensors) {
+            this.sensors = sensors;
             this.biostamps = BioStampManager.getInstance().getBioStampsLiveData().getValue();
-            if (selectedSerial != null && !sensorSerials.contains(selectedSerial)) {
-                selectedSerial = null;
+            if (selectedSerial != null) {
+                boolean selectedIsInList = false;
+                for (ScannedSensorStatus sensor : sensors) {
+                    if (sensor.getSerial().equals(selectedSerial)) {
+                        selectedIsInList = true;
+                        break;
+                    }
+                }
+                if (!selectedIsInList) {
+                    selectedSerial = null;
+                }
             }
             notifyDataSetChanged();
         }
@@ -178,6 +195,9 @@ public class ScanFragment extends BaseFragment {
 
         @BindView(R.id.statusTextView)
         TextView statusTextView;
+
+        @BindView(R.id.sensorStatusTextView)
+        TextView sensorStatusTextView;
 
         SensorViewHolder(View view, SensorViewHolder.SelectListener listener) {
             super(view);
