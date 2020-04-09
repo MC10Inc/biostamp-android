@@ -279,7 +279,8 @@ public class BioStampManager {
 
         @Override
         public void onScanStopped() {
-
+            // The Bitgatt scan always times out after 2 minutes
+            sensorsInRangeLiveData.scanStopped();
         }
 
         @Override
@@ -386,6 +387,11 @@ public class BioStampManager {
                 Timber.e("Start BLE scan failed; will retry");
                 handler.postDelayed(this::startScan, SCAN_FAILED_RETRY_DELAY);
             }
+        }
+
+        private void scanStopped() {
+            scanInProgress = false;
+            handler.post(this::startScan);
         }
 
         @Override
