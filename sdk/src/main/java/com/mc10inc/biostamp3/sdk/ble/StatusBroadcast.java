@@ -1,7 +1,10 @@
 package com.mc10inc.biostamp3.sdk.ble;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanRecord;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.BitSet;
@@ -137,5 +140,40 @@ public class StatusBroadcast {
 
     public boolean isFaultLogged() {
         return faultLogged;
+    }
+
+    @SuppressLint("DefaultLocale")
+    @NotNull
+    @Override
+    public String toString() {
+        if (valid) {
+            StringBuilder s = new StringBuilder();
+            s.append(String.format("Batt %d%%%s%s",
+                    getBatteryPercent(),
+                    isFullyCharged() ? " Full" : "",
+                    isCharging() ? " Charging" : ""));
+            if (isSensingEnabled()) {
+                if (isRecordingEnabled()) {
+                    s.append(", Recording");
+                } else {
+                    s.append(", Sensing");
+                }
+            } else {
+                s.append(", Idle");
+            }
+            s.append(String.format(", %d blocks free", getFreeSpace()));
+            if (isRecordingsEmpty()) {
+                s.append(" (empty)");
+            }
+            if (isFaultLogged()) {
+                s.append(", Fault Logged");
+            }
+            if (isHardwareFault()) {
+                s.append(", HW Fault");
+            }
+            return s.toString();
+        } else {
+            return "";
+        }
     }
 }
