@@ -355,8 +355,29 @@ public interface BioStamp {
      */
     int getRecordingMetadataMaxSize();
 
+    /**
+     * Clear the fault logs.
+     * <p/>
+     * {@link #getFaultLogs(Listener)} will return an empty list after calling this.
+     *
+     * @param listener
+     */
     void clearFaultLogs(Listener<Void> listener);
 
+    /**
+     * Get the fault logs.
+     * <p/>
+     * Any time the firmware encounters a fatal error condition that causes the sensor to reset, it
+     * stores a timestamped log of the error in its persistent storage. Additionally, when the
+     * sensor powers off due to low battery it also logs that event in the same way. This task
+     * returns all of the stored logs in chronological order, as a list with one entry per fault log
+     * entry. Once the log has been read it may be cleared by calling {@link
+     * #clearFaultLogs(Listener)}.
+     * <p/>
+     * These fault logs may be sent to MC10 to assist in troubleshooting.
+     *
+     * @param listener
+     */
     void getFaultLogs(Listener<List<String>> listener);
 
     /** State of the connection to this sensor. */
