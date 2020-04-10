@@ -4,28 +4,17 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.mc10inc.biostamp3.sdkexample.R;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+import com.mc10inc.biostamp3.sdkexample.databinding.LayoutPlotContainerBinding;
 
 public class PlotContainer extends ConstraintLayout {
     public interface Listener {
         void closePlot(PlotKey key);
     }
 
-    @BindView(R.id.container)
-    FrameLayout container;
-
-    @BindView(R.id.titleText)
-    TextView titleText;
-
+    private LayoutPlotContainerBinding binding;
     private Listener listener;
     private PlotKey key;
     private StreamingPlot plot;
@@ -46,8 +35,8 @@ public class PlotContainer extends ConstraintLayout {
     }
 
     private void initView(Context context) {
-        View view = LayoutInflater.from(context).inflate(R.layout.layout_plot_container, this, true);
-        ButterKnife.bind(this, view);
+        binding = LayoutPlotContainerBinding.inflate(LayoutInflater.from(context), this, true);
+        binding.closeButton.setOnClickListener(this::closeButton);
     }
 
     public void init(PlotKey key, Listener listener, StreamingPlot plot) {
@@ -55,12 +44,12 @@ public class PlotContainer extends ConstraintLayout {
         this.listener = listener;
         this.plot = plot;
 
-        titleText.setText(key.getSerial());
+        binding.titleText.setText(key.getSerial());
 
-        container.addView(plot.getView());
+        binding.container.addView(plot.getView());
     }
 
-    @OnClick(R.id.closeButton) void closeButton() {
+    private void closeButton(View v) {
         listener.closePlot(key);
     }
 

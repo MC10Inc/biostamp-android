@@ -9,7 +9,6 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.androidplot.util.PixelUtils;
 import com.androidplot.xy.BoundaryMode;
@@ -20,23 +19,19 @@ import com.androidplot.xy.XYPlot;
 import com.mc10inc.biostamp3.sdk.sensing.RawSamples;
 import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
 import com.mc10inc.biostamp3.sdkexample.R;
+import com.mc10inc.biostamp3.sdkexample.databinding.LayoutSignalPlotBinding;
+import com.mc10inc.biostamp3.sdkexample.databinding.StreamingXyplotBinding;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class SignalPlotView extends FrameLayout implements StreamingPlot {
     private static final int DURATION_SEC = 6;
     private static final double VOLTS_TO_MV = 1000;
 
-    @BindView(R.id.plot)
-    XYPlot plot;
-
-    @BindView(R.id.textUnderPlot)
-    TextView textUnderPlot;
+    private LayoutSignalPlotBinding binding;
+    private XYPlot plot;
 
     private List<RawSamplesDataSeries> dataSeriesList = new ArrayList<>();
 
@@ -58,8 +53,8 @@ public class SignalPlotView extends FrameLayout implements StreamingPlot {
     }
 
     private void initView(Context context) {
-        View view = LayoutInflater.from(context).inflate(R.layout.layout_signal_plot, this, true);
-        ButterKnife.bind(this, view);
+        binding = LayoutSignalPlotBinding.inflate(LayoutInflater.from(context), this, true);
+        plot = binding.getRoot().findViewById(R.id.xyplot);
     }
 
     @Override
@@ -149,7 +144,7 @@ public class SignalPlotView extends FrameLayout implements StreamingPlot {
     }
 
     private void initEda(SensorConfig sensorConfig) {
-        textUnderPlot.setVisibility(VISIBLE);
+        binding.textUnderPlot.setVisibility(VISIBLE);
         showEdaValue = true;
 
         genericPlotSetup(plot);
@@ -222,6 +217,6 @@ public class SignalPlotView extends FrameLayout implements StreamingPlot {
         double zReal = zMag * Math.cos(zPhase);
         double zImag = zMag * Math.sin(zPhase);
         double capUf = 1 / (2 * Math.PI * edaFreqHz * zImag) * 1000000;
-        textUnderPlot.setText(String.format("R=%.0fΩ C=%.6fµF", zReal, capUf));
+        binding.textUnderPlot.setText(String.format("R=%.0fΩ C=%.6fµF", zReal, capUf));
     }
 }

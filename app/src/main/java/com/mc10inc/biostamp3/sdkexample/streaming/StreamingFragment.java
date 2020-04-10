@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,29 +15,25 @@ import com.mc10inc.biostamp3.sdk.exception.SensorCannotStartException;
 import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
 import com.mc10inc.biostamp3.sdk.sensing.StreamingType;
 import com.mc10inc.biostamp3.sdkexample.BaseFragment;
-import com.mc10inc.biostamp3.sdkexample.R;
+import com.mc10inc.biostamp3.sdkexample.databinding.FragmentStreamingBinding;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import timber.log.Timber;
 
 public class StreamingFragment extends BaseFragment implements PlotContainer.Listener {
-    @BindView(R.id.plotGroup)
-    LinearLayout plotGroup;
-
+    private FragmentStreamingBinding binding;
     private Map<PlotKey, PlotContainer> plotContainers = new HashMap<>();
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_streaming, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        binding = FragmentStreamingBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
+        binding.addPlotButton.setOnClickListener(this::addPlotButton);
         return view;
     }
 
@@ -52,7 +47,7 @@ public class StreamingFragment extends BaseFragment implements PlotContainer.Lis
         plotContainers.clear();
     }
 
-    @OnClick(R.id.addPlotButton) void addPlotButton() {
+    private void addPlotButton(View v) {
         BioStamp s = viewModel.getSensor();
         if (s == null) {
             return;
@@ -137,7 +132,7 @@ public class StreamingFragment extends BaseFragment implements PlotContainer.Lis
         PlotContainer plotContainer = new PlotContainer(getContext());
         plotContainer.init(key, this, plot);
         plotContainers.put(key, plotContainer);
-        plotGroup.addView(plotContainer);
+        binding.plotGroup.addView(plotContainer);
     }
 
     private void addPlotAccel(BioStamp s, SensorConfig sensorConfig) {
@@ -225,7 +220,7 @@ public class StreamingFragment extends BaseFragment implements PlotContainer.Lis
         if (s != null) {
             s.removeStreamingListener(plotContainer.getPlot());
         }
-        plotGroup.removeView(plotContainer);
+        binding.plotGroup.removeView(plotContainer);
         plotContainers.remove(key);
     }
 }

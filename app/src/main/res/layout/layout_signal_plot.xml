@@ -8,13 +8,12 @@
     android:orientation="vertical">
 
     <include
-        android:id="@+id/plot"
         layout="@layout/streaming_xyplot"
         android:layout_width="match_parent"
         android:layout_height="240dp" />
 
     <TextView
-        android:id="@+id/textUnderPlot"
+        android:id="@+id/text_under_plot"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="24sp"

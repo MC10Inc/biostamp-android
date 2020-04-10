@@ -11,19 +11,13 @@ import androidx.annotation.Nullable;
 
 import com.mc10inc.biostamp3.sdk.sensing.RawSamples;
 import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
-import com.mc10inc.biostamp3.sdkexample.R;
+import com.mc10inc.biostamp3.sdkexample.databinding.LayoutRotationPlotBinding;
 
 import org.rajawali3d.math.Quaternion;
 import org.rajawali3d.view.ISurface;
-import org.rajawali3d.view.SurfaceView;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class RotationPlotView extends FrameLayout implements StreamingPlot {
-    @BindView(R.id.surfaceView)
-    SurfaceView surfaceView;
-
+    private LayoutRotationPlotBinding binding;
     private RotationRenderer renderer;
 
     public RotationPlotView(@NonNull Context context) {
@@ -42,13 +36,12 @@ public class RotationPlotView extends FrameLayout implements StreamingPlot {
     }
 
     private void initView(Context context) {
-        View view = LayoutInflater.from(context).inflate(R.layout.layout_rotation_plot, this, true);
-        ButterKnife.bind(this, view);
+        binding = LayoutRotationPlotBinding.inflate(LayoutInflater.from(context), this, true);
 
-        surfaceView.setRenderMode(ISurface.RENDERMODE_WHEN_DIRTY);
-        surfaceView.setTransparent(true);
+        binding.surfaceView.setRenderMode(ISurface.RENDERMODE_WHEN_DIRTY);
+        binding.surfaceView.setTransparent(true);
         renderer = new RotationRenderer(context);
-        surfaceView.setSurfaceRenderer(renderer);
+        binding.surfaceView.setSurfaceRenderer(renderer);
     }
 
     @Override

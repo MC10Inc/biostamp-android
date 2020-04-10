@@ -6,24 +6,13 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.mc10inc.biostamp3.sdk.sensing.RawSamples;
 import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
-import com.mc10inc.biostamp3.sdkexample.R;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.mc10inc.biostamp3.sdkexample.databinding.LayoutEnvironmentPlotBinding;
 
 public class EnvironmentPlotView extends LinearLayout implements StreamingPlot {
-    @BindView(R.id.temperatureText)
-    TextView temperatureText;
-
-    @BindView(R.id.externalTemperatureText)
-    TextView externalTemperatureText;
-
-    @BindView(R.id.pressureText)
-    TextView pressureText;
+    private LayoutEnvironmentPlotBinding binding;
 
     public EnvironmentPlotView(Context context) {
         super(context);
@@ -41,8 +30,7 @@ public class EnvironmentPlotView extends LinearLayout implements StreamingPlot {
     }
 
     private void initView(Context context) {
-        View view = LayoutInflater.from(context).inflate(R.layout.layout_environment_plot, this, true);
-        ButterKnife.bind(this, view);
+        binding = LayoutEnvironmentPlotBinding.inflate(LayoutInflater.from(context), this, true);
     }
 
     @Override
@@ -58,12 +46,12 @@ public class EnvironmentPlotView extends LinearLayout implements StreamingPlot {
     @SuppressLint("DefaultLocale")
     @Override
     public boolean handleRawSamples(RawSamples samples) {
-        temperatureText.setText(String.format("Temperature: %.1f°C",
+        binding.temperatureText.setText(String.format("Temperature: %.1f°C",
                 samples.getValue(RawSamples.ColumnType.TEMPERATURE, samples.getSize() - 1)));
-        externalTemperatureText.setText(String.format("External Temperature: %.1f°C",
+        binding.externalTemperatureText.setText(String.format("External Temperature: %.1f°C",
                 samples.getValue(RawSamples.ColumnType.EXTERNAL_TEMPERATURE,
                         samples.getSize() - 1)));
-        pressureText.setText(String.format("Pressure: %.0f pascals",
+        binding.pressureText.setText(String.format("Pressure: %.0f pascals",
                 samples.getValue(RawSamples.ColumnType.PASCALS, samples.getSize() - 1)));
 
         return true;
