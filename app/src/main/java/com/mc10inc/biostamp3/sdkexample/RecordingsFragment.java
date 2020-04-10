@@ -12,44 +12,42 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.mc10inc.biostamp3.sdk.BioStampManager;
 import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
+import com.mc10inc.biostamp3.sdkexample.databinding.FragmentRecordingsBinding;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import timber.log.Timber;
 
 public class RecordingsFragment extends BaseFragment {
     private static final int REQUEST_CODE_SELECT_EXPORT_FILE = 0;
     private static final String SELECTED_RECORDING_KEY = "SELECTED_RECORDING";
 
-    @BindView(R.id.recordingList)
-    RecyclerView recordingList;
-
+    private FragmentRecordingsBinding binding;
     private RecordingAdapter recordingAdapter;
     private RecordingInfo selectedRecordingToDecode;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_recordings, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        binding = FragmentRecordingsBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
 
         if (savedInstanceState != null) {
             selectedRecordingToDecode = savedInstanceState.getParcelable(SELECTED_RECORDING_KEY);
         }
 
-        recordingList.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recordingList.setLayoutManager(new LinearLayoutManager(getContext()));
         recordingAdapter = new RecordingAdapter();
-        recordingList.setAdapter(recordingAdapter);
+        binding.recordingList.setAdapter(recordingAdapter);
+        binding.decodeButton.setOnClickListener(this::decodeButton);
+        binding.deleteButton.setOnClickListener(this::deleteButton);
+        binding.deleteAllButton.setOnClickListener(this::deleteAllButton);
 
         BioStampManager.getInstance().getDb().getRecordingsLiveData().observe(getViewLifecycleOwner(), recordingInfos -> {
             List<RecordingAdapter.RecordingItem> items = recordingInfos.stream()
@@ -67,7 +65,7 @@ public class RecordingsFragment extends BaseFragment {
         outState.putParcelable(SELECTED_RECORDING_KEY, selectedRecordingToDecode);
     }
 
-    @OnClick(R.id.decodeButton) void decodeButton() {
+    private void decodeButton(View v) {
         if (getActivity() == null || getActivity().isFinishing()) {
             return;
         }
@@ -91,7 +89,7 @@ public class RecordingsFragment extends BaseFragment {
         startActivityForResult(intent, REQUEST_CODE_SELECT_EXPORT_FILE);
     }
 
-    @OnClick(R.id.deleteButton) void deleteButton() {
+    private void deleteButton(View v) {
         if (getActivity() == null || getActivity().isFinishing()) {
             return;
         }
@@ -110,7 +108,7 @@ public class RecordingsFragment extends BaseFragment {
                 .show();
     }
 
-    @OnClick(R.id.deleteAllButton) void deleteAllButton() {
+    private void deleteAllButton(View v) {
         if (getActivity() == null || getActivity().isFinishing()) {
             return;
         }

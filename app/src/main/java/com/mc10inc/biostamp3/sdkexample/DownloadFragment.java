@@ -5,47 +5,39 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.mc10inc.biostamp3.sdk.BioStamp;
 import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
+import com.mc10inc.biostamp3.sdkexample.databinding.FragmentDownloadBinding;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import timber.log.Timber;
 
 public class DownloadFragment extends BaseFragment {
-    @BindView(R.id.recordingList)
-    RecyclerView recordingList;
-
-    @BindView(R.id.downloadProgressBar)
-    ProgressBar progressBar;
-
-    @BindView(R.id.cancelButton)
-    Button cancelButton;
-
+    private FragmentDownloadBinding binding;
     private RecordingAdapter recordingAdapter;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_download, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        binding = FragmentDownloadBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
 
-        recordingList.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recordingList.setLayoutManager(new LinearLayoutManager(getContext()));
         recordingAdapter = new RecordingAdapter();
-        recordingList.setAdapter(recordingAdapter);
+        binding.recordingList.setAdapter(recordingAdapter);
+        binding.listButton.setOnClickListener(this::listButton);
+        binding.clearAllButton.setOnClickListener(this::clearAllButton);
+        binding.clearOldestButton.setOnClickListener(this::clearOldestButton);
+        binding.downloadButton.setOnClickListener(this::downloadButton);
+        binding.cancelButton.setOnClickListener(this::cancelButton);
 
         viewModel.getRecordingList().observe(getViewLifecycleOwner(), recordings -> {
             updateRecordingList(recordings);
@@ -53,21 +45,26 @@ public class DownloadFragment extends BaseFragment {
 
         viewModel.getDownloadInProgress().observe(getViewLifecycleOwner(), inProgress -> {
             if (inProgress) {
-                progressBar.setVisibility(View.VISIBLE);
-                cancelButton.setVisibility(View.VISIBLE);
+                binding.downloadProgressBar.setVisibility(View.VISIBLE);
+                binding.cancelButton.setVisibility(View.VISIBLE);
             } else {
-                progressBar.setVisibility(View.INVISIBLE);
-                cancelButton.setVisibility(View.INVISIBLE);
+                binding.downloadProgressBar.setVisibility(View.INVISIBLE);
+                binding.cancelButton.setVisibility(View.INVISIBLE);
             }
         });
 
         viewModel.getDownloadProgress().observe(getViewLifecycleOwner(), progress ->
-                progressBar.setProgress((int)(progressBar.getMax() * progress)));
+                binding.downloadProgressBar.setProgress(
+                        (int)(binding.downloadProgressBar.getMax() * progress)));
 
         return view;
     }
 
-    @OnClick(R.id.listButton) void listButton() {
+    private void listButton(View v) {
+        listRecordings();
+    }
+
+    private void listRecordings() {
         BioStamp s = viewModel.getSensor();
         if (s == null) {
             return;
@@ -81,7 +78,7 @@ public class DownloadFragment extends BaseFragment {
         });
     }
 
-    @OnClick(R.id.clearAllButton) void clearAllButton() {
+    private void clearAllButton(View v) {
         if (getActivity() == null || getActivity().isFinishing()) {
             return;
         }
@@ -93,7 +90,7 @@ public class DownloadFragment extends BaseFragment {
                 .show();
     }
 
-    @OnClick(R.id.clearOldestButton) void clearOldestButton() {
+    private void clearOldestButton(View v) {
         if (getActivity() == null || getActivity().isFinishing()) {
             return;
         }
@@ -128,7 +125,7 @@ public class DownloadFragment extends BaseFragment {
             if (error == null) {
                 // Update the list now
                 viewModel.setRecordingList(Collections.emptyList());
-                listButton();
+                listRecordings();
             } else {
                 Timber.e(error);
             }
@@ -147,7 +144,7 @@ public class DownloadFragment extends BaseFragment {
         }
     }
 
-    @OnClick(R.id.downloadButton) void downloadButton() {
+    private void downloadButton(View v) {
         BioStamp sensor = viewModel.getSensor();
         if (sensor == null) {
             return;
@@ -170,7 +167,7 @@ public class DownloadFragment extends BaseFragment {
         viewModel.setDownloadInProgress(true);
     }
 
-    @OnClick(R.id.cancelButton) void cancelButton() {
+    private void cancelButton(View v) {
         BioStamp sensor = viewModel.getSensor();
         if (sensor == null) {
             return;

@@ -5,20 +5,17 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.mc10inc.biostamp3.sdk.recording.DownloadStatus;
 import com.mc10inc.biostamp3.sdk.recording.RecordingInfo;
+import com.mc10inc.biostamp3.sdkexample.databinding.ListItemRecordingBinding;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.RecordingViewHolder> {
     public static class RecordingItem {
@@ -41,15 +38,13 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.Reco
             void selected(int position);
         }
 
+        ListItemRecordingBinding binding;
         View view;
-
-        @BindView(R.id.textView)
-        TextView textView;
 
         RecordingViewHolder(View view, SelectListener listener) {
             super(view);
+            binding = ListItemRecordingBinding.bind(view);
             this.view = view;
-            ButterKnife.bind(this, view);
 
             View.OnClickListener clickListener = v -> listener.selected(getAdapterPosition());
             view.setOnClickListener(clickListener);
@@ -95,7 +90,7 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.Reco
                 }
             }
         }
-        holder.textView.setText(Html.fromHtml(s.toString(), 0));
+        holder.binding.textView.setText(Html.fromHtml(s.toString(), 0));
         holder.view.setSelected(position == selection);
     }
 
