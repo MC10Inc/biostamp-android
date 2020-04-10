@@ -9,55 +9,44 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.ProgressBar;
-import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.mc10inc.biostamp3.sdk.BioStamp;
-import com.mc10inc.biostamp3.sdk.sensing.PredefinedConfigs;
-import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
+import com.mc10inc.biostamp3.sdkexample.databinding.FragmentControlsBinding;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import timber.log.Timber;
 
 public class ControlsFragment extends BaseFragment {
     private static final int REQUEST_CODE_OPEN_FW = 0;
 
-    @BindView(R.id.statusText)
-    TextView statusText;
-
-    @BindView(R.id.selectFirmwareButton)
-    Button selectFirmwareButton;
-
-    @BindView(R.id.uploadFirmwareButton)
-    Button uploadFirmwareButton;
-
-    @BindView(R.id.firmwareProgressBar)
-    ProgressBar firmwareProgressBar;
+    private FragmentControlsBinding binding;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_controls, container, false);
-        unbinder = ButterKnife.bind(this, view);
-        statusText.setMovementMethod(new ScrollingMovementMethod());
+        binding = FragmentControlsBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
+        binding.statusText.setMovementMethod(new ScrollingMovementMethod());
+        binding.blinkLedButton.setOnClickListener(this::blinkLedButton);
+        binding.getStatusButton.setOnClickListener(this::getStatusButton);
+        binding.resetButton.setOnClickListener(this::resetButton);
+        binding.powerOffButton.setOnClickListener(this::powerOffButton);
+        binding.loadImageButton.setOnClickListener(this::loadImageButton);
+        binding.selectFirmwareButton.setOnClickListener(this::selectFirmwareButton);
+        binding.uploadFirmwareButton.setOnClickListener(this::uploadFirmwareButton);
+        binding.shareStatusButton.setOnClickListener(this::shareStatusButton);
+        binding.getFaultLogButton.setOnClickListener(this::getFaultLogButton);
+        binding.clearFaultLogButton.setOnClickListener(this::clearFaultLogButton);
         return view;
     }
 
-    @OnClick(R.id.blinkLedButton) void blinkLedButton() {
+    private void blinkLedButton(View v) {
         BioStamp s = viewModel.getSensor();
         if (s == null) {
             return;
@@ -70,7 +59,7 @@ public class ControlsFragment extends BaseFragment {
     }
 
     @SuppressLint("DefaultLocale")
-    @OnClick(R.id.getStatusButton) void getStatusButton() {
+    private void getStatusButton(View v) {
         BioStamp s = viewModel.getSensor();
         if (s == null) {
             return;
@@ -104,7 +93,7 @@ public class ControlsFragment extends BaseFragment {
         });
     }
 
-    @OnClick(R.id.resetButton) void resetButton() {
+    private void resetButton(View v) {
         BioStamp s = viewModel.getSensor();
         if (s == null) {
             return;
@@ -116,7 +105,7 @@ public class ControlsFragment extends BaseFragment {
         });
     }
 
-    @OnClick(R.id.powerOffButton) void powerOffButton() {
+    private void powerOffButton(View v) {
         BioStamp s = viewModel.getSensor();
         if (s == null) {
             return;
@@ -128,7 +117,7 @@ public class ControlsFragment extends BaseFragment {
         });
     }
 
-    @OnClick(R.id.loadImageButton) void loadImageButton() {
+    private void loadImageButton(View v) {
         BioStamp s = viewModel.getSensor();
         if (s == null) {
             return;
@@ -140,7 +129,7 @@ public class ControlsFragment extends BaseFragment {
         });
     }
 
-    @OnClick(R.id.selectFirmwareButton) void selectFirmware() {
+    private void selectFirmwareButton(View v) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("*/*");
@@ -148,7 +137,7 @@ public class ControlsFragment extends BaseFragment {
         startActivityForResult(intent, REQUEST_CODE_OPEN_FW);
     }
 
-    @OnClick(R.id.uploadFirmwareButton) void uploadFirmware() {
+    private void uploadFirmwareButton(View v) {
         BioStamp s = viewModel.getSensor();
         if (s == null) {
             return;
@@ -159,16 +148,17 @@ public class ControlsFragment extends BaseFragment {
             Timber.e("No firmware image loaded");
         }
 
-        firmwareProgressBar.setVisibility(View.VISIBLE);
+        binding.firmwareProgressBar.setVisibility(View.VISIBLE);
         s.uploadFirmware(image, (error, result) -> {
-            firmwareProgressBar.setVisibility(View.INVISIBLE);
+            binding.firmwareProgressBar.setVisibility(View.INVISIBLE);
             if (error == null) {
                 Timber.i("Firmware upload complete");
             } else {
                 Timber.e(error);
             }
         }, progress -> {
-            firmwareProgressBar.setProgress((int)(progress * firmwareProgressBar.getMax()));
+            binding.firmwareProgressBar.setProgress(
+                    (int)(progress * binding.firmwareProgressBar.getMax()));
         });
     }
 
@@ -209,17 +199,17 @@ public class ControlsFragment extends BaseFragment {
         viewModel.setFirmwareImage(baos.toByteArray());
     }
 
-    @OnClick(R.id.shareStatusButton) void shareStatusButton() {
+    private void shareStatusButton(View v) {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, statusText.getText());
+        sendIntent.putExtra(Intent.EXTRA_TEXT, binding.statusText.getText());
         sendIntent.setType("text/plain");
 
         Intent shareIntent = Intent.createChooser(sendIntent, null);
         startActivity(shareIntent);
     }
 
-    @OnClick(R.id.getFaultLogButton) void getFaultLogButton() {
+    private void getFaultLogButton(View v) {
         BioStamp s = viewModel.getSensor();
         if (s == null) {
             return;
@@ -241,7 +231,7 @@ public class ControlsFragment extends BaseFragment {
         });
     }
 
-    @OnClick(R.id.clearFaultLogButton) void clearFaultLogButton() {
+    private void clearFaultLogButton(View v) {
         BioStamp s = viewModel.getSensor();
         if (s == null) {
             return;
@@ -254,7 +244,7 @@ public class ControlsFragment extends BaseFragment {
     }
 
     private void setStatusText(String text) {
-        statusText.setText(text);
-        statusText.scrollTo(0, 0);
+        binding.statusText.setText(text);
+        binding.statusText.scrollTo(0, 0);
     }
 }

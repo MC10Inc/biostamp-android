@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/blinkLedButton"
+        android:id="@+id/blink_led_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -16,63 +16,63 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/getStatusButton"
+        android:id="@+id/get_status_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="Get Status"
-        app:layout_constraintStart_toEndOf="@+id/blinkLedButton"
-        app:layout_constraintTop_toTopOf="@+id/blinkLedButton" />
+        app:layout_constraintStart_toEndOf="@+id/blink_led_button"
+        app:layout_constraintTop_toTopOf="@+id/blink_led_button" />
 
     <Button
-        android:id="@+id/resetButton"
+        android:id="@+id/reset_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="Reset"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/blinkLedButton" />
+        app:layout_constraintTop_toBottomOf="@+id/blink_led_button" />
 
     <Button
-        android:id="@+id/powerOffButton"
+        android:id="@+id/power_off_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="Power Off"
-        app:layout_constraintStart_toEndOf="@+id/resetButton"
-        app:layout_constraintTop_toTopOf="@+id/resetButton" />
+        app:layout_constraintStart_toEndOf="@+id/reset_button"
+        app:layout_constraintTop_toTopOf="@+id/reset_button" />
 
     <Button
-        android:id="@+id/selectFirmwareButton"
+        android:id="@+id/select_firmware_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="Select FW"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/resetButton" />
+        app:layout_constraintTop_toBottomOf="@+id/reset_button" />
 
     <Button
-        android:id="@+id/uploadFirmwareButton"
+        android:id="@+id/upload_firmware_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="Upload"
-        app:layout_constraintStart_toEndOf="@+id/selectFirmwareButton"
-        app:layout_constraintTop_toTopOf="@+id/selectFirmwareButton" />
+        app:layout_constraintStart_toEndOf="@+id/select_firmware_button"
+        app:layout_constraintTop_toTopOf="@+id/select_firmware_button" />
 
     <Button
-        android:id="@+id/loadImageButton"
+        android:id="@+id/load_image_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="Load FW"
-        app:layout_constraintStart_toEndOf="@+id/uploadFirmwareButton"
-        app:layout_constraintTop_toTopOf="@+id/selectFirmwareButton" />
+        app:layout_constraintStart_toEndOf="@+id/upload_firmware_button"
+        app:layout_constraintTop_toTopOf="@+id/select_firmware_button" />
 
     <ProgressBar
-        android:id="@+id/firmwareProgressBar"
+        android:id="@+id/firmware_progress_bar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -80,32 +80,32 @@
         android:layout_marginEnd="8dp"
         android:max="1000"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@id/uploadFirmwareButton"
+        app:layout_constraintBottom_toBottomOf="@id/upload_firmware_button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/loadImageButton"
-        app:layout_constraintTop_toTopOf="@id/uploadFirmwareButton" />
+        app:layout_constraintStart_toEndOf="@id/load_image_button"
+        app:layout_constraintTop_toTopOf="@id/upload_firmware_button" />
 
     <Button
-        android:id="@+id/getFaultLogButton"
+        android:id="@+id/get_fault_log_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="Get Fault Log"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/selectFirmwareButton" />
+        app:layout_constraintTop_toBottomOf="@+id/select_firmware_button" />
 
     <Button
-        android:id="@+id/clearFaultLogButton"
+        android:id="@+id/clear_fault_log_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="Clear Fault Log"
-        app:layout_constraintStart_toEndOf="@+id/getFaultLogButton"
-        app:layout_constraintTop_toTopOf="@+id/getFaultLogButton" />
+        app:layout_constraintStart_toEndOf="@+id/get_fault_log_button"
+        app:layout_constraintTop_toTopOf="@+id/get_fault_log_button" />
 
     <TextView
-        android:id="@+id/statusText"
+        android:id="@+id/status_text"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
@@ -114,15 +114,15 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/getFaultLogButton"
+        app:layout_constraintTop_toBottomOf="@+id/get_fault_log_button"
         tools:text="sensor status text" />
 
     <ImageButton
-        android:id="@+id/shareStatusButton"
+        android:id="@+id/share_status_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="#00FFFFFF"
-        app:layout_constraintEnd_toEndOf="@+id/statusText"
-        app:layout_constraintTop_toTopOf="@+id/statusText"
+        app:layout_constraintEnd_toEndOf="@+id/status_text"
+        app:layout_constraintTop_toTopOf="@+id/status_text"
         app:srcCompat="@android:drawable/ic_menu_share" />
 </androidx.constraintlayout.widget.ConstraintLayout>
