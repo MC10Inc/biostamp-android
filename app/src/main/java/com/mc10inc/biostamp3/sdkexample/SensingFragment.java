@@ -6,10 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
-import android.widget.Spinner;
+import android.widget.CompoundButton;
 import android.widget.SpinnerAdapter;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,67 +15,55 @@ import androidx.annotation.Nullable;
 import com.mc10inc.biostamp3.sdk.BioStamp;
 import com.mc10inc.biostamp3.sdk.sensing.PredefinedConfigs;
 import com.mc10inc.biostamp3.sdk.sensing.SensorConfig;
+import com.mc10inc.biostamp3.sdkexample.databinding.FragmentSensingBinding;
 
 import java.nio.charset.StandardCharsets;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnCheckedChanged;
-import butterknife.OnClick;
 import timber.log.Timber;
 
 public class SensingFragment extends BaseFragment {
-    @BindView(R.id.annotationText)
-    TextView annotationText;
-
-    @BindView(R.id.enableRecordingCheckBox)
-    CheckBox enableRecordingCheckBox;
-
-    @BindView(R.id.maxDurationText)
-    TextView maxDurationText;
-
-    @BindView(R.id.metadataText)
-    TextView metadataText;
-
-    @BindView(R.id.sensorConfigSpinner)
-    Spinner sensorConfigSpinner;
+    private FragmentSensingBinding binding;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_sensing, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        binding = FragmentSensingBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
 
         SpinnerAdapter sensorConfigAdapter = new ArrayAdapter<>(getContext(),
                 R.layout.list_item_sensor_config,
                 PredefinedConfigs.getConfigs());
-        sensorConfigSpinner.setAdapter(sensorConfigAdapter);
+        binding.sensorConfigSpinner.setAdapter(sensorConfigAdapter);
+        binding.startSensingButton.setOnClickListener(this::startSensingButton);
+        binding.stopSensingButton.setOnClickListener(this::stopSensingButton);
+        binding.annotateButton.setOnClickListener(this::annotateButton);
+        binding.enableRecordingCheckBox.setOnCheckedChangeListener(this::enableRecordingChanged);
 
-        maxDurationText.setEnabled(false);
-        metadataText.setEnabled(false);
+        binding.maxDurationText.setEnabled(false);
+        binding.metadataText.setEnabled(false);
 
         return view;
     }
 
     @SuppressLint("DefaultLocale")
-    @OnClick(R.id.startSensingButton) void startSensingButton() {
+    private void startSensingButton(View v) {
         BioStamp s = viewModel.getSensor();
         if (s == null) {
             return;
         }
 
-        SensorConfig sc = (SensorConfig)sensorConfigSpinner.getSelectedItem();
-        sc.setRecordingEnabled(enableRecordingCheckBox.isChecked());
+        SensorConfig sc = (SensorConfig)binding.sensorConfigSpinner.getSelectedItem();
+        sc.setRecordingEnabled(binding.enableRecordingCheckBox.isChecked());
 
         int maxDuration;
         try {
-            maxDuration = Integer.parseInt(maxDurationText.getText().toString());
+            maxDuration = Integer.parseInt(binding.maxDurationText.getText().toString());
         } catch (NumberFormatException e) {
             maxDuration = 0;
         }
 
         byte[] metadata = null;
-        String metadataStr = metadataText.getText().toString();
+        String metadataStr = binding.metadataText.getText().toString();
         if (metadataStr.length() > 0) {
             metadata = metadataStr.getBytes(StandardCharsets.UTF_8);
             if (metadata.length > s.getRecordingMetadataMaxSize()) {
@@ -98,7 +84,7 @@ public class SensingFragment extends BaseFragment {
 
     }
 
-    @OnClick(R.id.stopSensingButton) void stopSensingButton() {
+    private void stopSensingButton(View v) {
         BioStamp s = viewModel.getSensor();
         if (s == null) {
             return;
@@ -110,19 +96,19 @@ public class SensingFragment extends BaseFragment {
         });
     }
 
-    @OnCheckedChanged(R.id.enableRecordingCheckBox) void enableRecordingChanged(boolean enabled) {
-        maxDurationText.setEnabled(enabled);
-        metadataText.setEnabled(enabled);
+    private void enableRecordingChanged(CompoundButton cb, boolean enabled) {
+        binding.maxDurationText.setEnabled(enabled);
+        binding.metadataText.setEnabled(enabled);
     }
 
     @SuppressLint("DefaultLocale")
-    @OnClick(R.id.annotateButton) void annotateButton() {
+    private void annotateButton(View v) {
         BioStamp s = viewModel.getSensor();
         if (s == null) {
             return;
         }
 
-        String annoText = annotationText.getText().toString();
+        String annoText = binding.annotationText.getText().toString();
         if (annoText.length() < 1) {
             errorPopup("Annotation text may not be empty");
             return;

@@ -7,7 +7,7 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/startSensingButton"
+        android:id="@+id/start_sensing_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -17,35 +17,35 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/stopSensingButton"
+        android:id="@+id/stop_sensing_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="Stop"
-        app:layout_constraintStart_toEndOf="@+id/startSensingButton"
-        app:layout_constraintTop_toTopOf="@+id/startSensingButton" />
+        app:layout_constraintStart_toEndOf="@+id/start_sensing_button"
+        app:layout_constraintTop_toTopOf="@+id/start_sensing_button" />
 
     <CheckBox
-        android:id="@+id/enableRecordingCheckBox"
+        android:id="@+id/enable_recording_check_box"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="Enable Recording"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/startSensingButton" />
+        app:layout_constraintTop_toBottomOf="@+id/start_sensing_button" />
 
     <TextView
-        android:id="@+id/metadataLabel"
+        android:id="@+id/metadata_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Metadata"
-        app:layout_constraintBottom_toBottomOf="@+id/metadataText"
-        app:layout_constraintStart_toStartOf="@+id/enableRecordingCheckBox"
-        app:layout_constraintTop_toTopOf="@+id/metadataText" />
+        app:layout_constraintBottom_toBottomOf="@+id/metadata_text"
+        app:layout_constraintStart_toStartOf="@+id/enable_recording_check_box"
+        app:layout_constraintTop_toTopOf="@+id/metadata_text" />
 
     <EditText
-        android:id="@+id/metadataText"
+        android:id="@+id/metadata_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -54,61 +54,61 @@
         android:ems="10"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/metadataLabel"
-        app:layout_constraintTop_toBottomOf="@+id/enableRecordingCheckBox" />
+        app:layout_constraintStart_toEndOf="@+id/metadata_label"
+        app:layout_constraintTop_toBottomOf="@+id/enable_recording_check_box" />
 
     <Spinner
-        android:id="@+id/sensorConfigSpinner"
+        android:id="@+id/sensor_config_spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:spinnerMode="dialog"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/maxDurationText" />
+        app:layout_constraintTop_toBottomOf="@+id/max_duration_text" />
 
     <EditText
-        android:id="@+id/maxDurationText"
+        android:id="@+id/max_duration_text"
         android:layout_width="80dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:ems="10"
         android:inputType="number"
-        app:layout_constraintStart_toEndOf="@+id/maxDurationLabel"
-        app:layout_constraintTop_toBottomOf="@+id/metadataText" />
+        app:layout_constraintStart_toEndOf="@+id/max_duration_label"
+        app:layout_constraintTop_toBottomOf="@+id/metadata_text" />
 
     <TextView
-        android:id="@+id/maxDurationLabel"
+        android:id="@+id/max_duration_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="Maximum duration (sec)"
-        app:layout_constraintBottom_toBottomOf="@+id/maxDurationText"
-        app:layout_constraintStart_toStartOf="@+id/metadataLabel"
-        app:layout_constraintTop_toTopOf="@+id/maxDurationText" />
+        app:layout_constraintBottom_toBottomOf="@+id/max_duration_text"
+        app:layout_constraintStart_toStartOf="@+id/metadata_label"
+        app:layout_constraintTop_toTopOf="@+id/max_duration_text" />
 
     <EditText
-        android:id="@+id/annotationText"
+        android:id="@+id/annotation_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:ems="10"
         android:gravity="start|top"
         android:inputType="textMultiLine"
-        app:layout_constraintEnd_toStartOf="@+id/annotateButton"
-        app:layout_constraintStart_toStartOf="@+id/maxDurationLabel"
-        app:layout_constraintTop_toBottomOf="@id/sensorConfigSpinner" />
+        app:layout_constraintEnd_toStartOf="@+id/annotate_button"
+        app:layout_constraintStart_toStartOf="@+id/max_duration_label"
+        app:layout_constraintTop_toBottomOf="@id/sensor_config_spinner" />
 
     <Button
-        android:id="@+id/annotateButton"
+        android:id="@+id/annotate_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:text="Annotate"
-        app:layout_constraintBottom_toBottomOf="@+id/annotationText"
+        app:layout_constraintBottom_toBottomOf="@+id/annotation_text"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/annotationText" />
+        app:layout_constraintTop_toTopOf="@+id/annotation_text" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
