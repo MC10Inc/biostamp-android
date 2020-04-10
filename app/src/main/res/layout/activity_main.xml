@@ -14,10 +14,10 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/selectedSensorSpinner">
+        app:layout_constraintBottom_toTopOf="@id/selected_sensor_spinner">
 
         <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabLayout"
+            android:id="@+id/tab_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
@@ -26,7 +26,7 @@
     </androidx.viewpager.widget.ViewPager>
 
     <Spinner
-        android:id="@+id/selectedSensorSpinner"
+        android:id="@+id/selected_sensor_spinner"
         android:layout_width="160dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -34,7 +34,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/throughputText"
+        android:id="@+id/throughput_text"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"

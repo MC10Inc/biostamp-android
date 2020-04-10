@@ -152,13 +152,13 @@ public class SensorsFragment extends BaseFragment {
 
         View view;
 
-        @BindView(R.id.serialTextView)
+        @BindView(R.id.serial_text_view)
         TextView serialTextView;
 
-        @BindView(R.id.statusTextView)
+        @BindView(R.id.status_text_view)
         TextView statusTextView;
 
-        @BindView(R.id.sensorStatusTextView)
+        @BindView(R.id.sensor_status_text_view)
         TextView sensorStatusTextView;
 
         SensorViewHolder(View view, SensorViewHolder.SelectListener listener) {

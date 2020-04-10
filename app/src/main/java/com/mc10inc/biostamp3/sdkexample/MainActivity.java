@@ -1,16 +1,15 @@
 package com.mc10inc.biostamp3.sdkexample;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,10 +20,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.viewpager.widget.ViewPager;
 
 import com.mc10inc.biostamp3.sdk.BioStamp;
 import com.mc10inc.biostamp3.sdk.BioStampManager;
+import com.mc10inc.biostamp3.sdkexample.databinding.ActivityMainBinding;
 import com.mc10inc.biostamp3.sdkexample.streaming.StreamingFragment;
 
 import org.jetbrains.annotations.NotNull;
@@ -34,34 +33,32 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnItemSelected;
-import butterknife.Unbinder;
-import timber.log.Timber;
-
 public class MainActivity extends AppCompatActivity {
-    @BindView(R.id.pager)
-    ViewPager pager;
-
-    @BindView(R.id.selectedSensorSpinner)
-    Spinner selectedSensorSpinner;
-
-    @BindView(R.id.throughputText)
-    TextView throughputText;
-
-    private Unbinder unbinder;
     private ExampleViewModel viewModel;
+
+    private ActivityMainBinding binding;
 
     @SuppressLint("DefaultLocale")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        unbinder = ButterKnife.bind(this);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
         viewModel = new ViewModelProvider(this).get(ExampleViewModel.class);
 
-        pager.setAdapter(new PagesAdapter(getSupportFragmentManager()));
+        binding.pager.setAdapter(new PagesAdapter(getSupportFragmentManager()));
+
+        binding.selectedSensorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                viewModel.setSelectedSensor((String)binding.selectedSensorSpinner.getItemAtPosition(i));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                viewModel.setSelectedSensor(null);
+            }
+        });
 
         BioStampManager.getInstance().getBioStampsLiveData().observe(this, sensors -> {
             List<String> connectedSensors = sensors.values().stream()
@@ -69,11 +66,12 @@ public class MainActivity extends AppCompatActivity {
                     .map(BioStamp::getSerial)
                     .sorted()
                     .collect(Collectors.toList());
-            String previousSelection = (String)selectedSensorSpinner.getSelectedItem();
-            selectedSensorSpinner.setAdapter(new ArrayAdapter<>(this,
+            String previousSelection = (String)binding.selectedSensorSpinner.getSelectedItem();
+            binding.selectedSensorSpinner.setAdapter(new ArrayAdapter<>(this,
                     android.R.layout.simple_spinner_dropdown_item, connectedSensors));
             if (previousSelection != null && connectedSensors.contains(previousSelection)) {
-                selectedSensorSpinner.setSelection(connectedSensors.indexOf(previousSelection));
+                binding.selectedSensorSpinner.setSelection(
+                        connectedSensors.indexOf(previousSelection));
             }
             if (connectedSensors.isEmpty()) {
                 viewModel.setSelectedSensor(null);
@@ -82,17 +80,11 @@ public class MainActivity extends AppCompatActivity {
 
         BioStampManager.getInstance().getThroughput().observe(this, bps -> {
             if (bps == 0) {
-                throughputText.setText("");
+                binding.throughputText.setText("");
             } else {
-                throughputText.setText(String.format("%dbps", bps));
+                binding.throughputText.setText(String.format("%dbps", bps));
             }
         });
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unbinder.unbind();
     }
 
     @Override
@@ -146,15 +138,6 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(Intent.EXTRA_STREAM, uri);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(Intent.createChooser(intent, "Select destination for database export"));
-    }
-
-    @OnItemSelected(R.id.selectedSensorSpinner) void onSensorSelected(int position) {
-        viewModel.setSelectedSensor((String)selectedSensorSpinner.getItemAtPosition(position));
-    }
-
-    @OnItemSelected(value = R.id.selectedSensorSpinner, callback = OnItemSelected.Callback.NOTHING_SELECTED)
-    void onSensorNothingSelected() {
-        viewModel.setSelectedSensor(null);
     }
 
     private static class PagesAdapter extends FragmentPagerAdapter {
