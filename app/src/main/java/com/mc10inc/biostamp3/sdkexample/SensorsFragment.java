@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,20 +12,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.mc10inc.biostamp3.sdk.BioStamp;
 import com.mc10inc.biostamp3.sdk.BioStampManager;
+import com.mc10inc.biostamp3.sdkexample.databinding.FragmentSensorsBinding;
+import com.mc10inc.biostamp3.sdkexample.databinding.ListItemSensorBinding;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import timber.log.Timber;
 
 public class SensorsFragment extends BaseFragment {
-    @BindView(R.id.sensorList)
-    RecyclerView sensorList;
-
+    private FragmentSensorsBinding binding;
     private BioStampManager bs;
     private SensorAdapter sensorAdapter;
 
@@ -39,12 +35,14 @@ public class SensorsFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_sensors, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        binding = FragmentSensorsBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
 
-        sensorList.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.sensorList.setLayoutManager(new LinearLayoutManager(getContext()));
         sensorAdapter = new SensorAdapter();
-        sensorList.setAdapter(sensorAdapter);
+        binding.sensorList.setAdapter(sensorAdapter);
+        binding.connectButton.setOnClickListener(this::connectButton);
+        binding.disconnectButton.setOnClickListener(this::disconnectButton);
 
         bs.getBioStampsLiveData().observe(getViewLifecycleOwner(), sensors -> {
             List<BioStamp> ss = new ArrayList<>(sensors.values());
@@ -54,7 +52,7 @@ public class SensorsFragment extends BaseFragment {
         return view;
     }
 
-    @OnClick(R.id.connectButton) void connectButton() {
+    private void connectButton(View v) {
         BioStamp sensor = sensorAdapter.getSelectedItem();
         if (sensor != null) {
             if (sensor.getState() != BioStamp.State.DISCONNECTED) {
@@ -80,7 +78,7 @@ public class SensorsFragment extends BaseFragment {
         }
     }
 
-    @OnClick(R.id.disconnectButton) void disconnectButton() {
+    private void disconnectButton(View v) {
         BioStamp sensor = sensorAdapter.getSelectedItem();
         if (sensor != null) {
             sensor.disconnect();
@@ -102,7 +100,7 @@ public class SensorsFragment extends BaseFragment {
         @Override
         public void onBindViewHolder(@NonNull SensorViewHolder holder, int position) {
             BioStamp sensor = sensors.get(position);
-            holder.serialTextView.setText(sensor.getSerial());
+            holder.binding.serialTextView.setText(sensor.getSerial());
             String status = "";
             switch (sensor.getState()) {
                 case CONNECTED:
@@ -115,8 +113,8 @@ public class SensorsFragment extends BaseFragment {
                     status = "Connecting…";
                     break;
             }
-            holder.statusTextView.setText(status);
-            holder.sensorStatusTextView.setText("");
+            holder.binding.statusTextView.setText(status);
+            holder.binding.sensorStatusTextView.setText("");
             holder.view.setSelected(position == selection);
         }
 
@@ -150,21 +148,13 @@ public class SensorsFragment extends BaseFragment {
             void selected(int position);
         }
 
+        ListItemSensorBinding binding;
         View view;
-
-        @BindView(R.id.serial_text_view)
-        TextView serialTextView;
-
-        @BindView(R.id.status_text_view)
-        TextView statusTextView;
-
-        @BindView(R.id.sensor_status_text_view)
-        TextView sensorStatusTextView;
 
         SensorViewHolder(View view, SensorViewHolder.SelectListener listener) {
             super(view);
+            binding = ListItemSensorBinding.bind(view);
             this.view = view;
-            ButterKnife.bind(this, view);
 
             View.OnClickListener clickListener = v -> listener.selected(getAdapterPosition());
             view.setOnClickListener(clickListener);
