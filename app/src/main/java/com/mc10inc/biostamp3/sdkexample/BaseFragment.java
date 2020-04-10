@@ -9,24 +9,13 @@ import androidx.lifecycle.ViewModelProvider;
 
 import java.util.Objects;
 
-import butterknife.Unbinder;
-
 public class BaseFragment extends Fragment {
-    protected Unbinder unbinder;
     protected ExampleViewModel viewModel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(Objects.requireNonNull(getActivity())).get(ExampleViewModel.class);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (unbinder != null) {
-            unbinder.unbind();
-        }
     }
 
     protected void errorPopup(String message) {
