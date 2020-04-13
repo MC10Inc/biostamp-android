@@ -150,8 +150,8 @@ public class StatusBroadcast {
             StringBuilder s = new StringBuilder();
             s.append(String.format("Batt %d%%%s%s",
                     getBatteryPercent(),
-                    isFullyCharged() ? " Full" : "",
-                    isCharging() ? " Charging" : ""));
+                    isFullyCharged() ? " (Full)" : "",
+                    isCharging() ? " (Charging)" : ""));
             if (isSensingEnabled()) {
                 if (isRecordingEnabled()) {
                     s.append(", Recording");
