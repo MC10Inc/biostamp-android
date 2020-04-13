@@ -19,15 +19,17 @@ public class GetFaultLogs extends Task<List<String>> {
 
     @Override
     public void doTask() {
-        List<String> faults = new ArrayList<>();
         try {
+            Brc3.VersionGetResponseParam versionResp = Request.getVersion.execute(bs.getBle());
+            List<String> faults = new ArrayList<>();
             int i = 0;
             while (true) {
                 Brc3.FaultLogReadResponseParam resp = Request.readFaultLog.execute(
                         bs.getBle(),
                         Brc3.FaultLogReadCommandParam.newBuilder().setIndex(i));
                 if (resp.hasFaultInfo()) {
-                    faults.add(resp.getFaultInfo().toString());
+                    faults.add(resp.getFaultInfo().toString()
+                            + "\nFirmware: " + versionResp.getFirmwareVersion());
                 } else {
                     break;
                 }
