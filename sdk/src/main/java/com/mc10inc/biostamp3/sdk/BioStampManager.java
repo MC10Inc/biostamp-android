@@ -1,13 +1,11 @@
 package com.mc10inc.biostamp3.sdk;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -126,23 +124,6 @@ public class BioStampManager {
         return ContextCompat.checkSelfPermission(
                 applicationContext, Manifest.permission.ACCESS_COARSE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED;
-    }
-
-    /**
-     * Request the permissions needed to communicate with the sensors.
-     * <p/>
-     * This method must be called if hasPermissions returns false. Android will show the user a
-     * dialog asking them to grant the required permission. The message is:
-     * <p/>
-     * "Allow APP NAME to access this device's location?"
-     *
-     * @param activity application's activity that is currently running
-     */
-    public void requestPermissions(Activity activity) {
-        ActivityCompat.requestPermissions(
-                activity,
-                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                0);
     }
 
     /**

@@ -189,18 +189,44 @@ responsible for initiating that request. The SDK provides optional utility
 methods for requesting the permission.
 
 The `BioStampManager.hasPermissions()` method checks if the permissions are
-granted, and `BioStampManager.requestPermissions(activity)` requests the
-permissions. For example, from within an Activity:
+granted.
+permissions. For example:
 
 ```java
 BioStampManager bs = BioStampManager.getInstance();
 if (!bs.hasPermissions()) {
-    bs.requestPermissions(this);
+    // Need to request permissions!
 }
 ```
 
 If `hasPermissions()` returns `false` then scanning for sensors or connecting
 to a sensor will fail.
+
+To request the permissions from within your `Activity`:
+
+```java
+// Code to identify the response to this permission request
+private static final int PERMISSIONS_REQUEST_FOR_BLE = 1;
+
+public void requestBlePermissions() {
+    ActivityCompat.requestPermissions(
+            this,
+            new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+            PERMISSIONS_REQUEST_FOR_BLE);
+}
+
+@Override
+public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                       @NonNull int[] grantResults) {
+    if (requestCode == PERMISSIONS_REQUEST_FOR_BLE) {
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            // User granted the permissions - can start scanning now
+        } else {
+            // User denied the permissions - scanning will fail
+        }
+    }
+}
+```
 
 ### Scanning for sensors
 

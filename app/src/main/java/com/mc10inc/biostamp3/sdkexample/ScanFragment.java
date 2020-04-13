@@ -1,5 +1,7 @@
 package com.mc10inc.biostamp3.sdkexample;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,6 +9,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -53,7 +56,7 @@ public class ScanFragment extends BaseFragment {
     private void startButton(View v) {
         if (!bs.hasPermissions()) {
             if (getActivity() != null) {
-                bs.requestPermissions(getActivity());
+                ((MainActivity)getActivity()).requestBlePermissions();
             }
             return;
         }
