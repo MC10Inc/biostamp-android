@@ -46,8 +46,10 @@ public abstract class RawSamples {
         QUAT_D,
         /** AFE4900 biopotential in volts */
         ECG,
-        /** AFE4900 PPG in arbitrary units */
+        /** AFE4900 PPG in arbitrary units - red channel in SpO2 mode */
         PPG,
+        /** AFE4900 PPG infrared channel in SpO2 mode */
+        PPG_IR,
         /** AFE4900 PPG ambient in arbitrary units */
         AMBIENT,
         /** Atmospheric pressure in pascals */

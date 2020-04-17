@@ -19,6 +19,9 @@ public class AFE4900Samples extends RawSamples {
         if (samples.getPpgCount() > 0) {
             columns.put(ColumnType.PPG, differentialToAbsolute(samples.getPpgList()));
         }
+        if (samples.getPpgIrCount() > 0) {
+            columns.put(ColumnType.PPG_IR, differentialToAbsolute(samples.getPpgIrList()));
+        }
         if (samples.getAmbientCount() > 0) {
             columns.put(ColumnType.AMBIENT, differentialToAbsolute(samples.getAmbientList()));
         }
@@ -48,6 +51,7 @@ public class AFE4900Samples extends RawSamples {
             case ECG:
                 return raw * rawSampleInfo.getEcgVScale();
             case PPG:
+            case PPG_IR:
             case AMBIENT:
                 return raw;
             default:
