@@ -305,7 +305,7 @@ public class SensorConfig {
         } else if (c.getMode() == Brc3.AFE4900Mode.PTT) {
             s.append("ECG+PPG");
         }
-        s.append(")");
+        s.append(" ").append(rate(c.getSamplingPeriodUs())).append(")");
     }
 
     private void describeAd5940(StringBuilder s, Brc3.AD5940Config c) {
@@ -590,15 +590,17 @@ public class SensorConfig {
          * <p/>
          * {@link RawSamples.ColumnType#ECG}
          *
+         * @param samplingPeriodUs sampling period
          * @param ecgGain ECG gain. Must be 2, 3, 4, 5, 6, 9, or 12.
          * @return builder
          */
-        public Builder enableAfe4900Ecg(int ecgGain) {
+        public Builder enableAfe4900Ecg(int samplingPeriodUs, int ecgGain) {
             if (msg.hasAfe4900()) {
                 throw new IllegalArgumentException("AFE4900 sensor is already enabled!");
             }
             msg.setAfe4900(Brc3.AFE4900Config.newBuilder()
                     .setMode(Brc3.AFE4900Mode.ECG)
+                    .setSamplingPeriodUs(samplingPeriodUs)
                     .setEcgGain(convertAfe4900EcgGain(ecgGain)));
             return this;
         }

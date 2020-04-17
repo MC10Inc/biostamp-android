@@ -325,6 +325,7 @@ message AFE4900Samples {
     repeated sint32 ecg = 1;
     repeated sint32 ppg = 2;
     repeated sint32 ambient = 3;
+    repeated sint32 ppg_ir = 4;
 }
 
 message EnvironmentSamples {
@@ -400,6 +401,7 @@ enum AFE4900Mode {
     ECG = 1;
     PPG = 2;
     PTT = 3;
+    SPO2 = 4;
 }
 
 enum AFE4900ECGGain {
@@ -454,6 +456,9 @@ message AFE4900Dynamic {
     bool photodiode_disconnect = 4;
     int32 offdac_current_ambient = 5;
     AFE4900OffdacScale offdac_scale = 6;
+    AFE4900TIAGain tia_gain_ir = 7;
+    uint32 led_current_ir = 8;
+    int32 offdac_current_ir = 9;
 }
 
 message AFE4900Config {
@@ -461,6 +466,7 @@ message AFE4900Config {
     AFE4900ECGGain ecg_gain = 2;
     AFE4900Color color = 3;
     AFE4900Photodiode photodiode = 4;
+    uint32 sampling_period_us = 5;
 }
 
 enum EnvironmentMode {
@@ -526,6 +532,7 @@ message RecordingPage {
         AD5940Samples ad5940 = 6;
         EnvironmentSamples environment = 7;
         Annotation annotation = 8;
+        AFE4900Dynamic afe4900_dynamic = 9;
     }
 }
 

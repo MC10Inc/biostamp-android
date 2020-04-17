@@ -35,11 +35,11 @@ public class PredefinedConfigs {
                 .build());
 
         configs.add(new SensorConfig.Builder()
-                .enableAfe4900Ecg(12)
+                .enableAfe4900Ecg(4000, 12)
                 .build());
 
         configs.add(new SensorConfig.Builder()
-                .enableAfe4900Ecg(12)
+                .enableAfe4900Ecg(4000, 12)
                 .enableMotionAccelGyro(10000, 16, 500)
                 .enableEnvironment(1000000)
                 .build());
