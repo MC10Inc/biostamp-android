@@ -70,7 +70,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
     implementation 'org.apache.commons:commons-collections4:4.4'
 
-    implementation 'com.mc10inc.biostamp:bitgatt:0.0.2-b2634a8'
+    implementation 'com.mc10inc.biostamp:bitgatt:0.0.3-1814014'
 }
 
 protobuf {
