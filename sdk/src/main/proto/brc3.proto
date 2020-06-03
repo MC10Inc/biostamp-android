@@ -239,6 +239,12 @@ message FaultLogReadResponseParam {
     FaultInfo fault_info = 1;
 }
 
+message BlinkLedsCommandParam {
+    string blink_pattern = 1;
+    uint32 step_time_ms = 2;
+    uint32 repeats = 3;
+}
+
 message Request {
     Command command = 1;
     oneof param {
@@ -260,6 +266,7 @@ message Request {
         SimulateFaultCommandParam simulate_fault = 116;
         AnnotateCommandParam annotate = 117;
         FaultLogReadCommandParam fault_log_read = 118;
+        BlinkLedsCommandParam blink_leds = 119;
     }
 }
 

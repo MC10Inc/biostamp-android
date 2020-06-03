@@ -65,8 +65,8 @@ public class Request<TC, TR> {
         }
     }
 
-    public static final Request<Void, Void> blinkLeds =
-            new Request<>(Brc3.Command.BLINK_LEDS, null, null);
+    public static final Request<Brc3.BlinkLedsCommandParam.Builder, Void> blinkLeds =
+            new Request<>(Brc3.Command.BLINK_LEDS, Brc3.Request.Builder::setBlinkLeds, null);
 
     public static final Request<Brc3.TestDataCommandParam.Builder, Void> testData =
             new Request<>(Brc3.Command.TEST_DATA, Brc3.Request.Builder::setTestData, null);

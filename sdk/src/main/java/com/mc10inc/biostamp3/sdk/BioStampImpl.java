@@ -201,7 +201,10 @@ public class BioStampImpl implements BioStamp {
             @Override
             public void doTask() {
                 try {
-                    Request.blinkLeds.execute(ble);
+                    Request.blinkLeds.execute(ble, Brc3.BlinkLedsCommandParam.newBuilder()
+                            .setBlinkPattern("GB")
+                            .setStepTimeMs(500)
+                            .setRepeats(1));
                     success(null);
                 } catch (BleException e) {
                     error(e);
