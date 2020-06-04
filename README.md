@@ -185,8 +185,7 @@ until that connection is disconnected.
 
 To use Bluetooth Low Energy, the application must have the [Android permission][5]
 `ACCESS_COARSE_LOCATION` granted by the end user. The application's UI is
-responsible for initiating that request. The SDK provides optional utility
-methods for requesting the permission.
+responsible for initiating that request.
 
 The `BioStampManager.hasPermissions()` method checks if the permissions are
 granted.
