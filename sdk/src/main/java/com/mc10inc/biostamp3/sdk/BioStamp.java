@@ -83,6 +83,21 @@ public interface BioStamp {
     void blinkLed(Listener<Void> listener);
 
     /**
+     * Blink the sensor's LEDs according to a pattern.
+     *
+     * @param pattern    A string, up to 16 characters long, describing the LED pattern in units of
+     *                   green ("G"), blue ("B"), green AND blue ("X") or neither (" "). For
+     *                   example, the pattern "B G " flashes blue, then pauses, then flashes green,
+     *                   then pauses again. You may create irregular patterns by repeating certain
+     *                   characters. For example, the pattern "BBBG" generates a long blue flash
+     *                   followed by a short green flash.
+     * @param stepTimeMs amount of time, in milliseconds, to sustain each unit of the pattern
+     * @param repeats    number of times to repeat the pattern
+     * @param listener
+     */
+    void blinkLedPattern(String pattern, int stepTimeMs, int repeats, Listener<Void> listener);
+
+    /**
      * Start sensing.
      * <p/>
      * The sensors within the {@link SensorConfig} are initialized and begin sampling. If the {@link

@@ -213,6 +213,24 @@ public class BioStampImpl implements BioStamp {
         });
     }
 
+    @Override
+    public void blinkLedPattern(String pattern, int stepTimeMs, int repeats, Listener<Void> listener) {
+        executeTask(new Task<Void>(this, listener) {
+            @Override
+            public void doTask() {
+                try {
+                    Request.blinkLeds.execute(ble, Brc3.BlinkLedsCommandParam.newBuilder()
+                            .setBlinkPattern(pattern)
+                            .setStepTimeMs(stepTimeMs)
+                            .setRepeats(repeats));
+                    success(null);
+                } catch (BleException e) {
+                    error(e);
+                }
+            }
+        });
+    }
+
     public <TC, TR> void execute(Request<TC, TR> request, TC param, Listener<TR> listener) {
         executeTask(new Task<TR>(this, listener) {
             @Override
