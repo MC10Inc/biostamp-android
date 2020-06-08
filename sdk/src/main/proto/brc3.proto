@@ -429,12 +429,6 @@ enum AFE4900Color {
     INFRARED = 3;
 }
 
-enum AFE4900Photodiode {
-    AFE4900PHOTODIODE_UNDEFINED = 0;
-    PD1 = 1;
-    PD2 = 2;
-}
-
 enum AFE4900TIAGain {
     AFE4900TIAGAIN_UNDEFINED = 0;
     TIA_GAIN_10KOHM = 1;
@@ -472,7 +466,6 @@ message AFE4900Config {
     AFE4900Mode mode = 1;
     AFE4900ECGGain ecg_gain = 2;
     AFE4900Color color = 3;
-    AFE4900Photodiode photodiode = 4;
     uint32 sampling_period_us = 5;
 }
 
