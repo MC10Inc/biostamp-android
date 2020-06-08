@@ -39,11 +39,7 @@ android {
 
 repositories {
     maven() {
-        url = uri("https://maven.pkg.github.com/mc10inc/bitgatt")
-        credentials {
-            username = project.findProperty("gpr.user")
-            password = project.findProperty("gpr.key")
-        }
+        url 'https://jitpack.io'
     }
 }
 

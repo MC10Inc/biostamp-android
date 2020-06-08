@@ -71,18 +71,14 @@ android {
 }
 ```
 
-Add the GitHub Packages repositories. Your GitHub username and access token can
+Add the package repositories. Your GitHub username and access token can
 optionally be hardcoded here instead of referencing the values in
 `gradle.properties`:
 
 ```gradle
 repositories {
     maven() {
-        url = uri("https://maven.pkg.github.com/mc10inc/bitgatt")
-        credentials {
-            username = project.findProperty("gpr.user")
-            password = project.findProperty("gpr.key")
-        }
+        url 'https://jitpack.io'
     }
     maven() {
         url = uri("https://maven.pkg.github.com/mc10inc/biostamp-android")
