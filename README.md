@@ -95,7 +95,7 @@ Add the SDK library to the application's dependencies:
 ```gradle
 dependencies {
     ...
-    implementation 'com.mc10inc.biostamp3:sdk:0.0.1-e3a004e'
+    implementation 'com.mc10inc.biostamp3:sdk:0.0.4-f22d223'
 }
 ```
 
